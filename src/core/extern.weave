@@ -1,0 +1,43 @@
+; extern.weave — all extern declarations for weavec2
+;
+; Must be listed first in the build so all other files can call these.
+
+(program
+  (name "extern")
+  (version "0.1")
+
+  ; libc
+  (extern malloc (params (size i64)) (returns ptr))
+  (extern free (params (p ptr)) (returns void))
+  (extern strlen (params (s ptr)) (returns i64))
+
+  ; posix I/O
+  (extern open (params (path ptr) (flags i32) (mode i32)) (returns i32))
+  (extern close (params (fd i32)) (returns i32))
+  (extern read (params (fd i32) (buf ptr) (count i64)) (returns i64))
+  (extern write (params (fd i32) (buf ptr) (count i64)) (returns i64))
+  (extern lseek (params (fd i32) (offset i64) (whence i32)) (returns i64))
+
+  ; weavefront C runtime — lex/parse
+  (extern lex (params (source ptr) (length i64)) (returns ptr))
+  (extern parse (params (tokens ptr)) (returns ptr))
+
+  ; weavefront C runtime — node accessors
+  (extern node_kind (params (tree ptr) (index i64)) (returns i32))
+  (extern node_text_start (params (tree ptr) (index i64)) (returns i64))
+  (extern node_text_len (params (tree ptr) (index i64)) (returns i64))
+  (extern node_first_child (params (tree ptr) (index i64)) (returns i64))
+  (extern node_next_sibling (params (tree ptr) (index i64)) (returns i64))
+  (extern node_value (params (tree ptr) (index i64)) (returns i64))
+
+  ; weavefront C runtime — node kind constants
+  (extern node_list (params) (returns i32))
+  (extern node_ident (params) (returns i32))
+  (extern node_string (params) (returns i32))
+  (extern node_int (params) (returns i32))
+
+  ; weavefront C runtime — text comparison
+  (extern node_text_equals
+    (params (tree ptr) (source ptr) (node_index i64) (expected ptr) (expected_len i64))
+    (returns i32))
+)
