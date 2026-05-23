@@ -107,8 +107,8 @@
         (condition (ne_i64 (local_get child) (const_i64 -1)))
         (do
           ; child is (name type)
-          (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
-          (let type_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 2)))
+          (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 0)))
+          (let type_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
           (if
             (condition (and_bool
               (ne_i64 (local_get name_node) (const_i64 -1))

@@ -83,6 +83,7 @@
           (call_void free (local_get source))
           (return (const_i32 1))))
         (else (do)))
+      (call_i32 fchmod (local_get out_fd) (const_i32 420))
       ; Create emission context
       (let ctx ptr (call_ptr ctx_new (local_get out_fd) (local_get source) (local_get tree)))
       (if
