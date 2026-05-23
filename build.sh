@@ -7,14 +7,13 @@
 #   1. Concatenate src/**/*.weave → combined.wir (using weavefront-cat.sh)
 #   2. Compile combined.wir → .ll              (using weavec1)
 #   3. llvm-link .ll + weavefront runtime modules → .bc
-#   4. clang .bc + runtime.c → weavec2 binary
+#   4. clang .bc → weavec2 binary
 
 set -euo pipefail
 
 WF="../weavefront"
 WEAVEFRONT="$WF/build/weavefront"
 WEAVEC1="../weavec1/build/weavec1"
-RUNTIME="../weavec0/runtime.c"
 WF_BUILD="$WF/build"
 BUILD_DIR="build"
 
@@ -23,8 +22,6 @@ fail() { echo "[weavec2] ERROR: $*" >&2; exit 1; }
 
 [[ -x "$WEAVEFRONT" ]] || fail "weavefront not found at $WEAVEFRONT"
 [[ -x "$WEAVEC1"    ]] || fail "weavec1 not found at $WEAVEC1"
-[[ -f "$RUNTIME"    ]] || fail "runtime.c not found at $RUNTIME"
-
 for mod in sexpr_tokens.ll sexpr_tree.ll sexpr_lexer.ll sexpr_parser.ll; do
   [[ -f "$WF_BUILD/$mod" ]] || fail "weavefront runtime module missing: $WF_BUILD/$mod"
 done
@@ -79,7 +76,7 @@ llvm-link \
 
 # Step 4: compile to executable
 log "Compiling to executable..."
-clang "$BUILD_DIR/weavec2.bc" "$RUNTIME" -o "$BUILD_DIR/weavec2" \
+clang "$BUILD_DIR/weavec2.bc" -o "$BUILD_DIR/weavec2" \
   || fail "clang failed"
 
 log "Build complete: $BUILD_DIR/weavec2"
