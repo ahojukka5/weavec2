@@ -551,6 +551,47 @@
           (const_string_ptr "call_void") (const_i64 9)) (const_i32 0)))
         (then (do (return (call_i32 emit_call_void_stmt (param_get ctx) (param_get node)))))
         (else (do)))
+      ; Value-returning call used only for side effects.
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "call_i32") (const_i64 8)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 emit_expr (param_get ctx) (param_get node)) (const_i64 -1)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "call_i64") (const_i64 8)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 emit_expr (param_get ctx) (param_get node)) (const_i64 -1)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "call_ptr") (const_i64 8)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 emit_expr (param_get ctx) (param_get node)) (const_i64 -1)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "call_bool") (const_i64 9)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 emit_expr (param_get ctx) (param_get node)) (const_i64 -1)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (return (const_i32 0))))
+        (else (do)))
       ; debug
       (if
         (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
