@@ -1,0 +1,124 @@
+; locals.weave — local and parameter binding tables for weavec2
+;
+; Each binding record is 24 bytes: {name_start i64, name_len i64, type i64}.
+; Stored in ctx at locals (offset 56) and params (offset 72).
+
+(program
+  (name "locals")
+  (version "0.1")
+
+  ; Add a local binding to the context's locals table.
+  (fn add_local
+    (params (ctx ptr) (name_start i64) (name_len i64) (type_id i32))
+    (returns void)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 24))))
+      (store_i64 (local_get rec) (param_get name_start))
+      (store_i64 (ptr_add (local_get rec) (const_i64 8)) (param_get name_len))
+      (store_i64 (ptr_add (local_get rec) (const_i64 16)) (cast_i32_to_i64 (param_get type_id)))
+      (call_void ctx_set_n_locals (param_get ctx) (add_i64 (local_get n) (const_i64 1)))
+      (return_void)))
+
+  ; Add a parameter binding to the context's params table.
+  (fn add_param
+    (params (ctx ptr) (name_start i64) (name_len i64) (type_id i32))
+    (returns void)
+    (do
+      (let n i64 (call_i64 ctx_get_n_params (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_params (param_get ctx)))
+      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 24))))
+      (store_i64 (local_get rec) (param_get name_start))
+      (store_i64 (ptr_add (local_get rec) (const_i64 8)) (param_get name_len))
+      (store_i64 (ptr_add (local_get rec) (const_i64 16)) (cast_i32_to_i64 (param_get type_id)))
+      (call_void ctx_set_n_params (param_get ctx) (add_i64 (local_get n) (const_i64 1)))
+      (return_void)))
+
+  ; Look up a local's type by name. Returns type_id or 1 (i32) if not found.
+  (fn lookup_local_type
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (cast_i64_to_i32 (load_i64 (ptr_add (local_get rec) (const_i64 16)))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 1))))
+
+  ; Look up a param's type by name. Returns type_id or 1 (i32) if not found.
+  (fn lookup_param_type
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let n i64 (call_i64 ctx_get_n_params (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_params (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (cast_i64_to_i32 (load_i64 (ptr_add (local_get rec) (const_i64 16)))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 1))))
+
+  ; Build the params table from a WIR (params (p type)...) node.
+  ; Also populates ctx's param table for type lookup.
+  (fn build_params
+    (params (ctx ptr) (params_list i64))
+    (returns void)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      ; params_list head is the "params" ident, then each child is (name type)
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get params_list)))
+      ; skip "params" keyword
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          ; child is (name type)
+          (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+          (let type_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 2)))
+          (if
+            (condition (and_bool
+              (ne_i64 (local_get name_node) (const_i64 -1))
+              (ne_i64 (local_get type_node) (const_i64 -1))))
+            (then (do
+              (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+              (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+              (let tid i32 (call_i32 parse_type (local_get tree) (local_get source) (local_get type_node)))
+              (call_void add_param (param_get ctx) (local_get ns) (local_get nl) (local_get tid))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return_void)))
+)
