@@ -121,4 +121,26 @@
             (else (do)))
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 1))))
+
+  ; Compare a null-terminated C string with an expected byte string.
+  (fn cstr_equals
+    (params (actual ptr) (expected ptr) (expected_len i64))
+    (returns i32)
+    (do
+      (if
+        (condition (ne_i64 (call_i64 strlen (param_get actual)) (param_get expected_len)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (param_get expected_len)))
+        (do
+          (let ab i32 (load_u8 (ptr_add (param_get actual) (local_get i))))
+          (let eb i32 (load_u8 (ptr_add (param_get expected) (local_get i))))
+          (if
+            (condition (ne_i32 (local_get ab) (local_get eb)))
+            (then (do (return (const_i32 0))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 1))))
 )
