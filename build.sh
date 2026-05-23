@@ -36,6 +36,11 @@ FILES=(
   src/core/extern.weave
   src/core/io.weave
   src/core/util.weave
+  # frontend: surface Weave → WIR lowering
+  src/frontend/emit.weave
+  src/frontend/struct.weave
+  src/frontend/lower.weave
+  src/frontend/driver.weave
   # llvm: WIR → LLVM IR backend
   src/llvm/ctx.weave
   src/llvm/types.weave
