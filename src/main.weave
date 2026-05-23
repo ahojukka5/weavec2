@@ -1,6 +1,8 @@
 ; main.weave — entry point for weavec2
 ;
-; Usage: weavec2 <input.wir> <output.ll>
+; Usage:
+;   weavec2 --backend <input.wir> <output.ll>
+;   weavec2 --frontend <output.wir> <input.weave> [input2.weave ...]
 
 (program
   (name "main")
@@ -100,7 +102,7 @@
       (call_void free (local_get source))
       (return (local_get status))))
 
-  ; Entry point: weavec2 <input.wir> <output.ll>
+  ; Entry point.
   (entry main
     (params (argc i32) (argv ptr))
     (returns i32)
@@ -109,7 +111,33 @@
         (condition (lt_i32 (param_get argc) (const_i32 3)))
         (then (do (return (const_i32 1))))
         (else (do)))
-      (let input_path ptr (load_ptr (ptr_add (param_get argv) (const_i64 8))))
-      (let output_path ptr (load_ptr (ptr_add (param_get argv) (const_i64 16))))
-      (return (call_i32 compile_file (local_get input_path) (local_get output_path)))))
+      (let arg1 ptr (load_ptr (ptr_add (param_get argv) (const_i64 8))))
+      (if
+        (condition (ne_i32 (call_i32 cstr_equals
+          (local_get arg1) (const_string_ptr "--backend") (const_i64 9)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (ne_i32 (param_get argc) (const_i32 4)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (let input_path ptr (load_ptr (ptr_add (param_get argv) (const_i64 16))))
+          (let output_path ptr (load_ptr (ptr_add (param_get argv) (const_i64 24))))
+          (return (call_i32 compile_file (local_get input_path) (local_get output_path)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 cstr_equals
+          (local_get arg1) (const_string_ptr "--frontend") (const_i64 10)) (const_i32 0)))
+        (then (do
+          (if
+            (condition (lt_i32 (param_get argc) (const_i32 4)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (let output_path2 ptr (load_ptr (ptr_add (param_get argv) (const_i64 16))))
+          (return (call_i32 lower_sources
+            (param_get argc) (param_get argv) (local_get output_path2) (const_i64 3)))))
+        (else (do)))
+      ; Keep the historical backend spelling for current tests and scripts.
+      (let input_path_legacy ptr (local_get arg1))
+      (let output_path_legacy ptr (load_ptr (ptr_add (param_get argv) (const_i64 16))))
+      (return (call_i32 compile_file (local_get input_path_legacy) (local_get output_path_legacy)))))
 )
