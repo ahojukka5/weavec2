@@ -102,7 +102,7 @@
           (call_void write_byte (param_get fd) (const_i32 32))
           (call_void emit_node (param_get fd) (param_get source) (param_get tree) (local_get val_node))
           (call_void write_byte (param_get fd) (const_i32 41)))))
-      (call_void write_cstr (param_get fd) (const_string_ptr "))))"))
+      (call_void write_cstr (param_get fd) (const_string_ptr ")))"))
       (call_void write_byte (param_get fd) (const_i32 10))
       (return_void)))
 
@@ -120,24 +120,21 @@
         (do
           (if
             (condition (and_bool
-              (ne_i32 (call_i32 head_equals (param_get tree) (param_get source) (local_get child)
+              (eq_i32 (call_i32 head_equals (param_get tree) (param_get source) (local_get child)
                 (const_string_ptr "name") (const_i64 4)) (const_i32 0))
-              (ne_i32 (call_i32 head_equals (param_get tree) (param_get source) (local_get child)
+              (eq_i32 (call_i32 head_equals (param_get tree) (param_get source) (local_get child)
                 (const_string_ptr "version") (const_i64 7)) (const_i32 0))))
             (then (do (return (local_get child))))
             (else (do
               (set child (call_i64 node_next_sibling (param_get tree) (local_get child))))))))
       (return (const_i64 -1))))
 
-  ; Lower the top-level (program ...) to WIR text.
-  ; Returns 0 on success, 1 on error.
-  (fn lower_program
+  ; Emit only the top-level extern declarations from a parsed program.
+  (fn lower_program_externs
     (params (fd i32) (source ptr) (tree ptr))
     (returns i32)
     (do
-      (call_void emit_wir_header (param_get fd))
       (let first_decl i64 (call_i64 program_first_decl (param_get tree) (param_get source)))
-      ; Pass 1: extern declarations
       (let child i64 (local_get first_decl))
       (while
         (condition (ne_i64 (local_get child) (const_i64 -1)))
@@ -149,8 +146,15 @@
               (call_void emit_decl (param_get fd) (param_get source) (param_get tree) (local_get child))))
             (else (do)))
           (set child (call_i64 node_next_sibling (param_get tree) (local_get child)))))
-      ; Pass 2: fn, entry, const, struct
-      (set child (local_get first_decl))
+      (return (const_i32 0))))
+
+  ; Emit non-extern declarations from a parsed program.
+  (fn lower_program_decls
+    (params (fd i32) (source ptr) (tree ptr))
+    (returns i32)
+    (do
+      (let first_decl i64 (call_i64 program_first_decl (param_get tree) (param_get source)))
+      (let child i64 (local_get first_decl))
       (while
         (condition (ne_i64 (local_get child) (const_i64 -1)))
         (do
@@ -179,6 +183,27 @@
               (call_void lower_struct (param_get fd) (param_get source) (param_get tree) (local_get child))))
             (else (do)))
           (set child (call_i64 node_next_sibling (param_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
+  ; Lower the top-level (program ...) to WIR text.
+  ; Returns 0 on success, 1 on error.
+  (fn lower_program
+    (params (fd i32) (source ptr) (tree ptr))
+    (returns i32)
+    (do
+      (call_void emit_wir_header (param_get fd))
+      (let extern_status i32 (call_i32 lower_program_externs
+        (param_get fd) (param_get source) (param_get tree)))
+      (if
+        (condition (ne_i32 (local_get extern_status) (const_i32 0)))
+        (then (do (return (local_get extern_status))))
+        (else (do)))
+      (let decl_status i32 (call_i32 lower_program_decls
+        (param_get fd) (param_get source) (param_get tree)))
+      (if
+        (condition (ne_i32 (local_get decl_status) (const_i32 0)))
+        (then (do (return (local_get decl_status))))
+        (else (do)))
       (call_void emit_wir_footer (param_get fd))
       (return (const_i32 0))))
 )
