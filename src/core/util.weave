@@ -93,4 +93,32 @@
             (else (do)))
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 1))))
+
+  ; Compare the source text of a tree node against an expected C string.
+  ; This is the canonical text comparison used throughout the compiler;
+  ; defined here rather than as an extern because it is a pure Weave function
+  ; (not provided by the weavefront C runtime).
+  (fn node_text_equals
+    (params (tree ptr) (source ptr) (node_index i64) (expected ptr) (expected_len i64))
+    (returns i32)
+    (do
+      (let ts i64 (call_i64 node_text_start (param_get tree) (param_get node_index)))
+      (let tl i64 (call_i64 node_text_len (param_get tree) (param_get node_index)))
+      (if
+        (condition (ne_i64 (local_get tl) (param_get expected_len)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get tl)))
+        (do
+          (let sb i32 (load_u8 (ptr_add (param_get source)
+            (add_i64 (local_get ts) (local_get i)))))
+          (let eb i32 (load_u8 (ptr_add (param_get expected) (local_get i))))
+          (if
+            (condition (ne_i32 (local_get sb) (local_get eb)))
+            (then (do (return (const_i32 0))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 1))))
 )

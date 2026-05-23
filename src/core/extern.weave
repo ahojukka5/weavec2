@@ -35,9 +35,4 @@
   (extern node_ident (params) (returns i32))
   (extern node_string (params) (returns i32))
   (extern node_int (params) (returns i32))
-
-  ; weavefront C runtime — text comparison
-  (extern node_text_equals
-    (params (tree ptr) (source ptr) (node_index i64) (expected ptr) (expected_len i64))
-    (returns i32))
 )
