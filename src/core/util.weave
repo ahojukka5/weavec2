@@ -1,0 +1,96 @@
+; util.weave — tree traversal helpers for weavec2
+
+(program
+  (name "util")
+  (version "0.1")
+
+  ; Return the nth child (0-based) of a list node, or -1 if out of range.
+  (fn nth_child
+    (params (tree ptr) (node i64) (n i64))
+    (returns i64)
+    (do
+      (let child i64 (call_i64 node_first_child (param_get tree) (param_get node)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (and_bool (ne_i64 (local_get child) (const_i64 -1)) (lt_i64 (local_get i) (param_get n))))
+        (do
+          (set child (call_i64 node_next_sibling (param_get tree) (local_get child)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (local_get child))))
+
+  ; Return the number of children of a list node.
+  (fn count_children
+    (params (tree ptr) (node i64))
+    (returns i64)
+    (do
+      (let child i64 (call_i64 node_first_child (param_get tree) (param_get node)))
+      (let cnt i64 (const_i64 0))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (set cnt (add_i64 (local_get cnt) (const_i64 1)))
+          (set child (call_i64 node_next_sibling (param_get tree) (local_get child)))))
+      (return (local_get cnt))))
+
+  ; Check if an ident node's text equals the given C string of length n.
+  (fn ident_equals
+    (params (tree ptr) (source ptr) (node i64) (ident_str ptr) (name_len i64))
+    (returns i32)
+    (do
+      (return (call_i32 node_text_equals
+        (param_get tree) (param_get source) (param_get node)
+        (param_get ident_str) (param_get name_len)))))
+
+  ; Check if the first child of a list node is an ident matching name.
+  (fn head_equals
+    (params (tree ptr) (source ptr) (node i64) (ident_str ptr) (name_len i64))
+    (returns i32)
+    (do
+      (let head i64 (call_i64 node_first_child (param_get tree) (param_get node)))
+      (if
+        (condition (eq_i64 (local_get head) (const_i64 -1)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 node_kind (param_get tree) (local_get head)) (call_i32 node_ident)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (return (call_i32 node_text_equals
+        (param_get tree) (param_get source) (local_get head)
+        (param_get ident_str) (param_get name_len)))))
+
+  ; Write source text for a node (bytes from node_text_start/len).
+  (fn emit_node_text
+    (params (fd i32) (source ptr) (tree ptr) (node i64))
+    (returns void)
+    (do
+      (let ts i64 (call_i64 node_text_start (param_get tree) (param_get node)))
+      (let tl i64 (call_i64 node_text_len (param_get tree) (param_get node)))
+      (call_void write_bytes (param_get fd) (ptr_add (param_get source) (local_get ts)) (local_get tl))
+      (return_void)))
+
+  ; Check if two source slices are equal (used for name lookup).
+  (fn slices_equal
+    (params
+      (src ptr)
+      (a_start i64) (a_len i64)
+      (b_start i64) (b_len i64))
+    (returns i32)
+    (do
+      (if
+        (condition (ne_i64 (param_get a_len) (param_get b_len)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (param_get a_len)))
+        (do
+          (let ba i32 (load_u8 (ptr_add (param_get src) (add_i64 (param_get a_start) (local_get i)))))
+          (let bb i32 (load_u8 (ptr_add (param_get src) (add_i64 (param_get b_start) (local_get i)))))
+          (if
+            (condition (ne_i32 (local_get ba) (local_get bb)))
+            (then (do (return (const_i32 0))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 1))))
+)
