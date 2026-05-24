@@ -263,6 +263,7 @@ surface_smoke_tests=(
   57_struct_basic
   58_const_decl
   59_bare_identifier_operands
+  60_let_literal_sugar
 )
 
 for name in "${surface_smoke_tests[@]}"; do
