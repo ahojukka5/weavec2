@@ -36,6 +36,7 @@ expected_exit() {
     52_integration_nested_control_flow) echo 75 ;;
     53_integration_multi_function_chain) echo 35 ;;
     54_integration_memory_flow) echo 100 ;;
+    55_new_operators) echo 40 ;;
     *) echo 42 ;;
   esac
 }
