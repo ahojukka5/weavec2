@@ -150,8 +150,53 @@ done
 
 surface_smoke_tests=(
   01_return_42
+  02_return_constant
+  03_return_42
   04_add_i32
+  05_one_arg_function
+  06_let_local
+  07_set_local
+  08_if
+  09_while
+  10_two_arg_function
+  11_string_literal
+  12_const_i64
+  13_i64_arithmetic
+  14_i64_comparisons
+  15_bool_ops
+  16_ptr_null
+  17_extern_malloc_free
+  18_ptr_add_store_load_i64
+  19_store_load_i8
+  20_call_void
+  21_call_i64
+  22_call_ptr
+  23_return_void
+  24_mod_i32
+  25_buffer_like_smoke
+  26_ptr_params_call_i32
+  27_bool_return
+  28_three_arg_function
+  31_i64_sub_eq
+  32_not_bool
+  35_ge_i32
+  36_sub_i32
+  37_mul_i32
+  38_div_i32
   39_i32_comparisons_full
+  40_i64_ge_gt
+  41_call_bool_direct
+  43_empty_do
+  44_if_fallthrough_join
+  45_while_zero_iterations
+  46_nested_while
+  47_forward_function_call
+  49_string_escape
+  50_negative_i32_literal
+  51_debug_marker
+  52_integration_nested_control_flow
+  53_integration_multi_function_chain
+  56_extern_decl
   58_const_decl
 )
 
@@ -163,8 +208,13 @@ for name in "${surface_smoke_tests[@]}"; do
   bin="$BIN_DIR/surface_$name"
   expected=42
   case "$name" in
+    02_return_constant) expected=0 ;;
     04_add_i32) expected=42 ;;
+    05_one_arg_function) expected=43 ;;
+    24_mod_i32) expected=2 ;;
     39_i32_comparisons_full) expected=42 ;;
+    52_integration_nested_control_flow) expected=75 ;;
+    53_integration_multi_function_chain) expected=35 ;;
     58_const_decl) expected=42 ;;
   esac
 
