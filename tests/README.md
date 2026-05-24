@@ -18,6 +18,15 @@ exit codes. It also runs every copied single-file surface fixture through
 `--frontend`, `--backend`, LLVM validation, native linking, and runtime
 exit-code checks, plus one multi-file frontend check.
 
-Compile-fail WIR fixtures are copied here for the next diagnostics steps. Run
-`./surface-matrix.sh` to see the full surface compatibility matrix split by
-frontend, backend, LLVM validation, native linking, and runtime checks.
+Several compile-fail WIR fixtures are active expected-failure tests for backend
+diagnostics. Run `./surface-matrix.sh` to see the full surface compatibility
+matrix split by frontend, backend, LLVM validation, native linking, and runtime
+checks.
+
+`./selfhost.sh` builds stage1 and stage2 compilers, then uses stage2 to compile
+selected surface fixtures and compare their normalized WIR against golden
+outputs before validating LLVM and runtime exit codes.
+
+The first frontend sugar fixture is `60_let_literal_sugar.weave`; typed `let`
+statements can use integer literals directly when the statement already carries
+the target type.
