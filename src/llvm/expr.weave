@@ -11,6 +11,81 @@
   (name "expr")
   (version "0.1")
 
+  (fn diag_prefix
+    (params)
+    (returns void)
+    (do
+      (call_void write_cstr (const_i32 2) (const_string_ptr "weavec2: error: "))
+      (return_void)))
+
+  (fn diag_node_text
+    (params (ctx ptr) (node i64))
+    (returns void)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i64 (param_get node) (const_i64 -1)))
+        (then (do
+          (call_void write_cstr (const_i32 2) (const_string_ptr "<missing>"))
+          (return_void)))
+        (else (do)))
+      (call_void emit_node_text (const_i32 2) (local_get source) (local_get tree) (param_get node))
+      (return_void)))
+
+  (fn diag_unknown_identifier
+    (params (ctx ptr) (node i64))
+    (returns void)
+    (do
+      (call_void diag_prefix)
+      (call_void write_cstr (const_i32 2) (const_string_ptr "unknown identifier: "))
+      (call_void diag_node_text (param_get ctx) (param_get node))
+      (call_void write_byte (const_i32 2) (const_i32 10))
+      (return_void)))
+
+  (fn diag_unknown_expression
+    (params (ctx ptr) (node i64))
+    (returns void)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (call_void diag_prefix)
+      (if
+        (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
+        (then (do
+          (call_void write_cstr (const_i32 2) (const_string_ptr "expected expression list, got: "))
+          (call_void diag_node_text (param_get ctx) (param_get node))
+          (call_void write_byte (const_i32 2) (const_i32 10))
+          (return_void)))
+        (else (do)))
+      (let op i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (if
+        (condition (eq_i64 (local_get op) (const_i64 -1)))
+        (then (do
+          (call_void write_cstr (const_i32 2) (const_string_ptr "empty expression list"))
+          (call_void write_byte (const_i32 2) (const_i32 10))
+          (return_void)))
+        (else (do)))
+      (call_void write_cstr (const_i32 2) (const_string_ptr "unknown expression operator: "))
+      (call_void diag_node_text (param_get ctx) (local_get op))
+      (call_void write_byte (const_i32 2) (const_i32 10))
+      (return_void)))
+
+  (fn diag_wrong_arity
+    (params (ctx ptr) (node i64) (expected i64) (actual i64))
+    (returns void)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let op i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (call_void diag_prefix)
+      (call_void write_cstr (const_i32 2) (const_string_ptr "wrong arity for "))
+      (call_void diag_node_text (param_get ctx) (local_get op))
+      (call_void write_cstr (const_i32 2) (const_string_ptr ": expected "))
+      (call_void write_i64_dec (const_i32 2) (param_get expected))
+      (call_void write_cstr (const_i32 2) (const_string_ptr ", got "))
+      (call_void write_i64_dec (const_i32 2) (param_get actual))
+      (call_void write_byte (const_i32 2) (const_i32 10))
+      (return_void)))
+
   ; Write either a literal (result==-2) or %tN to the output fd.
   (fn emit_operand
     (params (ctx ptr) (node i64) (result i64))
@@ -146,6 +221,13 @@
     (do
       (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let actual_args i64 (sub_i64 (call_i64 count_children (local_get tree) (param_get node)) (const_i64 1)))
+      (if
+        (condition (ne_i64 (local_get actual_args) (const_i64 2)))
+        (then (do
+          (call_void diag_wrong_arity (param_get ctx) (param_get node) (const_i64 2) (local_get actual_args))
+          (return (const_i64 -1))))
+        (else (do)))
       (let left i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
       (let right i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 2)))
       (let lv i64 (call_i64 emit_expr (param_get ctx) (local_get left)))
@@ -323,6 +405,7 @@
             (condition (ne_i32 (local_get param_type) (const_i32 0)))
             (then (do (return (const_i64 -2))))
             (else (do)))
+          (call_void diag_unknown_identifier (param_get ctx) (param_get ident_node))
           (return (const_i64 -1))))
         (else (do)))
       (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
@@ -453,12 +536,16 @@
         (else (do)))
       (if
         (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
-        (then (do (return (const_i64 -1))))
+        (then (do
+          (call_void diag_unknown_expression (param_get ctx) (param_get node))
+          (return (const_i64 -1))))
         (else (do)))
       (let op i64 (call_i64 node_first_child (local_get tree) (param_get node)))
       (if
         (condition (eq_i64 (local_get op) (const_i64 -1)))
-        (then (do (return (const_i64 -1))))
+        (then (do
+          (call_void diag_unknown_expression (param_get ctx) (param_get node))
+          (return (const_i64 -1))))
         (else (do)))
 
       ; Direct operands (return -2)
@@ -777,5 +864,6 @@
         (then (do (return (call_i64 emit_call_expr (param_get ctx) (param_get node) (const_i32 3)))))
         (else (do)))
 
+      (call_void diag_unknown_expression (param_get ctx) (param_get node))
       (return (const_i64 -1))))
 )
