@@ -5,7 +5,7 @@
 ;   NAME_new(field0 type0, field1 type1, ...) → ptr
 ;     malloc(size), store each field, return self
 ;
-;   NAME_FNAME(self ptr) → FTYPE    [getter]
+;   NAME_get_FNAME(self ptr) → FTYPE    [getter]
 ;     load at computed offset
 ;
 ;   NAME_set_FNAME(self ptr, v FTYPE) → void  [setter]
@@ -211,10 +211,10 @@
     (do
       (let fname i64 (call_i64 nth_child (param_get tree) (param_get field) (const_i64 1)))
       (let ftype i64 (call_i64 nth_child (param_get tree) (param_get field) (const_i64 2)))
-      ; getter: (fn NAME_FNAME (params (self ptr)) (returns FTYPE) (do (return (load_OP ...))))
+      ; getter: (fn NAME_get_FNAME (params (self ptr)) (returns FTYPE) (do (return (load_OP ...))))
       (call_void write_cstr (param_get fd) (const_string_ptr "    (fn "))
       (call_void write_node_text (param_get fd) (param_get source) (param_get tree) (param_get struct_name))
-      (call_void write_byte (param_get fd) (const_i32 95))
+      (call_void write_cstr (param_get fd) (const_string_ptr "_get_"))
       (call_void emit_node (param_get fd) (param_get source) (param_get tree) (local_get fname))
       (call_void write_cstr (param_get fd) (const_string_ptr " (params (self ptr)) (returns "))
       (call_void emit_return_type (param_get tree) (param_get source) (local_get ftype) (param_get fd))
@@ -230,7 +230,7 @@
         (else (do
           (call_void write_cstr (param_get fd) (const_string_ptr " (ptr_add (param_get self) (const_i64 "))
           (call_void write_i64_dec (param_get fd) (param_get offset))
-          (call_void write_cstr (param_get fd) (const_string_ptr ")))))"))
+          (call_void write_cstr (param_get fd) (const_string_ptr "))))))"))
           (call_void write_byte (param_get fd) (const_i32 10)))))
       ; setter: (fn NAME_set_FNAME (params (self ptr) (v FTYPE)) (returns void)
       (call_void write_cstr (param_get fd) (const_string_ptr "    (fn "))
