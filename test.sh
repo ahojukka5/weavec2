@@ -23,6 +23,11 @@ fail() {
   fail_count=$((fail_count + 1))
 }
 
+normalize_wir() {
+  tr '\n\t\r' ' ' < "$1" |
+    sed -E 's/[[:space:]]+/ /g; s/\( /(/g; s/ \)/)/g; s/^ //; s/ $//'
+}
+
 require_tool() {
   command -v "$1" >/dev/null 2>&1 || {
     printf '[weavec2-test] missing required tool: %s\n' "$1" >&2
@@ -207,10 +212,12 @@ surface_smoke_tests=(
   56_extern_decl
   57_struct_basic
   58_const_decl
+  59_bare_identifier_operands
 )
 
 for name in "${surface_smoke_tests[@]}"; do
   src="$SURFACE_TEST_DIR/$name.weave"
+  expected_wir="$SURFACE_TEST_DIR/$name.expected.wir"
   wir="$WIR_FROM_SURFACE_DIR/$name.wir"
   ll="$LL_DIR/surface_$name.ll"
   bc="$BC_DIR/surface_$name.bc"
@@ -233,6 +240,11 @@ for name in "${surface_smoke_tests[@]}"; do
 
   if ! "$WEAVEC2" --frontend "$wir" "$src"; then
     fail "$name: frontend failed"
+    continue
+  fi
+
+  if ! diff -u <(normalize_wir "$expected_wir") <(normalize_wir "$wir"); then
+    fail "$name: frontend WIR golden mismatch"
     continue
   fi
 
