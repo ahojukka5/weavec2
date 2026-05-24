@@ -13,6 +13,13 @@
       (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let actual_args i64 (sub_i64 (call_i64 count_children (local_get tree) (param_get node)) (const_i64 1)))
+      (if
+        (condition (ne_i64 (local_get actual_args) (const_i64 3)))
+        (then (do
+          (call_void diag_wrong_arity (param_get ctx) (param_get node) (const_i64 3) (local_get actual_args))
+          (return (const_i32 1))))
+        (else (do)))
       ; child 1: name
       (let name_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
       ; child 2: (params ...)
@@ -60,6 +67,13 @@
       (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let actual_args i64 (sub_i64 (call_i64 count_children (local_get tree) (param_get node)) (const_i64 1)))
+      (if
+        (condition (ne_i64 (local_get actual_args) (const_i64 4)))
+        (then (do
+          (call_void diag_wrong_arity (param_get ctx) (param_get node) (const_i64 4) (local_get actual_args))
+          (return (const_i32 1))))
+        (else (do)))
       ; Reset per-function state
       (call_void ctx_reset_fn (param_get ctx))
       ; child 1: name
