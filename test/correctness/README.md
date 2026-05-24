@@ -1,10 +1,10 @@
-# weavec2 tests
+# weavec2 correctness tests
 
-This directory mirrors the current bootstrap fixture sets.
+This directory contains tests that prove behavior is correct.
 
-- `wir/` contains WIR inputs copied from `../weavec1/tests/`.
+- `wir/` contains WIR inputs copied from `../../../weavec1/tests/`.
 - `surface/` contains surface Weave inputs and expected WIR outputs copied from
-  `../weavefront/tests/`.
+  `../../../weavefront/tests/`.
 
 Run the active backend ladder from the `weavec2` directory:
 
@@ -30,3 +30,7 @@ outputs before validating LLVM and runtime exit codes.
 The first frontend sugar fixture is `60_let_literal_sugar.weave`; typed `let`
 statements can use integer literals directly when the statement already carries
 the target type.
+
+LLVM code shape tests live separately under `test/performance/`. Those tests
+compare generated LLVM against expected LLVM text so code quality regressions
+can be inspected directly.
