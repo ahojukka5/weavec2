@@ -28,6 +28,14 @@
       ; Direct operand: inspect node to write literal
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      ; bare parameter ident → %x
+      (if
+        (condition (eq_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_ident)))
+        (then (do
+          (call_void write_byte (local_get fd) (const_i32 37))
+          (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (param_get node))
+          (return_void)))
+        (else (do)))
       (let head i64 (call_i64 node_first_child (local_get tree) (param_get node)))
       ; param_get x → %x
       (if
@@ -87,6 +95,23 @@
     (do
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_ident)))
+        (then (do
+          (let ns0 i64 (call_i64 node_text_start (local_get tree) (param_get node)))
+          (let nl0 i64 (call_i64 node_text_len (local_get tree) (param_get node)))
+          (let ltype i32 (call_i32 lookup_local_type_or_zero (param_get ctx) (local_get ns0) (local_get nl0)))
+          (if
+            (condition (ne_i32 (local_get ltype) (const_i32 0)))
+            (then (do (return (local_get ltype))))
+            (else (do)))
+          (let ptype i32 (call_i32 lookup_param_type_or_zero (param_get ctx) (local_get ns0) (local_get nl0)))
+          (if
+            (condition (ne_i32 (local_get ptype) (const_i32 0)))
+            (then (do (return (local_get ptype))))
+            (else (do)))
+          (return (const_i32 1))))
+        (else (do)))
       (let op i64 (call_i64 node_first_child (local_get tree) (param_get node)))
       (if
         (condition (eq_i64 (local_get op) (const_i64 -1)))
@@ -279,6 +304,38 @@
       (call_void write_byte (local_get fd) (const_i32 10))
       (return (local_get t))))
 
+  ; Emit bare local ident: %tN = load TYPE, ptr %name.addr.
+  (fn emit_ident_get
+    (params (ctx ptr) (ident_node i64))
+    (returns i64)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let ns i64 (call_i64 node_text_start (local_get tree) (param_get ident_node)))
+      (let nl i64 (call_i64 node_text_len (local_get tree) (param_get ident_node)))
+      (let type_id i32 (call_i32 lookup_local_type_or_zero (param_get ctx) (local_get ns) (local_get nl)))
+      (if
+        (condition (eq_i32 (local_get type_id) (const_i32 0)))
+        (then (do
+          (let param_type i32 (call_i32 lookup_param_type_or_zero (param_get ctx) (local_get ns) (local_get nl)))
+          (if
+            (condition (ne_i32 (local_get param_type) (const_i32 0)))
+            (then (do (return (const_i64 -2))))
+            (else (do)))
+          (return (const_i64 -1))))
+        (else (do)))
+      (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
+      (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
+      (call_void write_i64_dec (local_get fd) (local_get t))
+      (call_void write_cstr (local_get fd) (const_string_ptr " = load "))
+      (call_void emit_type (local_get fd) (local_get type_id))
+      (call_void write_cstr (local_get fd) (const_string_ptr ", ptr %"))
+      (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (param_get ident_node))
+      (call_void write_cstr (local_get fd) (const_string_ptr ".addr"))
+      (call_void write_byte (local_get fd) (const_i32 10))
+      (return (local_get t))))
+
   ; Emit local_get: %tN = load TYPE, ptr %name.addr
   (fn emit_local_get
     (params (ctx ptr) (node i64))
@@ -390,6 +447,10 @@
     (do
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_ident)))
+        (then (do (return (call_i64 emit_ident_get (param_get ctx) (param_get node)))))
+        (else (do)))
       (if
         (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
         (then (do (return (const_i64 -1))))
