@@ -14,5 +14,9 @@ Run the active backend ladder from the `weavec2` directory:
 
 The current harness tests the `build/weavec2` executable as a WIR to LLVM
 compiler, then verifies generated LLVM with `llvm-as`, `clang`, and executable
-exit codes. Compile-fail WIR fixtures and surface fixtures are copied here for
-the next frontend and diagnostics steps, but are not enforced by `test.sh` yet.
+exit codes. It also runs focused frontend checks through `--frontend`, including
+single-file lowering, const lowering, and multi-file lowering.
+
+Compile-fail WIR fixtures and broader surface fixtures are copied here for the
+next frontend and diagnostics steps, but only the known-good subset is enforced
+by `test.sh` today.
