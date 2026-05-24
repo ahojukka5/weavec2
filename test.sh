@@ -99,6 +99,19 @@ is_positive_wir_test() {
   expected_exit "$1" >/dev/null
 }
 
+expected_backend_error() {
+  case "$1" in
+    51_unknown_operator) echo "unknown expression operator: banana_i32" ;;
+    52_wrong_arity_add_i32_too_few) echo "wrong arity for add_i32: expected 2, got 1" ;;
+    53_wrong_arity_add_i32_too_many) echo "wrong arity for add_i32: expected 2, got 3" ;;
+    *) return 1 ;;
+  esac
+}
+
+is_backend_fail_wir_test() {
+  expected_backend_error "$1" >/dev/null
+}
+
 [[ -x "$WEAVEC2" ]] || {
   printf '[weavec2-test] build/weavec2 not found; run ./build.sh first\n' >&2
   exit 1
@@ -150,6 +163,38 @@ for src in "$WIR_TEST_DIR"/*.wir; do
   fi
 
   log "ok $name"
+  pass_count=$((pass_count + 1))
+done
+
+for src in "$WIR_TEST_DIR"/*.wir; do
+  name="$(basename "$src" .wir)"
+
+  if ! is_backend_fail_wir_test "$name"; then
+    continue
+  fi
+
+  ll="$LL_DIR/$name.ll"
+  err="$BUILD_DIR/$name.err"
+  expected_error="$(expected_backend_error "$name")"
+
+  log "backend-fail $name"
+
+  set +e
+  "$WEAVEC2" "$src" "$ll" 2>"$err"
+  status="$?"
+  set -e
+
+  if [[ "$status" -eq 0 ]]; then
+    fail "$name: expected backend failure"
+    continue
+  fi
+
+  if ! grep -F "$expected_error" "$err" >/dev/null 2>&1; then
+    fail "$name: expected diagnostic '$expected_error'"
+    continue
+  fi
+
+  log "ok backend-fail $name"
   pass_count=$((pass_count + 1))
 done
 
