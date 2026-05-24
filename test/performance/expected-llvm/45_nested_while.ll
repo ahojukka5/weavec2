@@ -7,11 +7,12 @@
 ; returns: i32
 define i32 @main() {
 entry:
-  ; let outer
   %outer.addr = alloca i32
+  %total.addr = alloca i32
+  %inner.addr = alloca i32
+  ; let outer
   store i32 0, ptr %outer.addr
   ; let total
-  %total.addr = alloca i32
   store i32 0, ptr %total.addr
   ; while condition
   br label %while.cond
@@ -22,7 +23,6 @@ while.cond:
 while.body:
   ; while body
   ; let inner
-  %inner.addr = alloca i32
   store i32 0, ptr %inner.addr
   ; while condition
   br label %while.cond1

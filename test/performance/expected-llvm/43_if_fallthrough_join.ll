@@ -7,8 +7,8 @@
 ; returns: i32
 define i32 @main() {
 entry:
-  ; let x
   %x.addr = alloca i32
+  ; let x
   store i32 0, ptr %x.addr
   ; if condition
   %t0 = icmp slt i32 1, 2
