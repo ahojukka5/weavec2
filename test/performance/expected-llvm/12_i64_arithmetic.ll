@@ -8,19 +8,13 @@
 define i32 @main() {
 entry:
   ; let a
-  %a.addr = alloca i64
-  store i64 20, ptr %a.addr
   ; let b
-  %b.addr = alloca i64
-  store i64 2, ptr %b.addr
-  %t0 = load i64, ptr %b.addr
-  %t1 = mul i64 %t0, 11
+  %t0 = mul i64 2, 11
   ; let c
-  %t2 = load i64, ptr %a.addr
-  %t3 = add i64 %t2, %t1
+  %t1 = add i64 20, %t0
   ; let d
   ; return
-  %t4 = trunc i64 %t3 to i32
-  ret i32 %t4
+  %t2 = trunc i64 %t1 to i32
+  ret i32 %t2
 }
 

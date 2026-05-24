@@ -204,6 +204,14 @@
           (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (local_get ev) (const_i64 1))
           (return (const_i32 0))))
         (else (do)))
+      (if
+        (condition (and_bool
+          (eq_i64 (call_i64 ctx_get_fn_has_set (param_get ctx)) (const_i64 0))
+          (eq_i64 (local_get ev) (const_i64 -2))))
+        (then (do
+          (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (local_get expr_node) (const_i64 2))
+          (return (const_i32 0))))
+        (else (do)))
       (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (const_i64 -1) (const_i64 0))
       ; Emit: %name.addr = alloca TYPE
       (call_void write_cstr (local_get fd) (const_string_ptr "  %"))

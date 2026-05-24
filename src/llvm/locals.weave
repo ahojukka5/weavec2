@@ -2,7 +2,7 @@
 ;
 ; Each binding record is 40 bytes:
 ;   {name_start i64, name_len i64, type i64, value_id i64, mode i64}.
-; mode: 0 = stack slot, 1 = immutable SSA temp.
+; mode: 0 = stack slot, 1 = immutable SSA temp, 2 = immutable direct node.
 ; Stored in ctx at locals (offset 56) and params (offset 72).
 
 (program

@@ -8,11 +8,8 @@
 define i32 @main() {
 entry:
   ; let x
-  %x.addr = alloca i32
-  store i32 40, ptr %x.addr
   ; return
-  %t0 = load i32, ptr %x.addr
-  %t1 = add i32 %t0, 2
-  ret i32 %t1
+  %t0 = add i32 40, 2
+  ret i32 %t0
 }
 
