@@ -3,12 +3,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEAVEC2="$ROOT/build/weavec2"
-RUNTIME="$ROOT/../weavec0/runtime.c"
-TEST_DIR="$ROOT/tests/wir"
+WIR_TEST_DIR="$ROOT/tests/wir"
+SURFACE_TEST_DIR="$ROOT/tests/surface"
 BUILD_DIR="$ROOT/build/tests"
 LL_DIR="$BUILD_DIR/ll"
 BC_DIR="$BUILD_DIR/bc"
 BIN_DIR="$BUILD_DIR/bin"
+WIR_FROM_SURFACE_DIR="$BUILD_DIR/wir"
 
 pass_count=0
 fail_count=0
@@ -84,6 +85,7 @@ expected_exit() {
     55_integration_nested_control_flow) echo 75 ;;
     56_integration_multi_function_chain) echo 35 ;;
     57_integration_memory_flow) echo 100 ;;
+    60_discard_call_i32) echo 42 ;;
     *) return 1 ;;
   esac
 }
@@ -97,17 +99,12 @@ is_positive_wir_test() {
   exit 1
 }
 
-[[ -f "$RUNTIME" ]] || {
-  printf '[weavec2-test] runtime not found: %s\n' "$RUNTIME" >&2
-  exit 1
-}
-
 require_tool llvm-as
 require_tool clang
 
-mkdir -p "$LL_DIR" "$BC_DIR" "$BIN_DIR"
+mkdir -p "$LL_DIR" "$BC_DIR" "$BIN_DIR" "$WIR_FROM_SURFACE_DIR"
 
-for src in "$TEST_DIR"/*.wir; do
+for src in "$WIR_TEST_DIR"/*.wir; do
   name="$(basename "$src" .wir)"
 
   if ! is_positive_wir_test "$name"; then
@@ -132,7 +129,7 @@ for src in "$TEST_DIR"/*.wir; do
     continue
   fi
 
-  if ! clang "$ll" "$RUNTIME" -o "$bin"; then
+  if ! clang "$ll" -o "$bin"; then
     fail "$name: clang failed"
     continue
   fi
@@ -150,6 +147,88 @@ for src in "$TEST_DIR"/*.wir; do
   log "ok $name"
   pass_count=$((pass_count + 1))
 done
+
+surface_smoke_tests=(
+  01_return_42
+  04_add_i32
+  39_i32_comparisons_full
+  58_const_decl
+)
+
+for name in "${surface_smoke_tests[@]}"; do
+  src="$SURFACE_TEST_DIR/$name.weave"
+  wir="$WIR_FROM_SURFACE_DIR/$name.wir"
+  ll="$LL_DIR/surface_$name.ll"
+  bc="$BC_DIR/surface_$name.bc"
+  bin="$BIN_DIR/surface_$name"
+  expected=42
+  case "$name" in
+    04_add_i32) expected=42 ;;
+    39_i32_comparisons_full) expected=42 ;;
+    58_const_decl) expected=42 ;;
+  esac
+
+  log "frontend $name"
+
+  if ! "$WEAVEC2" --frontend "$wir" "$src"; then
+    fail "$name: frontend failed"
+    continue
+  fi
+
+  if ! "$WEAVEC2" --backend "$wir" "$ll"; then
+    fail "$name: backend failed"
+    continue
+  fi
+
+  if ! llvm-as "$ll" -o "$bc"; then
+    fail "$name: llvm-as failed"
+    continue
+  fi
+
+  if ! clang "$ll" -o "$bin"; then
+    fail "$name: clang failed"
+    continue
+  fi
+
+  set +e
+  "$bin"
+  actual="$?"
+  set -e
+
+  if [[ "$actual" != "$expected" ]]; then
+    fail "$name: expected exit $expected, got $actual"
+    continue
+  fi
+
+  log "ok frontend $name"
+  pass_count=$((pass_count + 1))
+done
+
+log "frontend multifile"
+if ! "$WEAVEC2" --frontend "$WIR_FROM_SURFACE_DIR/multifile.wir" \
+  "$SURFACE_TEST_DIR/multifile_a.weave" \
+  "$SURFACE_TEST_DIR/multifile_b.weave"; then
+  fail "multifile: frontend failed"
+else
+  if ! "$WEAVEC2" --backend "$WIR_FROM_SURFACE_DIR/multifile.wir" "$LL_DIR/surface_multifile.ll"; then
+    fail "multifile: backend failed"
+  elif ! llvm-as "$LL_DIR/surface_multifile.ll" -o "$BC_DIR/surface_multifile.bc"; then
+    fail "multifile: llvm-as failed"
+  elif ! clang "$LL_DIR/surface_multifile.ll" -o "$BIN_DIR/surface_multifile"; then
+    fail "multifile: clang failed"
+  else
+    set +e
+    "$BIN_DIR/surface_multifile"
+    actual="$?"
+    set -e
+    if [[ "$actual" != "42" ]]; then
+      fail "multifile: expected exit 42, got $actual"
+    else
+      log "ok frontend multifile"
+      pass_count=$((pass_count + 1))
+    fi
+  fi
+fi
 
 log "$pass_count passed, $fail_count failed"
 
