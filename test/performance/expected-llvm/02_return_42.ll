@@ -2,9 +2,6 @@
 ; source: test/performance/wir/02_return_42.wir
 ; core-version: 1
 
-; string literals
-
-
 ; function: main
 ; params: none
 ; returns: i32

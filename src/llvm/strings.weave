@@ -181,6 +181,33 @@
           (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
       (return_void)))
 
+  ; Recursively check whether a node contains a const_string_ptr expression.
+  (fn has_string_literal
+    (params (ctx ptr) (node i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "const_string_ptr") (const_i64 16)) (const_i32 0)))
+        (then (do (return (const_i32 1))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 has_string_literal (param_get ctx) (local_get child)) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
   ; Scan all fn bodies in the decls list for string literals and emit globals.
   ; After this call, ctx str_ctr = total number of string globals emitted.
   (fn emit_string_globals
@@ -208,12 +235,9 @@
             (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get scan_child)
               (const_string_ptr "fn") (const_i64 2)) (const_i32 0)))
             (then (do
-              ; check fn body for any const_string_ptr
-              (let do_node i64 (call_i64 nth_child (local_get tree) (local_get scan_child) (const_i64 4)))
               (if
-                (condition (ne_i64 (local_get do_node) (const_i64 -1)))
+                (condition (ne_i32 (call_i32 has_string_literal (param_get ctx) (local_get scan_child)) (const_i32 0)))
                 (then (do
-                  ; rough check: just set has_strings=1 and we'll scan properly below
                   (set has_strings (const_i32 1))))
                 (else (do)))))
             (else (do)))
