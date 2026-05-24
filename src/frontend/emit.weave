@@ -8,10 +8,65 @@
 ;
 ; This is the core primitive used throughout the frontend to copy subtrees
 ; verbatim into the WIR output without transformation.
+;
+; The frontend also accepts a small amount of typed surface sugar where the
+; surrounding form provides an unambiguous WIR type:
+;   (let x i32 42) -> (let x i32 (const_i32 42))
+;   (let x i64 42) -> (let x i64 (const_i64 42))
 
 (program
   (name "emit")
   (version "0.1")
+
+  (fn emit_const_for_type
+    (params (fd i32) (source ptr) (tree ptr) (type_node i64) (value_node i64))
+    (returns void)
+    (do
+      (call_void write_cstr (param_get fd) (const_string_ptr "(const_"))
+      (call_void write_node_text (param_get fd) (param_get source) (param_get tree) (param_get type_node))
+      (call_void write_byte (param_get fd) (const_i32 32))
+      (call_void write_node_text (param_get fd) (param_get source) (param_get tree) (param_get value_node))
+      (call_void write_byte (param_get fd) (const_i32 41))
+      (return_void)))
+
+  (fn emit_expr_for_type
+    (params (fd i32) (source ptr) (tree ptr) (type_node i64) (expr_node i64))
+    (returns void)
+    (do
+      (if
+        (condition (and_bool
+          (eq_i32 (call_i32 node_kind (param_get tree) (param_get expr_node)) (call_i32 node_int))
+          (or_bool
+            (ne_i32 (call_i32 ident_equals (param_get tree) (param_get source) (param_get type_node)
+              (const_string_ptr "i32") (const_i64 3)) (const_i32 0))
+            (ne_i32 (call_i32 ident_equals (param_get tree) (param_get source) (param_get type_node)
+              (const_string_ptr "i64") (const_i64 3)) (const_i32 0)))))
+        (then (do
+          (call_void emit_const_for_type
+            (param_get fd) (param_get source) (param_get tree)
+            (param_get type_node) (param_get expr_node))
+          (return_void)))
+        (else (do)))
+      (call_void emit_node (param_get fd) (param_get source) (param_get tree) (param_get expr_node))
+      (return_void)))
+
+  (fn emit_let_node
+    (params (fd i32) (source ptr) (tree ptr) (node i64))
+    (returns void)
+    (do
+      (let name_node i64 (call_i64 nth_child (param_get tree) (param_get node) (const_i64 1)))
+      (let type_node i64 (call_i64 nth_child (param_get tree) (param_get node) (const_i64 2)))
+      (let expr_node i64 (call_i64 nth_child (param_get tree) (param_get node) (const_i64 3)))
+      (call_void write_cstr (param_get fd) (const_string_ptr "(let "))
+      (call_void emit_node (param_get fd) (param_get source) (param_get tree) (local_get name_node))
+      (call_void write_byte (param_get fd) (const_i32 32))
+      (call_void emit_node (param_get fd) (param_get source) (param_get tree) (local_get type_node))
+      (call_void write_byte (param_get fd) (const_i32 32))
+      (call_void emit_expr_for_type
+        (param_get fd) (param_get source) (param_get tree)
+        (local_get type_node) (local_get expr_node))
+      (call_void write_byte (param_get fd) (const_i32 41))
+      (return_void)))
 
   (fn emit_node
     (params (fd i32) (source ptr) (tree ptr) (node i64))
@@ -21,6 +76,15 @@
       (if
         (condition (eq_i32 (local_get kind) (call_i32 node_list)))
         (then (do
+          (if
+            (condition (and_bool
+              (ne_i32 (call_i32 head_equals (param_get tree) (param_get source) (param_get node)
+                (const_string_ptr "let") (const_i64 3)) (const_i32 0))
+              (eq_i64 (call_i64 count_children (param_get tree) (param_get node)) (const_i64 4))))
+            (then (do
+              (call_void emit_let_node (param_get fd) (param_get source) (param_get tree) (param_get node))
+              (return_void)))
+            (else (do)))
           (call_void write_byte (param_get fd) (const_i32 40))
           (let child i64 (call_i64 node_first_child (param_get tree) (param_get node)))
           (let first i32 (const_i32 1))
