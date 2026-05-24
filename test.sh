@@ -3,9 +3,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEAVEC2="$ROOT/build/weavec2"
-WIR_TEST_DIR="$ROOT/tests/wir"
-SURFACE_TEST_DIR="$ROOT/tests/surface"
-BUILD_DIR="$ROOT/build/tests"
+WIR_TEST_DIR="$ROOT/test/correctness/wir"
+SURFACE_TEST_DIR="$ROOT/test/correctness/surface"
+BUILD_DIR="$ROOT/build/test/correctness"
 LL_DIR="$BUILD_DIR/ll"
 BC_DIR="$BUILD_DIR/bc"
 BIN_DIR="$BUILD_DIR/bin"
