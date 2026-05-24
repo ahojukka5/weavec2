@@ -61,6 +61,32 @@
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 1))))
 
+  ; Look up a local's type by name. Returns type_id or 0 if not found.
+  (fn lookup_local_type_or_zero
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (cast_i64_to_i32 (load_i64 (ptr_add (local_get rec) (const_i64 16)))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 0))))
+
   ; Look up a param's type by name. Returns type_id or 1 (i32) if not found.
   (fn lookup_param_type
     (params (ctx ptr) (name_start i64) (name_len i64))
@@ -86,6 +112,32 @@
             (else (do)))
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 1))))
+
+  ; Look up a param's type by name. Returns type_id or 0 if not found.
+  (fn lookup_param_type_or_zero
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let n i64 (call_i64 ctx_get_n_params (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_params (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (cast_i64_to_i32 (load_i64 (ptr_add (local_get rec) (const_i64 16)))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 0))))
 
   ; Build the params table from a WIR (params (p type)...) node.
   ; Also populates ctx's param table for type lookup.
