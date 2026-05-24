@@ -177,8 +177,12 @@ surface_smoke_tests=(
   26_ptr_params_call_i32
   27_bool_return
   28_three_arg_function
+  29_i32_memory_and_cast
+  30_const_string_ptr
   31_i64_sub_eq
   32_not_bool
+  33_codegen_join_and_i64_arg
+  34_store_i8_temp
   35_ge_i32
   36_sub_i32
   37_mul_i32
@@ -186,17 +190,22 @@ surface_smoke_tests=(
   39_i32_comparisons_full
   40_i64_ge_gt
   41_call_bool_direct
+  42_load_store_ptr
   43_empty_do
   44_if_fallthrough_join
   45_while_zero_iterations
   46_nested_while
   47_forward_function_call
+  48_multiple_externs_used_subset
   49_string_escape
   50_negative_i32_literal
   51_debug_marker
   52_integration_nested_control_flow
   53_integration_multi_function_chain
+  54_integration_memory_flow
+  55_new_operators
   56_extern_decl
+  57_struct_basic
   58_const_decl
 )
 
@@ -215,6 +224,8 @@ for name in "${surface_smoke_tests[@]}"; do
     39_i32_comparisons_full) expected=42 ;;
     52_integration_nested_control_flow) expected=75 ;;
     53_integration_multi_function_chain) expected=35 ;;
+    54_integration_memory_flow) expected=100 ;;
+    55_new_operators) expected=40 ;;
     58_const_decl) expected=42 ;;
   esac
 
