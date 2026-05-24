@@ -1,6 +1,8 @@
 ; locals.weave — local and parameter binding tables for weavec2
 ;
-; Each binding record is 24 bytes: {name_start i64, name_len i64, type i64}.
+; Each binding record is 40 bytes:
+;   {name_start i64, name_len i64, type i64, value_id i64, mode i64}.
+; mode: 0 = stack slot, 1 = immutable SSA temp.
 ; Stored in ctx at locals (offset 56) and params (offset 72).
 
 (program
@@ -9,15 +11,17 @@
 
   ; Add a local binding to the context's locals table.
   (fn add_local
-    (params (ctx ptr) (name_start i64) (name_len i64) (type_id i32))
+    (params (ctx ptr) (name_start i64) (name_len i64) (type_id i32) (value_id i64) (mode i64))
     (returns void)
     (do
       (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
       (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
-      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 24))))
+      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 40))))
       (store_i64 (local_get rec) (param_get name_start))
       (store_i64 (ptr_add (local_get rec) (const_i64 8)) (param_get name_len))
       (store_i64 (ptr_add (local_get rec) (const_i64 16)) (cast_i32_to_i64 (param_get type_id)))
+      (store_i64 (ptr_add (local_get rec) (const_i64 24)) (param_get value_id))
+      (store_i64 (ptr_add (local_get rec) (const_i64 32)) (param_get mode))
       (call_void ctx_set_n_locals (param_get ctx) (add_i64 (local_get n) (const_i64 1)))
       (return_void)))
 
@@ -28,10 +32,12 @@
     (do
       (let n i64 (call_i64 ctx_get_n_params (param_get ctx)))
       (let base ptr (call_ptr ctx_get_params (param_get ctx)))
-      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 24))))
+      (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get n) (const_i64 40))))
       (store_i64 (local_get rec) (param_get name_start))
       (store_i64 (ptr_add (local_get rec) (const_i64 8)) (param_get name_len))
       (store_i64 (ptr_add (local_get rec) (const_i64 16)) (cast_i32_to_i64 (param_get type_id)))
+      (store_i64 (ptr_add (local_get rec) (const_i64 24)) (const_i64 -1))
+      (store_i64 (ptr_add (local_get rec) (const_i64 32)) (const_i64 0))
       (call_void ctx_set_n_params (param_get ctx) (add_i64 (local_get n) (const_i64 1)))
       (return_void)))
 
@@ -47,7 +53,7 @@
       (while
         (condition (lt_i64 (local_get i) (local_get n)))
         (do
-          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
           (let rstart i64 (load_i64 (local_get rec)))
           (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
           (if
@@ -73,7 +79,7 @@
       (while
         (condition (lt_i64 (local_get i) (local_get n)))
         (do
-          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
           (let rstart i64 (load_i64 (local_get rec)))
           (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
           (if
@@ -87,6 +93,58 @@
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 0))))
 
+  ; Look up a local's storage mode by name. Returns 0 when not found.
+  (fn lookup_local_mode
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i64)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (load_i64 (ptr_add (local_get rec) (const_i64 32))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i64 0))))
+
+  ; Look up a local's remembered SSA temp id by name. Returns -1 when not found.
+  (fn lookup_local_value
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i64)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do
+              (return (load_i64 (ptr_add (local_get rec) (const_i64 24))))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i64 -1))))
+
   ; Look up a param's type by name. Returns type_id or 1 (i32) if not found.
   (fn lookup_param_type
     (params (ctx ptr) (name_start i64) (name_len i64))
@@ -99,7 +157,7 @@
       (while
         (condition (lt_i64 (local_get i) (local_get n)))
         (do
-          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
           (let rstart i64 (load_i64 (local_get rec)))
           (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
           (if
@@ -125,7 +183,7 @@
       (while
         (condition (lt_i64 (local_get i) (local_get n)))
         (do
-          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 24))))
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
           (let rstart i64 (load_i64 (local_get rec)))
           (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
           (if

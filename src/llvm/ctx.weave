@@ -1,6 +1,6 @@
 ; ctx.weave — emission context for weavec2
 ;
-; Layout (80 bytes):
+; Layout (88 bytes):
 ;   offset  0: out_fd    i64  (output fd as i64 for alignment)
 ;   offset  8: source    ptr  (source bytes)
 ;   offset 16: tree      ptr  (s-expression tree)
@@ -8,11 +8,13 @@
 ;   offset 32: blk_ctr   i64  (next block label, resets per function)
 ;   offset 40: str_ctr   i64  (string global counter, module-level)
 ;   offset 48: n_locals  i64  (locals count in current function)
-;   offset 56: locals    ptr  (array of {name_start i64, name_len i64, type i64})
+;   offset 56: locals    ptr  (array of binding records)
 ;   offset 64: n_params  i64  (params count in current function)
-;   offset 72: params    ptr  (array of {name_start i64, name_len i64, type i64})
+;   offset 72: params    ptr  (array of binding records)
+;   offset 80: fn_has_set i64 (1 when current function contains set)
 ;
-; Each binding record is 24 bytes: {name_start i64, name_len i64, type i64}.
+; Each binding record is 40 bytes:
+;   {name_start i64, name_len i64, type i64, value_id i64, mode i64}.
 ; MAX_BINDINGS = 64.
 
 (program
@@ -23,19 +25,19 @@
     (params (fd i32) (source ptr) (tree ptr))
     (returns ptr)
     (do
-      (let ctx ptr (call_ptr malloc (const_i64 80)))
+      (let ctx ptr (call_ptr malloc (const_i64 88)))
       (if
         (condition (eq_ptr (local_get ctx) (const_null)))
         (then (do (return (const_null))))
         (else (do)))
-      (let locals ptr (call_ptr malloc (mul_i64 (const_i64 64) (const_i64 24))))
+      (let locals ptr (call_ptr malloc (mul_i64 (const_i64 64) (const_i64 40))))
       (if
         (condition (eq_ptr (local_get locals) (const_null)))
         (then (do
           (call_void free (local_get ctx))
           (return (const_null))))
         (else (do)))
-      (let params_buf ptr (call_ptr malloc (mul_i64 (const_i64 64) (const_i64 24))))
+      (let params_buf ptr (call_ptr malloc (mul_i64 (const_i64 64) (const_i64 40))))
       (if
         (condition (eq_ptr (local_get params_buf) (const_null)))
         (then (do
@@ -53,6 +55,7 @@
       (store_ptr (ptr_add (local_get ctx) (const_i64 56)) (local_get locals))
       (store_i64 (ptr_add (local_get ctx) (const_i64 64)) (const_i64 0))
       (store_ptr (ptr_add (local_get ctx) (const_i64 72)) (local_get params_buf))
+      (store_i64 (ptr_add (local_get ctx) (const_i64 80)) (const_i64 0))
       (return (local_get ctx))))
 
   (fn ctx_free
@@ -167,7 +170,20 @@
       (store_i64 (ptr_add (param_get ctx) (const_i64 64)) (param_get n))
       (return_void)))
 
-  ; Reset per-function state: temp_ctr, blk_ctr, n_locals, n_params.
+  (fn ctx_get_fn_has_set
+    (params (ctx ptr))
+    (returns i64)
+    (do
+      (return (load_i64 (ptr_add (param_get ctx) (const_i64 80))))))
+
+  (fn ctx_set_fn_has_set
+    (params (ctx ptr) (value i64))
+    (returns void)
+    (do
+      (store_i64 (ptr_add (param_get ctx) (const_i64 80)) (param_get value))
+      (return_void)))
+
+  ; Reset per-function state: temp_ctr, blk_ctr, n_locals, n_params, fn_has_set.
   (fn ctx_reset_fn
     (params (ctx ptr))
     (returns void)
@@ -176,5 +192,6 @@
       (store_i64 (ptr_add (param_get ctx) (const_i64 32)) (const_i64 0))
       (store_i64 (ptr_add (param_get ctx) (const_i64 48)) (const_i64 0))
       (store_i64 (ptr_add (param_get ctx) (const_i64 64)) (const_i64 0))
+      (store_i64 (ptr_add (param_get ctx) (const_i64 80)) (const_i64 0))
       (return_void)))
 )

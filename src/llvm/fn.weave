@@ -88,6 +88,9 @@
       (let ret_type_id i32 (call_i32 parse_type (local_get tree) (local_get source) (local_get ret_type_node)))
       ; Build params table for type lookups
       (call_void build_params (param_get ctx) (local_get params_node))
+      (call_void ctx_set_fn_has_set
+        (param_get ctx)
+        (cast_i32_to_i64 (call_i32 node_contains_set (param_get ctx) (local_get do_node))))
       ; Emit comment header
       (call_void write_cstr (local_get fd) (const_string_ptr "; function: "))
       (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))

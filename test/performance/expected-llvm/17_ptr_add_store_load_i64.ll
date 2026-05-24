@@ -14,12 +14,9 @@ define i32 @main() {
 entry:
   %t0 = call ptr @malloc(i64 16)
   ; let p
-  %p.addr = alloca ptr
-  store ptr %t0, ptr %p.addr
   ; if condition
-  %t1 = load ptr, ptr %p.addr
-  %t2 = icmp eq ptr %t1, null
-  br i1 %t2, label %then, label %else
+  %t1 = icmp eq ptr %t0, null
+  br i1 %t1, label %then, label %else
 then:
   ; then
   ; return
@@ -28,29 +25,18 @@ else:
   ; else
   br label %endif
 endif:
-  %t3 = load ptr, ptr %p.addr
-  store i64 20, ptr %t3
-  %t4 = load ptr, ptr %p.addr
-  %t5 = getelementptr i8, ptr %t4, i64 8
-  store i64 22, ptr %t5
-  %t6 = load ptr, ptr %p.addr
-  %t7 = load i64, ptr %t6
+  store i64 20, ptr %t0
+  %t2 = getelementptr i8, ptr %t0, i64 8
+  store i64 22, ptr %t2
+  %t3 = load i64, ptr %t0
   ; let a
-  %a.addr = alloca i64
-  store i64 %t7, ptr %a.addr
-  %t8 = load ptr, ptr %p.addr
-  %t9 = getelementptr i8, ptr %t8, i64 8
-  %t10 = load i64, ptr %t9
+  %t4 = getelementptr i8, ptr %t0, i64 8
+  %t5 = load i64, ptr %t4
   ; let b
-  %b.addr = alloca i64
-  store i64 %t10, ptr %b.addr
-  %t11 = load ptr, ptr %p.addr
-  call void @free(ptr %t11)
+  call void @free(ptr %t0)
   ; return
-  %t12 = load i64, ptr %a.addr
-  %t13 = load i64, ptr %b.addr
-  %t14 = add i64 %t12, %t13
-  %t15 = trunc i64 %t14 to i32
-  ret i32 %t15
+  %t6 = add i64 %t3, %t5
+  %t7 = trunc i64 %t6 to i32
+  ret i32 %t7
 }
 
