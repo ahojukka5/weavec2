@@ -1,0 +1,10 @@
+(core-module
+  (core-version 1)
+  (decls
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (let x i32)
+        (return (const_i32 42)))))
+)
