@@ -9,12 +9,12 @@ define i32 @main() {
 entry:
   ; if condition
   %t0 = icmp slt i32 1, 2
-  br i1 %t0, label %then0, label %else0
-then0:
+  br i1 %t0, label %then, label %else
+then:
   ; then
   ; return
   ret i32 42
-else0:
+else:
   ; else
   ; return
   ret i32 0
