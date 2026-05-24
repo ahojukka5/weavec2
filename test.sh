@@ -104,6 +104,11 @@ expected_backend_error() {
     51_unknown_operator) echo "unknown expression operator: banana_i32" ;;
     52_wrong_arity_add_i32_too_few) echo "wrong arity for add_i32: expected 2, got 1" ;;
     53_wrong_arity_add_i32_too_many) echo "wrong arity for add_i32: expected 2, got 3" ;;
+    61_wrong_arity_let_too_few) echo "wrong arity for let: expected 3, got 2" ;;
+    62_wrong_arity_return_too_few) echo "wrong arity for return: expected 1, got 0" ;;
+    63_wrong_arity_if_too_few) echo "wrong arity for if: expected 3, got 2" ;;
+    64_wrong_arity_fn_too_few) echo "wrong arity for fn: expected 4, got 3" ;;
+    65_unknown_statement) echo "unknown expression operator: mystery_stmt" ;;
     *) return 1 ;;
   esac
 }
