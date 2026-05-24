@@ -16,6 +16,7 @@ require_tool() {
 
 [[ -x "$SEED" ]] || fail "seed compiler not found at $SEED; run ./build.sh first"
 require_tool llvm-link
+require_tool llvm-as
 require_tool clang
 
 chmod -R u+rw "$BUILD_DIR" 2>/dev/null || true
@@ -78,5 +79,50 @@ build_stage() {
 
 build_stage "$SEED" "$BUILD_DIR/stage1"
 build_stage "$BUILD_DIR/stage1/weavec2" "$BUILD_DIR/stage2"
+
+normalize_wir() {
+  tr '\n\t\r' ' ' < "$1" |
+    sed -E 's/[[:space:]]+/ /g; s/\( /(/g; s/ \)/)/g; s/^ //; s/ $//'
+}
+
+run_stage2_fixture() {
+  local name="$1"
+  local expected_exit="$2"
+  local stage2="$BUILD_DIR/stage2/weavec2"
+  local out_dir="$BUILD_DIR/stage2-fixtures"
+  local src="$ROOT/tests/surface/$name.weave"
+  local expected_wir="$ROOT/tests/surface/$name.expected.wir"
+  local wir="$out_dir/$name.wir"
+  local ll="$out_dir/$name.ll"
+  local bc="$out_dir/$name.bc"
+  local bin="$out_dir/$name"
+
+  mkdir -p "$out_dir"
+
+  log "stage2 frontend fixture $name"
+  "$stage2" --frontend "$wir" "$src"
+
+  if ! diff -u <(normalize_wir "$expected_wir") <(normalize_wir "$wir"); then
+    fail "stage2 frontend WIR mismatch for $name"
+  fi
+
+  log "stage2 backend fixture $name"
+  "$stage2" --backend "$wir" "$ll"
+  llvm-as "$ll" -o "$bc"
+  clang "$ll" -o "$bin"
+
+  set +e
+  "$bin"
+  local actual_exit="$?"
+  set -e
+
+  if [[ "$actual_exit" != "$expected_exit" ]]; then
+    fail "stage2 fixture $name expected exit $expected_exit, got $actual_exit"
+  fi
+}
+
+run_stage2_fixture 01_return_42 42
+run_stage2_fixture 59_bare_identifier_operands 42
+run_stage2_fixture 60_let_literal_sugar 42
 
 log "complete: $BUILD_DIR/stage2/weavec2"
