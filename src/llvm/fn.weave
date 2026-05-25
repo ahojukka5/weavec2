@@ -84,6 +84,7 @@
       (let returns_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 3)))
       ; child 4: (do ...)
       (let do_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 4)))
+      (call_void ctx_set_fn_body (param_get ctx) (local_get do_node))
       (let ret_type_node i64 (call_i64 nth_child (local_get tree) (local_get returns_node) (const_i64 1)))
       (let ret_type_id i32 (call_i32 parse_type (local_get tree) (local_get source) (local_get ret_type_node)))
       ; Build params table for type lookups
