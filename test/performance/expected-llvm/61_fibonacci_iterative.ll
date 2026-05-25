@@ -46,8 +46,7 @@ while.body1:
   ; set curr
   %curr.next1 = add i32 %t2, 0
   ; set i
-  %t3 = add i32 %i.phi1, 1
-  %i.next1 = add i32 %t3, 0
+  %i.next1 = add i32 %i.phi1, 1
   br label %while.cond1
 while.end1:
   ; return
