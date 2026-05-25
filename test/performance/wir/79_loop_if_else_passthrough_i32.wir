@@ -1,0 +1,77 @@
+; Loop with if/else where else does not assign the carried local.
+; Tests: endif merge uses phi0 on else path when else is empty.
+(core-module
+  (core-version 1)
+  (decls
+    (fn run
+      (params)
+      (returns i32)
+      (do
+        (let acc i32
+          (const_i32 0)
+        ) ;; let
+
+        (let i i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (lt_i32
+              (local_get i)
+              (const_i32 4)
+            ) ;; lt_i32
+          ) ;; condition
+          (do
+            (if
+              (condition
+                (eq_i32
+                  (mod_i32
+                    (local_get i)
+                    (const_i32 2)
+                  ) ;; mod_i32
+                  (const_i32 0)
+                ) ;; eq_i32
+              ) ;; condition
+              (then
+                (do
+                  (set acc
+                    (add_i32
+                      (local_get acc)
+                      (const_i32 10)
+                    ) ;; add_i32
+                  ) ;; set
+                ) ;; do
+              ) ;; then
+              (else
+                (do)
+              ) ;; else
+            ) ;; if
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get acc)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 run
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
