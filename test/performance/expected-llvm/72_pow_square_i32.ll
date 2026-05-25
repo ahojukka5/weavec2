@@ -41,7 +41,7 @@ then1:
   %result.next10 = mul i32 %result.phi0, %base.phi0
   br label %endif1
 endif1:
-  %result.merge1 = phi i32 [%result.next10, %then1], [%result.phi0, %else1]
+  %result.merge1 = phi i32 [%result.next10, %then1], [%result.phi0, %while.body]
   ; set base
   %base.next0 = mul i32 %base.phi0, %base.phi0
   ; set exp
@@ -50,8 +50,12 @@ endif1:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %result.phi0, ptr %result.addr
+  store i32 %base.phi0, ptr %base.addr
+  store i32 %exp.phi0, ptr %exp.addr
   ; return
-  ret i32 %result.merge1
+  %t3 = load i32, ptr %result.addr
+  ret i32 %t3
 }
 
 ; function: main

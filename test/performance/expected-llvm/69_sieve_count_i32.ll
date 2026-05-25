@@ -48,6 +48,7 @@ while.body:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %i.phi0, ptr %i.addr
   %t2 = call ptr @elem_ptr(ptr %flags, i32 0)
   store i32 0, ptr %t2
   %t3 = call ptr @elem_ptr(ptr %flags, i32 1)
@@ -133,8 +134,11 @@ while.body4:
 while.latch4:
   br label %while.cond4
 while.end4:
+  store i32 %count.phi4, ptr %count.addr
+  store i32 %i.phi4, ptr %i.addr
   ; return
-  ret i32 %count.phi4
+  %t23 = load i32, ptr %count.addr
+  ret i32 %t23
 }
 
 ; function: main

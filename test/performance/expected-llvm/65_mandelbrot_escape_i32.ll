@@ -77,8 +77,13 @@ endif1:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %active.phi0, ptr %active.addr
+  store i32 %zy.phi0, ptr %zy.addr
+  store i32 %zx.phi0, ptr %zx.addr
+  store i32 %iter.phi0, ptr %iter.addr
   ; return
-  ret i32 %iter.merge1
+  %t13 = load i32, ptr %iter.addr
+  ret i32 %t13
 }
 
 ; function: main

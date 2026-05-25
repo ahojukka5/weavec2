@@ -17,11 +17,9 @@ entry:
   br label %while.pre
 while.pre:
   %n.init0 = load i32, ptr %n.addr
-  %n.init0 = load i32, ptr %n.addr
   %steps.init0 = load i32, ptr %steps.addr
   br label %while.cond
 while.cond:
-  %n.phi0 = phi i32 [%n.init0, %while.pre], [%n.merge1, %while.latch]
   %n.phi0 = phi i32 [%n.init0, %while.pre], [%n.merge1, %while.latch]
   %steps.phi0 = phi i32 [%steps.init0, %while.pre], [%steps.next0, %while.latch]
   %t0 = icmp ne i32 %n.phi0, 1
@@ -51,8 +49,11 @@ endif1:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %n.phi0, ptr %n.addr
+  store i32 %steps.phi0, ptr %steps.addr
   ; return
-  ret i32 %steps.phi0
+  %t4 = load i32, ptr %steps.addr
+  ret i32 %t4
 }
 
 ; function: main

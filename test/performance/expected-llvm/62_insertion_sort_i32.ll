@@ -87,13 +87,16 @@ endif2:
 while.latch1:
   br label %while.cond1
 while.end1:
-  %t15 = add i32 %j.merge2, 1
-  %t16 = call ptr @elem_ptr(ptr %items, i32 %t15)
-  store i32 %t4, ptr %t16
+  store i32 %j.phi1, ptr %j.addr
+  store i32 %done.phi1, ptr %done.addr
+  %t15 = load i32, ptr %j.addr
+  %t16 = add i32 %t15, 1
+  %t17 = call ptr @elem_ptr(ptr %items, i32 %t16)
+  store i32 %t4, ptr %t17
   ; set i
-  %t17 = load i32, ptr %i.addr
-  %t18 = add i32 %t17, 1
-  store i32 %t18, ptr %i.addr
+  %t18 = load i32, ptr %i.addr
+  %t19 = add i32 %t18, 1
+  store i32 %t19, ptr %i.addr
   br label %while.cond
 while.end:
   ret void

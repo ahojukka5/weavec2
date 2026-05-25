@@ -46,8 +46,8 @@ while.pre:
 while.cond:
   %result.phi0 = phi i32 [%result.init0, %while.pre], [%result.merge1, %while.latch]
   %active.phi0 = phi i32 [%active.init0, %while.pre], [%active.merge1, %while.latch]
-  %low.phi0 = phi i32 [%low.init0, %while.pre], [%low.next0, %while.latch]
-  %high.phi0 = phi i32 [%high.init0, %while.pre], [%high.next0, %while.latch]
+  %low.phi0 = phi i32 [%low.init0, %while.pre], [%low.merge1, %while.latch]
+  %high.phi0 = phi i32 [%high.init0, %while.pre], [%high.merge1, %while.latch]
   %t0 = icmp sle i32 %low.phi0, %high.phi0
   %t1 = icmp ne i32 %active.phi0, 0
   %t2 = and i1 %t0, %t1
@@ -90,14 +90,21 @@ endif2:
   %high.merge2 = phi i32 [%high.phi0, %then2], [%high.next21, %else2]
   br label %endif1
 endif1:
-  %result.merge1 = phi i32 [%result.next10, %then1], [%result.phi0, %else1]
-  %active.merge1 = phi i32 [%active.next10, %then1], [%active.phi0, %else1]
+  %low.merge1 = phi i32 [%low.phi0, %then1], [%low.merge2, %endif2]
+  %high.merge1 = phi i32 [%high.phi0, %then1], [%high.merge2, %endif2]
+  %result.merge1 = phi i32 [%result.next10, %then1], [%result.phi0, %endif2]
+  %active.merge1 = phi i32 [%active.next10, %then1], [%active.phi0, %endif2]
   br label %while.latch
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %result.phi0, ptr %result.addr
+  store i32 %active.phi0, ptr %active.addr
+  store i32 %low.phi0, ptr %low.addr
+  store i32 %high.phi0, ptr %high.addr
   ; return
-  ret i32 %result.merge1
+  %t9 = load i32, ptr %result.addr
+  ret i32 %t9
 }
 
 ; function: main

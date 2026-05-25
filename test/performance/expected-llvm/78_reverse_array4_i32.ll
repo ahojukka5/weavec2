@@ -59,6 +59,8 @@ while.body:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %left.phi0, ptr %left.addr
+  store i32 %right.phi0, ptr %right.addr
   ; return
   %t7 = call ptr @elem_ptr(ptr %items, i32 1)
   %t8 = load i32, ptr %t7

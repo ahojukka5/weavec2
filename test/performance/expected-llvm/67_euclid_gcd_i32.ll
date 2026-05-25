@@ -36,8 +36,11 @@ while.body:
 while.latch:
   br label %while.cond
 while.end:
+  store i32 %x.phi0, ptr %x.addr
+  store i32 %y.phi0, ptr %y.addr
   ; return
-  ret i32 %x.phi0
+  %t2 = load i32, ptr %x.addr
+  ret i32 %t2
 }
 
 ; function: main

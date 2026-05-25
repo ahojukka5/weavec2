@@ -47,15 +47,18 @@ then2:
   %prime.next120 = add i32 0, 0
   br label %endif2
 endif2:
-  %prime.merge2 = phi i32 [%prime.next120, %then2], [%prime.phi1, %else2]
+  %prime.merge2 = phi i32 [%prime.next120, %then2], [%prime.phi1, %while.body1]
   ; set d
   %d.next1 = add i32 %d.phi1, 1
   br label %while.latch1
 while.latch1:
   br label %while.cond1
 while.end1:
+  store i32 %prime.phi1, ptr %prime.addr
+  store i32 %d.phi1, ptr %d.addr
   ; return
-  ret i32 %prime.merge2
+  %t7 = load i32, ptr %prime.addr
+  ret i32 %t7
 }
 
 ; function: main

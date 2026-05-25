@@ -69,43 +69,47 @@ then2:
   %min_idx.next120 = add i32 %j.phi1, 0
   br label %endif2
 endif2:
-  %min_idx.merge2 = phi i32 [%min_idx.next120, %then2], [%min_idx.phi1, %else2]
+  %min_idx.merge2 = phi i32 [%min_idx.next120, %then2], [%min_idx.phi1, %while.body1]
   ; set j
   %j.next1 = add i32 %j.phi1, 1
   br label %while.latch1
 while.latch1:
   br label %while.cond1
 while.end1:
+  store i32 %min_idx.phi1, ptr %min_idx.addr
   store i32 %j.phi1, ptr %j.addr
   ; if condition
-  %t11 = load i32, ptr %i.addr
-  %t12 = icmp ne i32 %min_idx.merge2, %t11
-  br i1 %t12, label %then3, label %endif3
+  %t11 = load i32, ptr %min_idx.addr
+  %t12 = load i32, ptr %i.addr
+  %t13 = icmp ne i32 %t11, %t12
+  br i1 %t13, label %then3, label %endif3
 then3:
   ; then
-  %t13 = load i32, ptr %i.addr
-  %t14 = call ptr @elem_ptr(ptr %items, i32 %t13)
-  %t15 = load i32, ptr %t14
+  %t14 = load i32, ptr %i.addr
+  %t15 = call ptr @elem_ptr(ptr %items, i32 %t14)
+  %t16 = load i32, ptr %t15
   ; let tmp
-  %t16 = load i32, ptr %i.addr
-  %t17 = call ptr @elem_ptr(ptr %items, i32 %t16)
-  %t18 = call ptr @elem_ptr(ptr %items, i32 %min_idx.merge2)
-  %t19 = load i32, ptr %t18
-  store i32 %t19, ptr %t17
-  %t20 = call ptr @elem_ptr(ptr %items, i32 %min_idx.merge2)
-  store i32 %t15, ptr %t20
+  %t17 = load i32, ptr %i.addr
+  %t18 = call ptr @elem_ptr(ptr %items, i32 %t17)
+  %t19 = load i32, ptr %min_idx.addr
+  %t20 = call ptr @elem_ptr(ptr %items, i32 %t19)
+  %t21 = load i32, ptr %t20
+  store i32 %t21, ptr %t18
+  %t22 = load i32, ptr %min_idx.addr
+  %t23 = call ptr @elem_ptr(ptr %items, i32 %t22)
+  store i32 %t16, ptr %t23
   br label %endif3
 endif3:
   ; set i
-  %t21 = load i32, ptr %i.addr
-  %t22 = add i32 %t21, 1
-  store i32 %t22, ptr %i.addr
+  %t24 = load i32, ptr %i.addr
+  %t25 = add i32 %t24, 1
+  store i32 %t25, ptr %i.addr
   br label %while.cond
 while.end:
   ; return
-  %t23 = call ptr @elem_ptr(ptr %items, i32 0)
-  %t24 = load i32, ptr %t23
-  ret i32 %t24
+  %t26 = call ptr @elem_ptr(ptr %items, i32 0)
+  %t27 = load i32, ptr %t26
+  ret i32 %t27
 }
 
 ; function: main
