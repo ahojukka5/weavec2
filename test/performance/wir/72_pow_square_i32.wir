@@ -1,0 +1,96 @@
+; Algorithm: exponentiation by squaring
+; Tests: branch-aware loop-carried state and repeated division/modulo
+(core-module
+  (core-version 1)
+  (decls
+    (fn pow_i32
+      (params
+        (base0 i32)
+        (exp0 i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let result i32
+          (const_i32 1)
+        ) ;; let
+
+        (let base i32
+          (param_get base0)
+        ) ;; let
+
+        (let exp i32
+          (param_get exp0)
+        ) ;; let
+
+        (while
+          (condition
+            (gt_i32
+              (local_get exp)
+              (const_i32 0)
+            ) ;; gt_i32
+          ) ;; condition
+          (do
+            (if
+              (condition
+                (ne_i32
+                  (mod_i32
+                    (local_get exp)
+                    (const_i32 2)
+                  ) ;; mod_i32
+                  (const_i32 0)
+                ) ;; ne_i32
+              ) ;; condition
+              (then
+                (do
+                  (set result
+                    (mul_i32
+                      (local_get result)
+                      (local_get base)
+                    ) ;; mul_i32
+                  ) ;; set
+                ) ;; do
+              ) ;; then
+              (else
+                (do)
+              ) ;; else
+            ) ;; if
+
+            (set base
+              (mul_i32
+                (local_get base)
+                (local_get base)
+              ) ;; mul_i32
+            ) ;; set
+
+            (set exp
+              (div_i32
+                (local_get exp)
+                (const_i32 2)
+              ) ;; div_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get result)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (add_i32
+            (call_i32 pow_i32
+              (const_i32 3)
+              (const_i32 3)
+            ) ;; call_i32
+            (const_i32 15)
+          ) ;; add_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
