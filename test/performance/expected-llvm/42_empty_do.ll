@@ -9,12 +9,9 @@ define i32 @main() {
 entry:
   ; if condition
   %t0 = icmp eq i32 1, 2
-  br i1 %t0, label %then, label %else
+  br i1 %t0, label %then, label %endif
 then:
   ; then
-  br label %endif
-else:
-  ; else
   br label %endif
 endif:
   ; return
