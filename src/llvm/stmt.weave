@@ -39,7 +39,48 @@
           (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
       (return (const_i32 0))))
 
-  ; Emit stack slots for every let in a mutable function before body code.
+  ; Return 1 when node or any descendant sets the named local.
+  (fn node_sets_local
+    (params (ctx ptr) (node i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i64 (param_get node) (const_i64 -1)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+        (then (do
+          (let set_name i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (call_i64 node_text_start (local_get tree) (local_get set_name))
+              (call_i64 node_text_len (local_get tree) (local_get set_name))) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 node_sets_local
+              (param_get ctx) (local_get child) (param_get name_start) (param_get name_len)) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
+  ; Emit stack slots for mutable lets before body code.
   (fn emit_stack_allocas
     (params (ctx ptr) (node i64))
     (returns void)
@@ -62,11 +103,18 @@
           (let name_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
           (let type_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 2)))
           (let type_id i32 (call_i32 parse_type (local_get tree) (local_get source) (local_get type_node)))
-          (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
-          (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
-          (call_void write_cstr (local_get fd) (const_string_ptr ".addr = alloca "))
-          (call_void emit_type (local_get fd) (local_get type_id))
-          (call_void write_byte (local_get fd) (const_i32 10))))
+          (let ns0 i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+          (let nl0 i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+          (if
+            (condition (ne_i32 (call_i32 node_sets_local
+              (param_get ctx) (call_i64 ctx_get_fn_body (param_get ctx)) (local_get ns0) (local_get nl0)) (const_i32 0)))
+            (then (do
+              (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
+              (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+              (call_void write_cstr (local_get fd) (const_string_ptr ".addr = alloca "))
+              (call_void emit_type (local_get fd) (local_get type_id))
+              (call_void write_byte (local_get fd) (const_i32 10))))
+            (else (do)))))
         (else (do)))
       (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
       (while
@@ -223,6 +271,8 @@
       (let type_id i32 (call_i32 parse_type (local_get tree) (local_get source) (local_get type_node)))
       (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
       (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+      (let is_set_local i32 (call_i32 node_sets_local
+        (param_get ctx) (call_i64 ctx_get_fn_body (param_get ctx)) (local_get ns) (local_get nl)))
       ; Evaluate initializer expression
       (let ev i64 (call_i64 emit_expr (param_get ctx) (local_get expr_node)))
       (if
@@ -235,7 +285,7 @@
       (call_void write_byte (local_get fd) (const_i32 10))
       (if
         (condition (and_bool
-          (eq_i64 (call_i64 ctx_get_fn_has_set (param_get ctx)) (const_i64 0))
+          (eq_i32 (local_get is_set_local) (const_i32 0))
           (ge_i64 (local_get ev) (const_i64 0))))
         (then (do
           (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (local_get ev) (const_i64 1))
@@ -243,7 +293,7 @@
         (else (do)))
       (if
         (condition (and_bool
-          (eq_i64 (call_i64 ctx_get_fn_has_set (param_get ctx)) (const_i64 0))
+          (eq_i32 (local_get is_set_local) (const_i32 0))
           (eq_i64 (local_get ev) (const_i64 -2))))
         (then (do
           (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (local_get expr_node) (const_i64 2))
@@ -252,7 +302,7 @@
       (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (const_i64 -1) (const_i64 0))
       ; Emit: %name.addr = alloca TYPE
       (if
-        (condition (eq_i64 (call_i64 ctx_get_fn_has_set (param_get ctx)) (const_i64 0)))
+        (condition (eq_i32 (local_get is_set_local) (const_i32 0)))
         (then (do
           (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
           (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
@@ -303,6 +353,24 @@
         (then (do (return (const_i32 1))))
         (else (do)))
       ; Emit: store TYPE %tN, ptr %name.addr
+      (if
+        (condition (and_bool
+          (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 3))
+          (gt_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0))))
+        (then (do
+          (let phi_blk i64 (call_i64 lookup_local_value (param_get ctx) (local_get ns) (local_get nl)))
+          (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
+          (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+          (call_void write_cstr (local_get fd) (const_string_ptr ".next"))
+          (call_void write_i64_dec (local_get fd) (local_get phi_blk))
+          (call_void write_cstr (local_get fd) (const_string_ptr " = add "))
+          (call_void emit_type (local_get fd) (local_get type_id))
+          (call_void write_byte (local_get fd) (const_i32 32))
+          (call_void emit_operand (param_get ctx) (local_get expr_node) (local_get ev))
+          (call_void write_cstr (local_get fd) (const_string_ptr ", 0"))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          (return (const_i32 0))))
+        (else (do)))
       (call_void write_cstr (local_get fd) (const_string_ptr "  store "))
       (call_void emit_type (local_get fd) (local_get type_id))
       (call_void write_byte (local_get fd) (const_i32 32))
@@ -311,6 +379,10 @@
       (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
       (call_void write_cstr (local_get fd) (const_string_ptr ".addr"))
       (call_void write_byte (local_get fd) (const_i32 10))
+      (if
+        (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 3)))
+        (then (do (call_void set_local_value (param_get ctx) (local_get ns) (local_get nl) (const_i64 -1) (const_i64 0))))
+        (else (do)))
       (return (const_i32 0))))
 
   ; Emit return statement.
@@ -429,6 +501,265 @@
         (else (do)))
       (return (call_i32 stmt_ends_with_return (param_get ctx) (local_get last)))))
 
+  ; Return non-zero when a (do ...) block has no statements.
+  (fn do_block_is_empty
+    (params (ctx ptr) (node i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (if
+        (condition (eq_i64 (local_get child) (const_i64 -1)))
+        (then (do (return (const_i32 1))))
+        (else (do)))
+      (return (const_i32 0))))
+
+  ; Return non-zero when an earlier direct child set assigns the same local.
+  (fn direct_set_seen_before
+    (params (ctx ptr) (body_do i64) (stop_child i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (and_bool
+          (ne_i64 (local_get child) (const_i64 -1))
+          (ne_i64 (local_get child) (param_get stop_child))))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let seen_name i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (if
+                (condition (ne_i32 (call_i32 slices_equal
+                  (local_get source)
+                  (param_get name_start) (param_get name_len)
+                  (call_i64 node_text_start (local_get tree) (local_get seen_name))
+                  (call_i64 node_text_len (local_get tree) (local_get seen_name))) (const_i32 0)))
+                (then (do (return (const_i32 1))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
+  ; Emit initial values for direct loop-carried scalar locals.
+  (fn loop_has_phi_locals
+    (params (ctx ptr) (body_do i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (let found_phi_local i32 (const_i32 0))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (or_bool
+              (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+                (const_string_ptr "if") (const_i64 2)) (const_i32 0))
+              (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+                (const_string_ptr "while") (const_i64 5)) (const_i32 0))))
+            (then (do (return (const_i32 0))))
+            (else (do)))
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+              (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+              (let type_id i32 (call_i32 lookup_local_type (param_get ctx) (local_get ns) (local_get nl)))
+              (if
+                (condition (ne_i32 (call_i32 direct_set_seen_before
+                  (param_get ctx) (param_get body_do) (local_get child) (local_get ns) (local_get nl)) (const_i32 0)))
+                (then (do (return (const_i32 0))))
+                (else (do)))
+              (if
+                (condition (eq_i32 (local_get type_id) (const_i32 1)))
+                (then (do
+                  (let mode i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)))
+                  (if
+                    (condition (or_bool
+                      (eq_i64 (local_get mode) (const_i64 0))
+                      (eq_i64 (local_get mode) (const_i64 3))))
+                    (then (do (set found_phi_local (const_i32 1))))
+                    (else (do)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (local_get found_phi_local))))
+
+  ; Emit initial values for direct loop-carried scalar locals.
+  (fn emit_loop_phi_initials
+    (params (ctx ptr) (body_do i64) (blk i64))
+    (returns void)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+              (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+              (let type_id i32 (call_i32 lookup_local_type (param_get ctx) (local_get ns) (local_get nl)))
+              (if
+                (condition (eq_i32 (local_get type_id) (const_i32 1)))
+                (then (do
+                  (let mode i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)))
+                  (if
+                    (condition (eq_i64 (local_get mode) (const_i64 0)))
+                    (then (do
+                      (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
+                      (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ".init"))
+                      (call_void write_i64_dec (local_get fd) (param_get blk))
+                      (call_void write_cstr (local_get fd) (const_string_ptr " = load "))
+                      (call_void emit_type (local_get fd) (local_get type_id))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ", ptr %"))
+                      (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ".addr"))
+                      (call_void write_byte (local_get fd) (const_i32 10))))
+                    (else (do)))
+                  (if
+                    (condition (eq_i64 (local_get mode) (const_i64 3)))
+                    (then (do
+                      (let prev_blk i64 (call_i64 lookup_local_value (param_get ctx) (local_get ns) (local_get nl)))
+                      (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
+                      (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ".init"))
+                      (call_void write_i64_dec (local_get fd) (param_get blk))
+                      (call_void write_cstr (local_get fd) (const_string_ptr " = add "))
+                      (call_void emit_type (local_get fd) (local_get type_id))
+                      (call_void write_cstr (local_get fd) (const_string_ptr " %"))
+                      (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ".phi"))
+                      (call_void write_i64_dec (local_get fd) (local_get prev_blk))
+                      (call_void write_cstr (local_get fd) (const_string_ptr ", 0"))
+                      (call_void write_byte (local_get fd) (const_i32 10))))
+                    (else (do)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return_void)))
+
+  ; Switch direct loop-carried scalar locals to phi mode for this loop.
+  (fn activate_loop_phi_locals
+    (params (ctx ptr) (body_do i64) (blk i64))
+    (returns void)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+              (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+              (let type_id i32 (call_i32 lookup_local_type (param_get ctx) (local_get ns) (local_get nl)))
+              (if
+                (condition (eq_i32 (local_get type_id) (const_i32 1)))
+                (then (do
+                  (let mode i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)))
+                  (if
+                    (condition (or_bool
+                      (eq_i64 (local_get mode) (const_i64 0))
+                      (eq_i64 (local_get mode) (const_i64 3))))
+                    (then (do
+                      (call_void set_local_value (param_get ctx) (local_get ns) (local_get nl) (param_get blk) (const_i64 3))))
+                    (else (do)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return_void)))
+
+  ; Emit phi nodes for direct loop-carried scalar locals.
+  (fn emit_loop_phi_nodes
+    (params (ctx ptr) (body_do i64) (blk i64))
+    (returns void)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let name_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (let ns i64 (call_i64 node_text_start (local_get tree) (local_get name_node)))
+              (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
+              (let type_id i32 (call_i32 lookup_local_type (param_get ctx) (local_get ns) (local_get nl)))
+              (if
+                (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 3)))
+                (then (do
+                  (call_void write_cstr (local_get fd) (const_string_ptr "  %"))
+                  (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                  (call_void write_cstr (local_get fd) (const_string_ptr ".phi"))
+                  (call_void write_i64_dec (local_get fd) (param_get blk))
+                  (call_void write_cstr (local_get fd) (const_string_ptr " = phi "))
+                  (call_void emit_type (local_get fd) (local_get type_id))
+                  (call_void write_cstr (local_get fd) (const_string_ptr " [%"))
+                  (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                  (call_void write_cstr (local_get fd) (const_string_ptr ".init"))
+                  (call_void write_i64_dec (local_get fd) (param_get blk))
+                  (call_void write_cstr (local_get fd) (const_string_ptr ", %while.pre"))
+                  (call_void emit_blk_suffix (local_get fd) (param_get blk))
+                  (call_void write_cstr (local_get fd) (const_string_ptr "], [%"))
+                  (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+                  (call_void write_cstr (local_get fd) (const_string_ptr ".next"))
+                  (call_void write_i64_dec (local_get fd) (param_get blk))
+                  (call_void write_cstr (local_get fd) (const_string_ptr ", %while.body"))
+                  (call_void emit_blk_suffix (local_get fd) (param_get blk))
+                  (call_void write_cstr (local_get fd) (const_string_ptr "]"))
+                  (call_void write_byte (local_get fd) (const_i32 10))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return_void)))
+
   ; Emit if statement.
   ; Structure: (if (condition cond) (then (do ...)) (else (do ...)))
   (fn emit_if_stmt
@@ -454,6 +785,7 @@
       ; child3 = (else (do ...))
       (let else_wrapper i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 3)))
       (let else_do i64 (call_i64 nth_child (local_get tree) (local_get else_wrapper) (const_i64 1)))
+      (let else_empty i32 (call_i32 do_block_is_empty (param_get ctx) (local_get else_do)))
       (let blk i64 (call_i64 ctx_alloc_blk (param_get ctx)))
       ; Emit: ; if condition
       (call_void write_cstr (local_get fd) (const_string_ptr "  ; if condition"))
@@ -485,8 +817,14 @@
       (call_void emit_operand (param_get ctx) (local_get cond_node) (local_get cv))
       (call_void write_cstr (local_get fd) (const_string_ptr ", label %then"))
       (call_void emit_blk_suffix (local_get fd) (local_get blk))
-      (call_void write_cstr (local_get fd) (const_string_ptr ", label %else"))
-      (call_void emit_blk_suffix (local_get fd) (local_get blk))
+      (if
+        (condition (ne_i32 (local_get else_empty) (const_i32 0)))
+        (then (do
+          (call_void write_cstr (local_get fd) (const_string_ptr ", label %endif"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))))
+        (else (do
+          (call_void write_cstr (local_get fd) (const_string_ptr ", label %else"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk)))))
       (call_void write_byte (local_get fd) (const_i32 10))
       ; then block
       (call_void write_cstr (local_get fd) (const_string_ptr "then"))
@@ -508,19 +846,25 @@
           (call_void write_byte (local_get fd) (const_i32 10))))
         (else (do)))
       ; else block
-      (call_void write_cstr (local_get fd) (const_string_ptr "else"))
-      (call_void emit_blk_suffix (local_get fd) (local_get blk))
-      (call_void write_byte (local_get fd) (const_i32 58))
-      (call_void write_byte (local_get fd) (const_i32 10))
-      (call_void write_cstr (local_get fd) (const_string_ptr "  ; else"))
-      (call_void write_byte (local_get fd) (const_i32 10))
       (if
-        (condition (ne_i32 (call_i32 emit_do_block (param_get ctx) (local_get else_do) (param_get ret_type_id)) (const_i32 0)))
-        (then (do (return (const_i32 1))))
+        (condition (eq_i32 (local_get else_empty) (const_i32 0)))
+        (then (do
+          (call_void write_cstr (local_get fd) (const_string_ptr "else"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))
+          (call_void write_byte (local_get fd) (const_i32 58))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          (call_void write_cstr (local_get fd) (const_string_ptr "  ; else"))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          (if
+            (condition (ne_i32 (call_i32 emit_do_block (param_get ctx) (local_get else_do) (param_get ret_type_id)) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))))
         (else (do)))
       (let else_returns i32 (call_i32 do_block_ends_with_return (param_get ctx) (local_get else_do)))
       (if
-        (condition (eq_i32 (local_get else_returns) (const_i32 0)))
+        (condition (and_bool
+          (eq_i32 (local_get else_empty) (const_i32 0))
+          (eq_i32 (local_get else_returns) (const_i32 0))))
         (then (do
           (call_void write_cstr (local_get fd) (const_string_ptr "  br label %endif"))
           (call_void emit_blk_suffix (local_get fd) (local_get blk))
@@ -558,17 +902,45 @@
       (let cond_node i64 (call_i64 nth_child (local_get tree) (local_get cond_wrapper) (const_i64 1)))
       (let body_do i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 2)))
       (let blk i64 (call_i64 ctx_alloc_blk (param_get ctx)))
+      (let use_loop_phi i32 (const_i32 0))
+      (if
+        (condition (and_bool
+          (eq_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0))
+          (ne_i32 (call_i32 loop_has_phi_locals (param_get ctx) (local_get body_do)) (const_i32 0))))
+        (then (do (set use_loop_phi (const_i32 1))))
+        (else (do)))
       ; Jump to condition
       (call_void write_cstr (local_get fd) (const_string_ptr "  ; while condition"))
       (call_void write_byte (local_get fd) (const_i32 10))
-      (call_void write_cstr (local_get fd) (const_string_ptr "  br label %while.cond"))
-      (call_void emit_blk_suffix (local_get fd) (local_get blk))
-      (call_void write_byte (local_get fd) (const_i32 10))
+      (if
+        (condition (ne_i32 (local_get use_loop_phi) (const_i32 0)))
+        (then (do
+          (call_void write_cstr (local_get fd) (const_string_ptr "  br label %while.pre"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          ; Preheader captures initial loop-carried values.
+          (call_void write_cstr (local_get fd) (const_string_ptr "while.pre"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))
+          (call_void write_byte (local_get fd) (const_i32 58))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          (call_void emit_loop_phi_initials (param_get ctx) (local_get body_do) (local_get blk))
+          (call_void activate_loop_phi_locals (param_get ctx) (local_get body_do) (local_get blk))
+          (call_void write_cstr (local_get fd) (const_string_ptr "  br label %while.cond"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))
+          (call_void write_byte (local_get fd) (const_i32 10))))
+        (else (do
+          (call_void write_cstr (local_get fd) (const_string_ptr "  br label %while.cond"))
+          (call_void emit_blk_suffix (local_get fd) (local_get blk))
+          (call_void write_byte (local_get fd) (const_i32 10)))))
       ; Condition label
       (call_void write_cstr (local_get fd) (const_string_ptr "while.cond"))
       (call_void emit_blk_suffix (local_get fd) (local_get blk))
       (call_void write_byte (local_get fd) (const_i32 58))
       (call_void write_byte (local_get fd) (const_i32 10))
+      (if
+        (condition (ne_i32 (local_get use_loop_phi) (const_i32 0)))
+        (then (do (call_void emit_loop_phi_nodes (param_get ctx) (local_get body_do) (local_get blk))))
+        (else (do)))
       ; Evaluate condition
       (let cv i64 (call_i64 emit_expr (param_get ctx) (local_get cond_node)))
       (if
@@ -606,10 +978,12 @@
       (call_void write_byte (local_get fd) (const_i32 10))
       (call_void write_cstr (local_get fd) (const_string_ptr "  ; while body"))
       (call_void write_byte (local_get fd) (const_i32 10))
+      (call_void ctx_set_loop_depth (param_get ctx) (add_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 1)))
       (if
         (condition (ne_i32 (call_i32 emit_do_block (param_get ctx) (local_get body_do) (param_get ret_type_id)) (const_i32 0)))
         (then (do (return (const_i32 1))))
         (else (do)))
+      (call_void ctx_set_loop_depth (param_get ctx) (sub_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 1)))
       ; Back-edge
       (call_void write_cstr (local_get fd) (const_string_ptr "  br label %while.cond"))
       (call_void emit_blk_suffix (local_get fd) (local_get blk))
