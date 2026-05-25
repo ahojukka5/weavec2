@@ -53,6 +53,7 @@ FILES=(
 
 # Step 1: concatenate .weave files
 log "Concatenating source files..."
+: > "$BUILD_DIR/weavec2.wir"
 WEAVEFRONT="$WEAVEFRONT" "$WF/weavefront-cat.sh" \
   "$BUILD_DIR/weavec2.wir" "${FILES[@]}" \
   || fail "weavefront-cat.sh failed"
