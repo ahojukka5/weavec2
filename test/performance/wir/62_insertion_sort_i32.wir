@@ -25,15 +25,12 @@
       (returns ptr)
       (do
         (return
-          (ptr_add
+          (array_i32_at
             (param_get base)
-            (mul_i64
-              (cast_i32_to_i64
-                (param_get index)
-              ) ;; cast_i32_to_i64
-              (const_i64 4)
-            ) ;; mul_i64
-          ) ;; ptr_add
+            (cast_i32_to_i64
+              (param_get index)
+            ) ;; cast_i32_to_i64
+          ) ;; array_i32_at
         ) ;; return
       ) ;; do
     ) ;; fn
