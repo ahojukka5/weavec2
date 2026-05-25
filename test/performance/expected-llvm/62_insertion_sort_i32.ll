@@ -14,9 +14,8 @@ define ptr @elem_ptr(ptr %base, i32 %index) {
 entry:
   ; return
   %t0 = sext i32 %index to i64
-  %t1 = mul i64 %t0, 4
-  %t2 = getelementptr i8, ptr %base, i64 %t1
-  ret ptr %t2
+  %t1 = getelementptr i32, ptr %base, i64 %t0
+  ret ptr %t1
 }
 
 ; function: sort4
