@@ -23,7 +23,7 @@ while.cond:
   %x.phi0 = phi i32 [%x.init0, %while.pre], [%y.phi0, %while.latch]
   %y.phi0 = phi i32 [%y.init0, %while.pre], [%y.next0, %while.latch]
   %t0 = icmp ne i32 %y.phi0, 0
-  br i1 %t0, label %while.body, label %while.end
+  br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   %t1 = srem i32 %x.phi0, %y.phi0
@@ -35,9 +35,12 @@ while.body:
   br label %while.latch
 while.latch:
   br label %while.cond
-while.end:
+while.exit-merge:
+  ; sync loop-carried locals to stack
   store i32 %x.phi0, ptr %x.addr
   store i32 %y.phi0, ptr %y.addr
+  br label %while.end
+while.end:
   ; return
   %t2 = load i32, ptr %x.addr
   ret i32 %t2

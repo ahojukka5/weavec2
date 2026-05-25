@@ -28,7 +28,7 @@ while.cond:
   %base.phi0 = phi i32 [%base.init0, %while.pre], [%base.next0, %while.latch]
   %exp.phi0 = phi i32 [%exp.init0, %while.pre], [%exp.next0, %while.latch]
   %t0 = icmp sgt i32 %exp.phi0, 0
-  br i1 %t0, label %while.body, label %while.end
+  br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   ; if condition
@@ -49,10 +49,13 @@ endif1:
   br label %while.latch
 while.latch:
   br label %while.cond
-while.end:
+while.exit-merge:
+  ; sync loop-carried locals to stack
   store i32 %result.phi0, ptr %result.addr
   store i32 %base.phi0, ptr %base.addr
   store i32 %exp.phi0, ptr %exp.addr
+  br label %while.end
+while.end:
   ; return
   %t3 = load i32, ptr %result.addr
   ret i32 %t3

@@ -48,7 +48,7 @@ while.cond1:
   %t3 = load i32, ptr %pass.addr
   %t4 = sub i32 3, %t3
   %t5 = icmp slt i32 %t2, %t4
-  br i1 %t5, label %while.body1, label %while.end1
+  br i1 %t5, label %while.body1, label %while.exit-merge1
 while.body1:
   ; while body
   %t6 = call ptr @elem_ptr(ptr %items, i32 %j.phi1)
@@ -75,8 +75,11 @@ endif2:
   br label %while.latch1
 while.latch1:
   br label %while.cond1
-while.end1:
+while.exit-merge1:
+  ; sync loop-carried locals to stack
   store i32 %j.phi1, ptr %j.addr
+  br label %while.end1
+while.end1:
   ; set pass
   %t15 = load i32, ptr %pass.addr
   %t16 = add i32 %t15, 1

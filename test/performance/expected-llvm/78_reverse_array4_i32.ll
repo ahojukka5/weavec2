@@ -39,7 +39,7 @@ while.cond:
   %left.phi0 = phi i32 [%left.init0, %while.pre], [%left.next0, %while.latch]
   %right.phi0 = phi i32 [%right.init0, %while.pre], [%right.next0, %while.latch]
   %t0 = icmp slt i32 %left.phi0, %right.phi0
-  br i1 %t0, label %while.body, label %while.end
+  br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   %t1 = call ptr @elem_ptr(ptr %items, i32 %left.phi0)
@@ -58,9 +58,12 @@ while.body:
   br label %while.latch
 while.latch:
   br label %while.cond
-while.end:
+while.exit-merge:
+  ; sync loop-carried locals to stack
   store i32 %left.phi0, ptr %left.addr
   store i32 %right.phi0, ptr %right.addr
+  br label %while.end
+while.end:
   ; return
   %t7 = call ptr @elem_ptr(ptr %items, i32 1)
   %t8 = load i32, ptr %t7

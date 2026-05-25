@@ -35,7 +35,7 @@ while.cond:
   %t0 = icmp slt i32 %iter.phi0, %max_iter
   %t1 = icmp ne i32 %active.phi0, 0
   %t2 = and i1 %t0, %t1
-  br i1 %t2, label %while.body, label %while.end
+  br i1 %t2, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   %t3 = mul i32 %zx.phi0, %zx.phi0
@@ -76,11 +76,14 @@ endif1:
   br label %while.latch
 while.latch:
   br label %while.cond
-while.end:
+while.exit-merge:
+  ; sync loop-carried locals to stack
   store i32 %active.phi0, ptr %active.addr
   store i32 %zy.phi0, ptr %zy.addr
   store i32 %zx.phi0, ptr %zx.addr
   store i32 %iter.phi0, ptr %iter.addr
+  br label %while.end
+while.end:
   ; return
   %t13 = load i32, ptr %iter.addr
   ret i32 %t13

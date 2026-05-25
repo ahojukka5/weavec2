@@ -34,7 +34,7 @@ while.cond1:
   %total.phi1 = phi i32 [%total.init1, %while.pre1], [%total.next1, %while.latch1]
   %inner.phi1 = phi i32 [%inner.init1, %while.pre1], [%inner.next1, %while.latch1]
   %t2 = icmp slt i32 %inner.phi1, 3
-  br i1 %t2, label %while.body1, label %while.end1
+  br i1 %t2, label %while.body1, label %while.exit-merge1
 while.body1:
   ; while body
   ; set total
@@ -44,9 +44,12 @@ while.body1:
   br label %while.latch1
 while.latch1:
   br label %while.cond1
-while.end1:
+while.exit-merge1:
+  ; sync loop-carried locals to stack
   store i32 %total.phi1, ptr %total.addr
   store i32 %inner.phi1, ptr %inner.addr
+  br label %while.end1
+while.end1:
   ; set outer
   %t3 = load i32, ptr %outer.addr
   %t4 = add i32 %t3, 1

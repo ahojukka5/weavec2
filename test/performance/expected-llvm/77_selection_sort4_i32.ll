@@ -53,7 +53,7 @@ while.cond1:
   %min_idx.phi1 = phi i32 [%min_idx.init1, %while.pre1], [%min_idx.merge2, %while.latch1]
   %j.phi1 = phi i32 [%j.init1, %while.pre1], [%j.next1, %while.latch1]
   %t5 = icmp slt i32 %j.phi1, 4
-  br i1 %t5, label %while.body1, label %while.end1
+  br i1 %t5, label %while.body1, label %while.exit-merge1
 while.body1:
   ; while body
   ; if condition
@@ -75,9 +75,12 @@ endif2:
   br label %while.latch1
 while.latch1:
   br label %while.cond1
-while.end1:
+while.exit-merge1:
+  ; sync loop-carried locals to stack
   store i32 %min_idx.phi1, ptr %min_idx.addr
   store i32 %j.phi1, ptr %j.addr
+  br label %while.end1
+while.end1:
   ; if condition
   %t11 = load i32, ptr %min_idx.addr
   %t12 = load i32, ptr %i.addr
