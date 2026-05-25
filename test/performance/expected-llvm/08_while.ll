@@ -14,25 +14,27 @@ entry:
   ; let sum
   store i32 0, ptr %sum.addr
   ; while condition
+  br label %while.pre
+while.pre:
+  %sum.init0 = load i32, ptr %sum.addr
+  %i.init0 = load i32, ptr %i.addr
   br label %while.cond
 while.cond:
-  %t0 = load i32, ptr %i.addr
-  %t1 = icmp slt i32 %t0, 7
-  br i1 %t1, label %while.body, label %while.end
+  %sum.phi0 = phi i32 [%sum.init0, %while.pre], [%sum.next0, %while.body]
+  %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.body]
+  %t0 = icmp slt i32 %i.phi0, 7
+  br i1 %t0, label %while.body, label %while.end
 while.body:
   ; while body
   ; set sum
-  %t2 = load i32, ptr %sum.addr
-  %t3 = add i32 %t2, 6
-  store i32 %t3, ptr %sum.addr
+  %t1 = add i32 %sum.phi0, 6
+  %sum.next0 = add i32 %t1, 0
   ; set i
-  %t4 = load i32, ptr %i.addr
-  %t5 = add i32 %t4, 1
-  store i32 %t5, ptr %i.addr
+  %t2 = add i32 %i.phi0, 1
+  %i.next0 = add i32 %t2, 0
   br label %while.cond
 while.end:
   ; return
-  %t6 = load i32, ptr %sum.addr
-  ret i32 %t6
+  ret i32 %sum.phi0
 }
 
