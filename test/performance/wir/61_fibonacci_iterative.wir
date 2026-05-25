@@ -1,0 +1,93 @@
+; Algorithm: iterative Fibonacci
+; Tests: loop-carried scalar state, call_i32, and mutable locals
+(core-module
+  (core-version 1)
+  (decls
+    (fn fib
+      (params
+        (n i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (if
+          (condition
+            (le_i32
+              (param_get n)
+              (const_i32 1)
+            ) ;; le_i32
+          ) ;; condition
+          (then
+            (do
+              (return
+                (param_get n)
+              ) ;; return
+            ) ;; do
+          ) ;; then
+          (else
+            (do)
+          ) ;; else
+        ) ;; if
+
+        (let prev i32
+          (const_i32 0)
+        ) ;; let
+
+        (let curr i32
+          (const_i32 1)
+        ) ;; let
+
+        (let i i32
+          (const_i32 2)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get i)
+              (param_get n)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (let next i32
+              (add_i32
+                (local_get prev)
+                (local_get curr)
+              ) ;; add_i32
+            ) ;; let
+
+            (set prev
+              (local_get curr)
+            ) ;; set
+
+            (set curr
+              (local_get next)
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get curr)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 fib
+            (const_i32 10)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
