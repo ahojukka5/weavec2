@@ -16,28 +16,22 @@ entry:
   ; let buffer
   ; if condition
   %t1 = icmp eq ptr %t0, null
-  br i1 %t1, label %then, label %else
+  br i1 %t1, label %then, label %endif
 then:
   ; then
   ; return
   ret i32 0
-else:
-  ; else
-  br label %endif
 endif:
   %t2 = call ptr @malloc(i64 8)
   ; let data
   ; if condition
   %t3 = icmp eq ptr %t2, null
-  br i1 %t3, label %then1, label %else1
+  br i1 %t3, label %then1, label %endif1
 then1:
   ; then
   call void @free(ptr %t0)
   ; return
   ret i32 0
-else1:
-  ; else
-  br label %endif1
 endif1:
   store ptr %t2, ptr %t0
   %t4 = getelementptr i8, ptr %t0, i64 8
