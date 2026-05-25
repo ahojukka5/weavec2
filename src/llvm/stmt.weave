@@ -369,6 +369,14 @@
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
       (if
+        (condition (or_bool
+          (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+            (const_string_ptr "const_i32") (const_i64 9)) (const_i32 0))
+          (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+            (const_string_ptr "param_get") (const_i64 9)) (const_i32 0))))
+        (then (do (return (const_i32 2))))
+        (else (do)))
+      (if
         (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
           (const_string_ptr "local_get") (const_i64 9)) (const_i32 0)))
         (then (do
@@ -432,6 +440,16 @@
       (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
       (let source ptr (call_ptr ctx_get_source (param_get ctx)))
       (let expr_node i64 (call_i64 nth_child (local_get tree) (param_get set_node) (const_i64 2)))
+      (if
+        (condition (or_bool
+          (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get expr_node)
+            (const_string_ptr "const_i32") (const_i64 9)) (const_i32 0))
+          (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get expr_node)
+            (const_string_ptr "param_get") (const_i64 9)) (const_i32 0))))
+        (then (do
+          (call_void emit_operand (param_get ctx) (local_get expr_node) (const_i64 -2))
+          (return_void)))
+        (else (do)))
       (if
         (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get expr_node)
           (const_string_ptr "local_get") (const_i64 9)) (const_i32 0)))
