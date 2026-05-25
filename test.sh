@@ -91,6 +91,7 @@ expected_exit() {
     56_integration_multi_function_chain) echo 35 ;;
     57_integration_memory_flow) echo 100 ;;
     60_discard_call_i32) echo 42 ;;
+    66_typed_array_at) echo 42 ;;
     *) return 1 ;;
   esac
 }
