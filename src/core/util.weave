@@ -150,4 +150,139 @@
             (else (do)))
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 1))))
+
+  ; Count if statements in a do block (matches ctx_alloc_blk order during emit).
+  (fn count_if_blks_in_do
+    (params (tree ptr) (source ptr) (do_node i64))
+    (returns i64)
+    (do
+      (let tp ptr (param_get tree))
+      (let sp ptr (param_get source))
+      (let dn i64 (param_get do_node))
+      (let n i64 (const_i64 0))
+      (let child i64 (call_i64 node_first_child (local_get tp) (local_get dn)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tp) (local_get sp) (local_get child)
+              (const_string_ptr "if") (const_i64 2)) (const_i32 0)))
+            (then (do
+              (set n (add_i64 (local_get n) (const_i64 1)))
+              (let tw i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 2)))
+              (let td i64 (call_i64 nth_child (local_get tp) (local_get tw) (const_i64 1)))
+              (let ew i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 3)))
+              (let ed i64 (call_i64 nth_child (local_get tp) (local_get ew) (const_i64 1)))
+              (set n (add_i64 (local_get n) (call_i64 count_if_blks_in_do (local_get tp) (local_get sp) (local_get td))))
+              (set n (add_i64 (local_get n) (call_i64 count_if_blks_in_do (local_get tp) (local_get sp) (local_get ed))))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+      (return (local_get n))))
+
+  ; Largest if suffix allocated when emitting ifs in do_node (run_blk before first if).
+  (fn max_if_suffix_alloc_in_do
+    (params (tree ptr) (source ptr) (do_node i64) (run_blk i64))
+    (returns i64)
+    (do
+      (let tp ptr (param_get tree))
+      (let sp ptr (param_get source))
+      (let dn i64 (param_get do_node))
+      (let max_suf i64 (const_i64 -1))
+      (let child i64 (call_i64 node_first_child (local_get tp) (local_get dn)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tp) (local_get sp) (local_get child)
+              (const_string_ptr "if") (const_i64 2)) (const_i32 0)))
+            (then (do
+              (let if_suf i64 (add_i64 (param_get run_blk) (const_i64 1)))
+              (if
+                (condition (gt_i64 (local_get if_suf) (local_get max_suf)))
+                (then (do (set max_suf (local_get if_suf))))
+                (else (do)))
+              (let tw i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 2)))
+              (let td i64 (call_i64 nth_child (local_get tp) (local_get tw) (const_i64 1)))
+              (let ew i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 3)))
+              (let ed i64 (call_i64 nth_child (local_get tp) (local_get ew) (const_i64 1)))
+              (let sub_max i64 (call_i64 max_if_suffix_alloc_in_do
+                (local_get tp) (local_get sp) (local_get td) (local_get if_suf)))
+              (if
+                (condition (gt_i64 (local_get sub_max) (local_get max_suf)))
+                (then (do (set max_suf (local_get sub_max))))
+                (else (do)))
+              (let nb i64 (add_i64 (local_get if_suf) (call_i64 count_if_blks_in_do (local_get tp) (local_get sp) (local_get td))))
+              (set sub_max (call_i64 max_if_suffix_alloc_in_do
+                (local_get tp) (local_get sp) (local_get ed) (local_get nb)))
+              (if
+                (condition (gt_i64 (local_get sub_max) (local_get max_suf)))
+                (then (do (set max_suf (local_get sub_max))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+      (return (local_get max_suf))))
+
+  ; If blk suffix for a set of name in body_do, or best when not found.
+  ; run_blk/enclosing mirror emit_loop_phi_nodes_do if recursion.
+  (fn find_merge_if_blk_for_local_do
+    (params (tree ptr) (source ptr) (body_do i64) (ns i64) (nl i64) (run_blk i64) (enclosing_if_blk i64) (best i64))
+    (returns i64)
+    (do
+      (let tp ptr (param_get tree))
+      (let sp ptr (param_get source))
+      (let dn i64 (param_get body_do))
+      (let found i64 (param_get best))
+      (let child i64 (call_i64 node_first_child (local_get tp) (local_get dn)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tp) (local_get sp) (local_get child)
+              (const_string_ptr "if") (const_i64 2)) (const_i32 0)))
+            (then (do
+              (let nb i64 (add_i64 (param_get run_blk) (const_i64 1)))
+              (let tw i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 2)))
+              (let td i64 (call_i64 nth_child (local_get tp) (local_get tw) (const_i64 1)))
+              (let ew i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 3)))
+              (let ed i64 (call_i64 nth_child (local_get tp) (local_get ew) (const_i64 1)))
+              (set found (call_i64 find_merge_if_blk_for_local_do
+                (local_get tp) (local_get sp) (local_get td) (param_get ns) (param_get nl)
+                (local_get nb) (param_get run_blk) (local_get found)))
+              (set nb (add_i64 (local_get nb) (call_i64 count_if_blks_in_do (local_get tp) (local_get sp) (local_get td))))
+              (set found (call_i64 find_merge_if_blk_for_local_do
+                (local_get tp) (local_get sp) (local_get ed) (param_get ns) (param_get nl)
+                (local_get nb) (param_get run_blk) (local_get found)))))
+            (else (do)))
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tp) (local_get sp) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let sn i64 (call_i64 nth_child (local_get tp) (local_get child) (const_i64 1)))
+              (if
+                (condition (ne_i32 (call_i32 slices_equal
+                  (local_get sp)
+                  (param_get ns) (param_get nl)
+                  (call_i64 node_text_start (local_get tp) (local_get sn))
+                  (call_i64 node_text_len (local_get tp) (local_get sn))) (const_i32 0)))
+                (then (do
+                  (if
+                    (condition (ge_i64 (param_get enclosing_if_blk) (const_i64 0)))
+                    (then (do (set found (param_get enclosing_if_blk))))
+                    (else (do)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tp) (local_get child)))))
+      (return (local_get found))))
 )
