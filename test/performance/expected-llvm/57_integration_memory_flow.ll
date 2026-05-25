@@ -32,8 +32,7 @@ while.body:
   %t4 = mul i32 %i.phi0, 10
   store i32 %t4, ptr %t3
   ; set i
-  %t5 = add i32 %i.phi0, 1
-  %i.next0 = add i32 %t5, 0
+  %i.next0 = add i32 %i.phi0, 1
   br label %while.cond
 while.end:
   ret void
@@ -68,11 +67,9 @@ while.body:
   %t2 = mul i64 %t1, 4
   %t3 = getelementptr i8, ptr %buffer, i64 %t2
   %t4 = load i32, ptr %t3
-  %t5 = add i32 %sum.phi0, %t4
-  %sum.next0 = add i32 %t5, 0
+  %sum.next0 = add i32 %sum.phi0, %t4
   ; set i
-  %t6 = add i32 %i.phi0, 1
-  %i.next0 = add i32 %t6, 0
+  %i.next0 = add i32 %i.phi0, 1
   br label %while.cond
 while.end:
   ; return
