@@ -44,6 +44,7 @@ FILES=(
   src/llvm/locals.weave
   src/llvm/strings.weave
   src/llvm/expr.weave
+  src/llvm/loop-phi.weave
   src/llvm/stmt.weave
   src/llvm/fn.weave
   src/llvm/module.weave
