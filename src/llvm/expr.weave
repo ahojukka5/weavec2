@@ -4,6 +4,7 @@
 ;   Returns: ≥0 = temp register index
 ;            -2 = direct operand (constant or param_get, no instruction emitted)
 ;            -3 = direct immutable local operand
+;            -4 = loop phi local operand
 ;            -1 = error
 ;
 ; Callers use emit_operand(ctx, node, result) to write either %tN or the literal.
@@ -119,6 +120,23 @@
           (let nl1 i64 (call_i64 node_text_len (local_get tree) (local_get name_node0)))
           (let value_node1 i64 (call_i64 lookup_local_value (param_get ctx) (local_get ns1) (local_get nl1)))
           (call_void emit_operand (param_get ctx) (local_get value_node1) (const_i64 -2))
+          (return_void)))
+        (else (do)))
+      (if
+        (condition (eq_i64 (param_get result) (const_i64 -4)))
+        (then (do
+          (let phi_name i64 (param_get node))
+          (if
+            (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_ident)))
+            (then (do
+              (set phi_name (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))))
+            (else (do)))
+          (let ps i64 (call_i64 node_text_start (local_get tree) (local_get phi_name)))
+          (let pl i64 (call_i64 node_text_len (local_get tree) (local_get phi_name)))
+          (call_void write_byte (local_get fd) (const_i32 37))
+          (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get phi_name))
+          (call_void write_cstr (local_get fd) (const_string_ptr ".phi"))
+          (call_void write_i64_dec (local_get fd) (call_i64 lookup_local_value (param_get ctx) (local_get ps) (local_get pl)))
           (return_void)))
         (else (do)))
       (if
@@ -413,6 +431,33 @@
       (call_void write_byte (local_get fd) (const_i32 10))
       (return (local_get t))))
 
+  ; Emit typed array address: %tN = getelementptr TYPE, ptr base, i64 index
+  (fn emit_array_at
+    (params (ctx ptr) (node i64) (elem_type_id i32))
+    (returns i64)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let base_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+      (let index_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 2)))
+      (let bv i64 (call_i64 emit_expr (param_get ctx) (local_get base_node)))
+      (let iv i64 (call_i64 emit_expr (param_get ctx) (local_get index_node)))
+      (if
+        (condition (or_bool (eq_i64 (local_get bv) (const_i64 -1)) (eq_i64 (local_get iv) (const_i64 -1))))
+        (then (do (return (const_i64 -1))))
+        (else (do)))
+      (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
+      (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
+      (call_void write_i64_dec (local_get fd) (local_get t))
+      (call_void write_cstr (local_get fd) (const_string_ptr " = getelementptr "))
+      (call_void emit_type (local_get fd) (param_get elem_type_id))
+      (call_void write_cstr (local_get fd) (const_string_ptr ", ptr "))
+      (call_void emit_operand (param_get ctx) (local_get base_node) (local_get bv))
+      (call_void write_cstr (local_get fd) (const_string_ptr ", i64 "))
+      (call_void emit_operand (param_get ctx) (local_get index_node) (local_get iv))
+      (call_void write_byte (local_get fd) (const_i32 10))
+      (return (local_get t))))
+
   ; Emit bare local ident. Immutable SSA locals reuse their initializer temp;
   ; stack locals are loaded from %name.addr.
   (fn emit_ident_get
@@ -444,6 +489,10 @@
       (if
         (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 2)))
         (then (do (return (const_i64 -3))))
+        (else (do)))
+      (if
+        (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 3)))
+        (then (do (return (const_i64 -4))))
         (else (do)))
       (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
       (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
@@ -477,6 +526,10 @@
       (if
         (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 2)))
         (then (do (return (const_i64 -3))))
+        (else (do)))
+      (if
+        (condition (eq_i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)) (const_i64 3)))
+        (then (do (return (const_i64 -4))))
         (else (do)))
       (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
       (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
@@ -887,6 +940,21 @@
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
           (const_string_ptr "ptr_add") (const_i64 7)) (const_i32 0)))
         (then (do (return (call_i64 emit_ptr_add (param_get ctx) (param_get node)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "array_i32_at") (const_i64 12)) (const_i32 0)))
+        (then (do (return (call_i64 emit_array_at (param_get ctx) (param_get node) (const_i32 1)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "array_i64_at") (const_i64 12)) (const_i32 0)))
+        (then (do (return (call_i64 emit_array_at (param_get ctx) (param_get node) (const_i32 2)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "array_ptr_at") (const_i64 12)) (const_i32 0)))
+        (then (do (return (call_i64 emit_array_at (param_get ctx) (param_get node) (const_i32 4)))))
         (else (do)))
 
       ; Call expressions
