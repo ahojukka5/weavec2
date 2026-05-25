@@ -20,8 +20,8 @@ while.pre:
   %y.init0 = load i32, ptr %y.addr
   br label %while.cond
 while.cond:
-  %x.phi0 = phi i32 [%x.init0, %while.pre], [%y.phi0, %while.body]
-  %y.phi0 = phi i32 [%y.init0, %while.pre], [%y.next0, %while.body]
+  %x.phi0 = phi i32 [%x.init0, %while.pre], [%y.phi0, %while.latch]
+  %y.phi0 = phi i32 [%y.init0, %while.pre], [%y.next0, %while.latch]
   %t0 = icmp ne i32 %y.phi0, 0
   br i1 %t0, label %while.body, label %while.end
 while.body:
@@ -29,8 +29,11 @@ while.body:
   %t1 = srem i32 %x.phi0, %y.phi0
   ; let r
   ; set x
+  %x.next0 = add i32 %y.phi0, 0
   ; set y
   %y.next0 = add i32 %t1, 0
+  br label %while.latch
+while.latch:
   br label %while.cond
 while.end:
   ; return

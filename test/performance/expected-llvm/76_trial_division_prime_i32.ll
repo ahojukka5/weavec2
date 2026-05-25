@@ -22,38 +22,40 @@ endif:
   ; let prime
   store i32 1, ptr %prime.addr
   ; while condition
+  br label %while.pre1
+while.pre1:
+  %prime.init1 = load i32, ptr %prime.addr
+  %d.init1 = load i32, ptr %d.addr
   br label %while.cond1
 while.cond1:
-  %t1 = load i32, ptr %prime.addr
-  %t2 = icmp ne i32 %t1, 0
-  %t3 = load i32, ptr %d.addr
-  %t4 = load i32, ptr %d.addr
-  %t5 = mul i32 %t3, %t4
-  %t6 = icmp sle i32 %t5, %n
-  %t7 = and i1 %t2, %t6
-  br i1 %t7, label %while.body1, label %while.end1
+  %prime.phi1 = phi i32 [%prime.init1, %while.pre1], [%prime.merge2, %while.latch1]
+  %d.phi1 = phi i32 [%d.init1, %while.pre1], [%d.next1, %while.latch1]
+  %t1 = icmp ne i32 %prime.phi1, 0
+  %t2 = mul i32 %d.phi1, %d.phi1
+  %t3 = icmp sle i32 %t2, %n
+  %t4 = and i1 %t1, %t3
+  br i1 %t4, label %while.body1, label %while.end1
 while.body1:
   ; while body
   ; if condition
-  %t8 = load i32, ptr %d.addr
-  %t9 = srem i32 %n, %t8
-  %t10 = icmp eq i32 %t9, 0
-  br i1 %t10, label %then2, label %endif2
+  %t5 = srem i32 %n, %d.phi1
+  %t6 = icmp eq i32 %t5, 0
+  br i1 %t6, label %then2, label %endif2
 then2:
   ; then
   ; set prime
-  store i32 0, ptr %prime.addr
+  %prime.next120 = add i32 0, 0
   br label %endif2
 endif2:
+  %prime.merge2 = phi i32 [%prime.next120, %then2], [%prime.phi1, %else2]
   ; set d
-  %t11 = load i32, ptr %d.addr
-  %t12 = add i32 %t11, 1
-  store i32 %t12, ptr %d.addr
+  %d.next1 = add i32 %d.phi1, 1
+  br label %while.latch1
+while.latch1:
   br label %while.cond1
 while.end1:
   ; return
-  %t13 = load i32, ptr %prime.addr
-  ret i32 %t13
+  ret i32 %prime.merge2
 }
 
 ; function: main

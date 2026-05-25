@@ -17,41 +17,41 @@ entry:
   ; let exp
   store i32 %exp0, ptr %exp.addr
   ; while condition
+  br label %while.pre
+while.pre:
+  %result.init0 = load i32, ptr %result.addr
+  %base.init0 = load i32, ptr %base.addr
+  %exp.init0 = load i32, ptr %exp.addr
   br label %while.cond
 while.cond:
-  %t0 = load i32, ptr %exp.addr
-  %t1 = icmp sgt i32 %t0, 0
-  br i1 %t1, label %while.body, label %while.end
+  %result.phi0 = phi i32 [%result.init0, %while.pre], [%result.merge1, %while.latch]
+  %base.phi0 = phi i32 [%base.init0, %while.pre], [%base.next0, %while.latch]
+  %exp.phi0 = phi i32 [%exp.init0, %while.pre], [%exp.next0, %while.latch]
+  %t0 = icmp sgt i32 %exp.phi0, 0
+  br i1 %t0, label %while.body, label %while.end
 while.body:
   ; while body
   ; if condition
-  %t2 = load i32, ptr %exp.addr
-  %t3 = srem i32 %t2, 2
-  %t4 = icmp ne i32 %t3, 0
-  br i1 %t4, label %then1, label %endif1
+  %t1 = srem i32 %exp.phi0, 2
+  %t2 = icmp ne i32 %t1, 0
+  br i1 %t2, label %then1, label %endif1
 then1:
   ; then
   ; set result
-  %t5 = load i32, ptr %result.addr
-  %t6 = load i32, ptr %base.addr
-  %t7 = mul i32 %t5, %t6
-  store i32 %t7, ptr %result.addr
+  %result.next10 = mul i32 %result.phi0, %base.phi0
   br label %endif1
 endif1:
+  %result.merge1 = phi i32 [%result.next10, %then1], [%result.phi0, %else1]
   ; set base
-  %t8 = load i32, ptr %base.addr
-  %t9 = load i32, ptr %base.addr
-  %t10 = mul i32 %t8, %t9
-  store i32 %t10, ptr %base.addr
+  %base.next0 = mul i32 %base.phi0, %base.phi0
   ; set exp
-  %t11 = load i32, ptr %exp.addr
-  %t12 = sdiv i32 %t11, 2
-  store i32 %t12, ptr %exp.addr
+  %exp.next0 = sdiv i32 %exp.phi0, 2
+  br label %while.latch
+while.latch:
   br label %while.cond
 while.end:
   ; return
-  %t13 = load i32, ptr %result.addr
-  ret i32 %t13
+  ret i32 %result.merge1
 }
 
 ; function: main

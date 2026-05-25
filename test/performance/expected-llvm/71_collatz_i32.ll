@@ -14,43 +14,45 @@ entry:
   ; let steps
   store i32 0, ptr %steps.addr
   ; while condition
+  br label %while.pre
+while.pre:
+  %n.init0 = load i32, ptr %n.addr
+  %n.init0 = load i32, ptr %n.addr
+  %steps.init0 = load i32, ptr %steps.addr
   br label %while.cond
 while.cond:
-  %t0 = load i32, ptr %n.addr
-  %t1 = icmp ne i32 %t0, 1
-  br i1 %t1, label %while.body, label %while.end
+  %n.phi0 = phi i32 [%n.init0, %while.pre], [%n.merge1, %while.latch]
+  %n.phi0 = phi i32 [%n.init0, %while.pre], [%n.merge1, %while.latch]
+  %steps.phi0 = phi i32 [%steps.init0, %while.pre], [%steps.next0, %while.latch]
+  %t0 = icmp ne i32 %n.phi0, 1
+  br i1 %t0, label %while.body, label %while.end
 while.body:
   ; while body
   ; if condition
-  %t2 = load i32, ptr %n.addr
-  %t3 = srem i32 %t2, 2
-  %t4 = icmp eq i32 %t3, 0
-  br i1 %t4, label %then1, label %else1
+  %t1 = srem i32 %n.phi0, 2
+  %t2 = icmp eq i32 %t1, 0
+  br i1 %t2, label %then1, label %else1
 then1:
   ; then
   ; set n
-  %t5 = load i32, ptr %n.addr
-  %t6 = sdiv i32 %t5, 2
-  store i32 %t6, ptr %n.addr
+  %n.next10 = sdiv i32 %n.phi0, 2
   br label %endif1
 else1:
   ; else
   ; set n
-  %t7 = load i32, ptr %n.addr
-  %t8 = mul i32 %t7, 3
-  %t9 = add i32 %t8, 1
-  store i32 %t9, ptr %n.addr
+  %t3 = mul i32 %n.phi0, 3
+  %n.next11 = add i32 %t3, 1
   br label %endif1
 endif1:
+  %n.merge1 = phi i32 [%n.next10, %then1], [%n.next11, %else1]
   ; set steps
-  %t10 = load i32, ptr %steps.addr
-  %t11 = add i32 %t10, 1
-  store i32 %t11, ptr %steps.addr
+  %steps.next0 = add i32 %steps.phi0, 1
+  br label %while.latch
+while.latch:
   br label %while.cond
 while.end:
   ; return
-  %t12 = load i32, ptr %steps.addr
-  ret i32 %t12
+  ret i32 %steps.phi0
 }
 
 ; function: main

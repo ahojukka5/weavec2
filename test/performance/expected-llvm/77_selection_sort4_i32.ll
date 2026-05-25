@@ -44,67 +44,68 @@ while.body:
   ; let j
   store i32 %t4, ptr %j.addr
   ; while condition
+  br label %while.pre1
+while.pre1:
+  %min_idx.init1 = load i32, ptr %min_idx.addr
+  %j.init1 = load i32, ptr %j.addr
   br label %while.cond1
 while.cond1:
-  %t5 = load i32, ptr %j.addr
-  %t6 = icmp slt i32 %t5, 4
-  br i1 %t6, label %while.body1, label %while.end1
+  %min_idx.phi1 = phi i32 [%min_idx.init1, %while.pre1], [%min_idx.merge2, %while.latch1]
+  %j.phi1 = phi i32 [%j.init1, %while.pre1], [%j.next1, %while.latch1]
+  %t5 = icmp slt i32 %j.phi1, 4
+  br i1 %t5, label %while.body1, label %while.end1
 while.body1:
   ; while body
   ; if condition
-  %t7 = load i32, ptr %j.addr
-  %t8 = call ptr @elem_ptr(ptr %items, i32 %t7)
+  %t6 = call ptr @elem_ptr(ptr %items, i32 %j.phi1)
+  %t7 = load i32, ptr %t6
+  %t8 = call ptr @elem_ptr(ptr %items, i32 %min_idx.phi1)
   %t9 = load i32, ptr %t8
-  %t10 = load i32, ptr %min_idx.addr
-  %t11 = call ptr @elem_ptr(ptr %items, i32 %t10)
-  %t12 = load i32, ptr %t11
-  %t13 = icmp slt i32 %t9, %t12
-  br i1 %t13, label %then2, label %endif2
+  %t10 = icmp slt i32 %t7, %t9
+  br i1 %t10, label %then2, label %endif2
 then2:
   ; then
   ; set min_idx
-  %t14 = load i32, ptr %j.addr
-  store i32 %t14, ptr %min_idx.addr
+  %min_idx.next120 = add i32 %j.phi1, 0
   br label %endif2
 endif2:
+  %min_idx.merge2 = phi i32 [%min_idx.next120, %then2], [%min_idx.phi1, %else2]
   ; set j
-  %t15 = load i32, ptr %j.addr
-  %t16 = add i32 %t15, 1
-  store i32 %t16, ptr %j.addr
+  %j.next1 = add i32 %j.phi1, 1
+  br label %while.latch1
+while.latch1:
   br label %while.cond1
 while.end1:
+  store i32 %j.phi1, ptr %j.addr
   ; if condition
-  %t17 = load i32, ptr %min_idx.addr
-  %t18 = load i32, ptr %i.addr
-  %t19 = icmp ne i32 %t17, %t18
-  br i1 %t19, label %then3, label %endif3
+  %t11 = load i32, ptr %i.addr
+  %t12 = icmp ne i32 %min_idx.merge2, %t11
+  br i1 %t12, label %then3, label %endif3
 then3:
   ; then
-  %t20 = load i32, ptr %i.addr
-  %t21 = call ptr @elem_ptr(ptr %items, i32 %t20)
-  %t22 = load i32, ptr %t21
+  %t13 = load i32, ptr %i.addr
+  %t14 = call ptr @elem_ptr(ptr %items, i32 %t13)
+  %t15 = load i32, ptr %t14
   ; let tmp
-  %t23 = load i32, ptr %i.addr
-  %t24 = call ptr @elem_ptr(ptr %items, i32 %t23)
-  %t25 = load i32, ptr %min_idx.addr
-  %t26 = call ptr @elem_ptr(ptr %items, i32 %t25)
-  %t27 = load i32, ptr %t26
-  store i32 %t27, ptr %t24
-  %t28 = load i32, ptr %min_idx.addr
-  %t29 = call ptr @elem_ptr(ptr %items, i32 %t28)
-  store i32 %t22, ptr %t29
+  %t16 = load i32, ptr %i.addr
+  %t17 = call ptr @elem_ptr(ptr %items, i32 %t16)
+  %t18 = call ptr @elem_ptr(ptr %items, i32 %min_idx.merge2)
+  %t19 = load i32, ptr %t18
+  store i32 %t19, ptr %t17
+  %t20 = call ptr @elem_ptr(ptr %items, i32 %min_idx.merge2)
+  store i32 %t15, ptr %t20
   br label %endif3
 endif3:
   ; set i
-  %t30 = load i32, ptr %i.addr
-  %t31 = add i32 %t30, 1
-  store i32 %t31, ptr %i.addr
+  %t21 = load i32, ptr %i.addr
+  %t22 = add i32 %t21, 1
+  store i32 %t22, ptr %i.addr
   br label %while.cond
 while.end:
   ; return
-  %t32 = call ptr @elem_ptr(ptr %items, i32 0)
-  %t33 = load i32, ptr %t32
-  ret i32 %t33
+  %t23 = call ptr @elem_ptr(ptr %items, i32 0)
+  %t24 = load i32, ptr %t23
+  ret i32 %t24
 }
 
 ; function: main

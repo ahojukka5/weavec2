@@ -36,8 +36,8 @@ while.pre:
   %right.init0 = load i32, ptr %right.addr
   br label %while.cond
 while.cond:
-  %left.phi0 = phi i32 [%left.init0, %while.pre], [%left.next0, %while.body]
-  %right.phi0 = phi i32 [%right.init0, %while.pre], [%right.next0, %while.body]
+  %left.phi0 = phi i32 [%left.init0, %while.pre], [%left.next0, %while.latch]
+  %right.phi0 = phi i32 [%right.init0, %while.pre], [%right.next0, %while.latch]
   %t0 = icmp slt i32 %left.phi0, %right.phi0
   br i1 %t0, label %while.body, label %while.end
 while.body:
@@ -55,6 +55,8 @@ while.body:
   %left.next0 = add i32 %left.phi0, 1
   ; set right
   %right.next0 = sub i32 %right.phi0, 1
+  br label %while.latch
+while.latch:
   br label %while.cond
 while.end:
   ; return

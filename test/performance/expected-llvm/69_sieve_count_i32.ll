@@ -35,7 +35,7 @@ while.pre:
   %i.init0 = load i32, ptr %i.addr
   br label %while.cond
 while.cond:
-  %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.body]
+  %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.latch]
   %t0 = icmp sle i32 %i.phi0, 16
   br i1 %t0, label %while.body, label %while.end
 while.body:
@@ -44,6 +44,8 @@ while.body:
   store i32 1, ptr %t1
   ; set i
   %i.next0 = add i32 %i.phi0, 1
+  br label %while.latch
+while.latch:
   br label %while.cond
 while.end:
   %t2 = call ptr @elem_ptr(ptr %flags, i32 0)
@@ -81,7 +83,7 @@ while.pre3:
   %multiple.init3 = load i32, ptr %multiple.addr
   br label %while.cond3
 while.cond3:
-  %multiple.phi3 = phi i32 [%multiple.init3, %while.pre3], [%multiple.next3, %while.body3]
+  %multiple.phi3 = phi i32 [%multiple.init3, %while.pre3], [%multiple.next320, %while.latch3]
   %t15 = icmp sle i32 %multiple.phi3, 16
   br i1 %t15, label %while.body3, label %while.end3
 while.body3:
@@ -90,7 +92,9 @@ while.body3:
   store i32 0, ptr %t16
   ; set multiple
   %t17 = load i32, ptr %p.addr
-  %multiple.next3 = add i32 %multiple.phi3, %t17
+  %multiple.next320 = add i32 %multiple.phi3, %t17
+  br label %while.latch3
+while.latch3:
   br label %while.cond3
 while.end3:
   store i32 %multiple.phi3, ptr %multiple.addr
@@ -113,8 +117,8 @@ while.pre4:
   %i.init4 = load i32, ptr %i.addr
   br label %while.cond4
 while.cond4:
-  %count.phi4 = phi i32 [%count.init4, %while.pre4], [%count.next4, %while.body4]
-  %i.phi4 = phi i32 [%i.init4, %while.pre4], [%i.next4, %while.body4]
+  %count.phi4 = phi i32 [%count.init4, %while.pre4], [%count.next4, %while.latch4]
+  %i.phi4 = phi i32 [%i.init4, %while.pre4], [%i.next4, %while.latch4]
   %t20 = icmp sle i32 %i.phi4, 16
   br i1 %t20, label %while.body4, label %while.end4
 while.body4:
@@ -125,6 +129,8 @@ while.body4:
   %count.next4 = add i32 %count.phi4, %t22
   ; set i
   %i.next4 = add i32 %i.phi4, 1
+  br label %while.latch4
+while.latch4:
   br label %while.cond4
 while.end4:
   ; return
