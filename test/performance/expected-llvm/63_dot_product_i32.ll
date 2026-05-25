@@ -14,9 +14,8 @@ define ptr @i32_at(ptr %base, i32 %index) {
 entry:
   ; return
   %t0 = sext i32 %index to i64
-  %t1 = mul i64 %t0, 4
-  %t2 = getelementptr i8, ptr %base, i64 %t1
-  ret ptr %t2
+  %t1 = getelementptr i32, ptr %base, i64 %t0
+  ret ptr %t1
 }
 
 ; function: dot4
@@ -51,11 +50,9 @@ while.body:
   ; let bv
   ; set sum
   %t5 = mul i32 %t2, %t4
-  %t6 = add i32 %sum.phi0, %t5
-  %sum.next0 = add i32 %t6, 0
+  %sum.next0 = add i32 %sum.phi0, %t5
   ; set i
-  %t7 = add i32 %i.phi0, 1
-  %i.next0 = add i32 %t7, 0
+  %i.next0 = add i32 %i.phi0, 1
   br label %while.cond
 while.end:
   ; return
