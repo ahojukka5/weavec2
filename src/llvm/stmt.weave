@@ -1356,24 +1356,40 @@
                           (call_void write_cstr (local_get fd) (const_string_ptr ", %else"))
                           (call_void emit_blk_suffix (local_get fd) (param_get if_blk)))))))
                     (else (do
-                      (call_void write_byte (local_get fd) (const_i32 37))
-                      (call_void emit_slice_text (local_get fd) (local_get source) (local_get ns) (local_get nl))
-                      (call_void write_cstr (local_get fd) (const_string_ptr ".phi"))
-                      (call_void write_i64_dec (local_get fd) (local_get loop_blk))
                       (if
-                        (condition (ge_i64 (local_get else_exit_suf) (const_i64 0)))
+                        (condition (ne_i32 (call_i32 local_is_loop_merge (param_get ctx) (local_get ns) (local_get nl)) (const_i32 0)))
                         (then (do
-                          (call_void write_cstr (local_get fd) (const_string_ptr ", %endif"))
-                          (call_void emit_blk_suffix (local_get fd) (local_get else_exit_suf))))
-                        (else (do
+                          (call_void write_byte (local_get fd) (const_i32 37))
+                          (call_void emit_slice_text (local_get fd) (local_get source) (local_get ns) (local_get nl))
+                          (call_void write_cstr (local_get fd) (const_string_ptr ".merge"))
+                          (call_void write_i64_dec (local_get fd) (call_i64 local_loop_merge_suffix (param_get ctx) (local_get ns) (local_get nl)))
                           (if
-                            (condition (ne_i32 (param_get else_empty) (const_i32 0)))
+                            (condition (gt_i64 (param_get if_blk) (const_i64 1)))
                             (then (do
-                              (call_void write_cstr (local_get fd) (const_string_ptr ", %while.body"))
-                              (call_void emit_blk_suffix (local_get fd) (local_get loop_blk))))
+                              (call_void write_cstr (local_get fd) (const_string_ptr ", %endif"))
+                              (call_void emit_blk_suffix (local_get fd) (sub_i64 (param_get if_blk) (const_i64 1)))))
                             (else (do
-                              (call_void write_cstr (local_get fd) (const_string_ptr ", %else"))
-                              (call_void emit_blk_suffix (local_get fd) (param_get if_blk)))))))))))
+                              (call_void write_cstr (local_get fd) (const_string_ptr ", %while.body"))
+                              (call_void emit_blk_suffix (local_get fd) (local_get loop_blk)))))))
+                        (else (do
+                          (call_void write_byte (local_get fd) (const_i32 37))
+                          (call_void emit_slice_text (local_get fd) (local_get source) (local_get ns) (local_get nl))
+                          (call_void write_cstr (local_get fd) (const_string_ptr ".phi"))
+                          (call_void write_i64_dec (local_get fd) (local_get loop_blk))
+                          (if
+                            (condition (ge_i64 (local_get else_exit_suf) (const_i64 0)))
+                            (then (do
+                              (call_void write_cstr (local_get fd) (const_string_ptr ", %endif"))
+                              (call_void emit_blk_suffix (local_get fd) (local_get else_exit_suf))))
+                            (else (do
+                              (if
+                                (condition (ne_i32 (param_get else_empty) (const_i32 0)))
+                                (then (do
+                                  (call_void write_cstr (local_get fd) (const_string_ptr ", %while.body"))
+                                  (call_void emit_blk_suffix (local_get fd) (local_get loop_blk))))
+                                (else (do
+                                  (call_void write_cstr (local_get fd) (const_string_ptr ", %else"))
+                                  (call_void emit_blk_suffix (local_get fd) (param_get if_blk))))))))))))))
                   (call_void write_cstr (local_get fd) (const_string_ptr "]"))
                   (call_void write_byte (local_get fd) (const_i32 10))
                   (call_void set_local_value (param_get ctx) (local_get ns) (local_get nl) (param_get if_blk) (const_i64 4))))
