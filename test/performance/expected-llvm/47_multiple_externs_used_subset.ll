@@ -17,14 +17,11 @@ entry:
   ; let p
   ; if condition
   %t1 = icmp eq ptr %t0, null
-  br i1 %t1, label %then, label %else
+  br i1 %t1, label %then, label %endif
 then:
   ; then
   ; return
   ret i32 0
-else:
-  ; else
-  br label %endif
 endif:
   call void @free(ptr %t0)
   ; return
