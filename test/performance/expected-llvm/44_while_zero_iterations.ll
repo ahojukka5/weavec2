@@ -7,11 +7,11 @@
 ; returns: i32
 define i32 @main() {
 entry:
-  ; let i
   %i.addr = alloca i32
+  %sum.addr = alloca i32
+  ; let i
   store i32 10, ptr %i.addr
   ; let sum
-  %sum.addr = alloca i32
   store i32 42, ptr %sum.addr
   ; while condition
   br label %while.cond
