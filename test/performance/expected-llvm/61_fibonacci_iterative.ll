@@ -32,7 +32,7 @@ while.pre1:
   %i.init1 = load i32, ptr %i.addr
   br label %while.cond1
 while.cond1:
-  %prev.phi1 = phi i32 [%prev.init1, %while.pre1], [%prev.next1, %while.body1]
+  %prev.phi1 = phi i32 [%prev.init1, %while.pre1], [%curr.phi1, %while.body1]
   %curr.phi1 = phi i32 [%curr.init1, %while.pre1], [%curr.next1, %while.body1]
   %i.phi1 = phi i32 [%i.init1, %while.pre1], [%i.next1, %while.body1]
   %t1 = icmp sle i32 %i.phi1, %n
@@ -42,7 +42,6 @@ while.body1:
   %t2 = add i32 %prev.phi1, %curr.phi1
   ; let next
   ; set prev
-  %prev.next1 = add i32 %curr.phi1, 0
   ; set curr
   %curr.next1 = add i32 %t2, 0
   ; set i
