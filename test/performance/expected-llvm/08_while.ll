@@ -27,11 +27,9 @@ while.cond:
 while.body:
   ; while body
   ; set sum
-  %t1 = add i32 %sum.phi0, 6
-  %sum.next0 = add i32 %t1, 0
+  %sum.next0 = add i32 %sum.phi0, 6
   ; set i
-  %t2 = add i32 %i.phi0, 1
-  %i.next0 = add i32 %t2, 0
+  %i.next0 = add i32 %i.phi0, 1
   br label %while.cond
 while.end:
   ; return
