@@ -16,14 +16,11 @@ entry:
   ; let p
   ; if condition
   %t1 = icmp eq ptr %t0, null
-  br i1 %t1, label %then, label %else
+  br i1 %t1, label %then, label %endif
 then:
   ; then
   ; return
   ret i32 0
-else:
-  ; else
-  br label %endif
 endif:
   %t2 = mul i32 21, 4
   %t3 = sdiv i32 %t2, 2
