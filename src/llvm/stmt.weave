@@ -268,6 +268,107 @@
       (call_void free (local_get arg_nodes))
       (return (const_i32 0))))
 
+  ; Return 1 when node is (local_get name).
+  (fn node_is_local_get_of
+    (params (ctx ptr) (node i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i64 (param_get node) (const_i64 -1)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "local_get") (const_i64 9)) (const_i32 0)))
+        (then (do
+          (let get_name i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (call_i64 node_text_start (local_get tree) (local_get get_name))
+              (call_i64 node_text_len (local_get tree) (local_get get_name))) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))))
+        (else (do)))
+      (return (const_i32 0))))
+
+  ; Count (local_get name) under node (recursive).
+  (fn count_local_get_of
+    (params (ctx ptr) (node i64) (name_start i64) (name_len i64))
+    (returns i64)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (eq_i64 (param_get node) (const_i64 -1)))
+        (then (do (return (const_i64 0))))
+        (else (do)))
+      (let total i64
+        (cast_i32_to_i64
+          (call_i32 node_is_local_get_of
+            (param_get ctx) (param_get node) (param_get name_start) (param_get name_len))))
+      (if
+        (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
+        (then (do (return (local_get total))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (set total (add_i64 (local_get total)
+            (call_i64 count_local_get_of
+              (param_get ctx) (local_get child) (param_get name_start) (param_get name_len))))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (local_get total))))
+
+  ; Return 1 when name is read exactly once in a set to a different local.
+  (fn let_deferred_in_foreign_set
+    (params (ctx ptr) (body_do i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (if
+        (condition (lt_i64 (param_get body_do) (const_i64 0)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let use_count i64 (call_i64 count_local_get_of
+        (param_get ctx) (param_get body_do) (param_get name_start) (param_get name_len)))
+      (if
+        (condition (ne_i64 (local_get use_count) (const_i64 1)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let set_name i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (let sns i64 (call_i64 node_text_start (local_get tree) (local_get set_name)))
+              (let snl i64 (call_i64 node_text_len (local_get tree) (local_get set_name)))
+              (if
+                (condition (eq_i32 (call_i32 slices_equal
+                  (local_get source)
+                  (param_get name_start) (param_get name_len)
+                  (local_get sns) (local_get snl)) (const_i32 0)))
+                (then (do
+                  (let expr_node i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 2)))
+                  (if
+                    (condition (eq_i64 (call_i64 count_local_get_of
+                      (param_get ctx) (local_get expr_node) (param_get name_start) (param_get name_len)) (const_i64 1)))
+                    (then (do (return (const_i32 1))))
+                    (else (do)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
   ; Emit let statement: alloca + store
   (fn emit_let_stmt
     (params (ctx ptr) (node i64))
@@ -292,6 +393,38 @@
       (let nl i64 (call_i64 node_text_len (local_get tree) (local_get name_node)))
       (let is_set_local i32 (call_i32 node_sets_local
         (param_get ctx) (call_i64 ctx_get_fn_body (param_get ctx)) (local_get ns) (local_get nl)))
+      (if
+        (condition (and_bool
+          (gt_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0))
+          (ne_i32 (call_i32 let_deferred_in_foreign_set
+            (param_get ctx)
+            (call_i64 ctx_get_loop_body_do (param_get ctx))
+            (local_get ns)
+            (local_get nl)) (const_i32 0))))
+        (then (do
+          (call_void write_cstr (local_get fd) (const_string_ptr "  ; let "))
+          (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
+          (call_void write_cstr (local_get fd) (const_string_ptr " (deferred)"))
+          (call_void write_byte (local_get fd) (const_i32 10))
+          (if
+            (condition (eq_i32 (call_i32 local_binding_exists (param_get ctx) (local_get ns) (local_get nl)) (const_i32 0)))
+            (then (do
+              (call_void add_local
+                (param_get ctx)
+                (local_get ns)
+                (local_get nl)
+                (local_get type_id)
+                (local_get expr_node)
+                (const_i64 2))))
+            (else (do
+              (call_void set_local_value
+                (param_get ctx)
+                (local_get ns)
+                (local_get nl)
+                (local_get expr_node)
+                (const_i64 2)))))
+          (return (const_i32 0))))
+        (else (do)))
       ; Evaluate initializer expression
       (let ev i64 (call_i64 emit_expr (param_get ctx) (local_get expr_node)))
       (if
