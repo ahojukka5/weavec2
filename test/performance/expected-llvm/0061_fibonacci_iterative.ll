@@ -43,7 +43,7 @@ while.body1:
   ; let next
   ; set prev
   ; set curr
-  %curr.next1 = add i32 %t2, 0
+  %curr.next1 = add i32 %prev.phi1, %curr.phi1
   ; set i
   %i.next1 = add i32 %i.phi1, 1
   br label %while.latch1

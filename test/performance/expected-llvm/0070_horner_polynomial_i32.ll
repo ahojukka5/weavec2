@@ -30,7 +30,8 @@ while.body:
   %t2 = add i32 %t1, 2
   ; let next
   ; set acc
-  %acc.next0 = add i32 %t2, 0
+  %t3 = mul i32 %acc.phi0, %x
+  %acc.next0 = add i32 %t3, 2
   ; set i
   %i.next0 = add i32 %i.phi0, 1
   br label %while.latch
@@ -43,8 +44,8 @@ while.exit-merge:
   br label %while.end
 while.end:
   ; return
-  %t3 = load i32, ptr %acc.addr
-  ret i32 %t3
+  %t4 = load i32, ptr %acc.addr
+  ret i32 %t4
 }
 
 ; function: main

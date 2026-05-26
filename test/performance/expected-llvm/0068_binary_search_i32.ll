@@ -66,15 +66,16 @@ while.body:
 then1:
   ; then
   ; set result
-  %result.next10 = add i32 %t4, 0
+  %t8 = add i32 %low.phi0, %high.phi0
+  %result.next10 = sdiv i32 %t8, 2
   ; set active
   %active.next10 = add i32 0, 0
   br label %endif1
 else1:
   ; else
   ; if condition
-  %t8 = icmp slt i32 %t6, %target
-  br i1 %t8, label %then2, label %else2
+  %t9 = icmp slt i32 %t6, %target
+  br i1 %t9, label %then2, label %else2
 then2:
   ; then
   ; set low
@@ -106,8 +107,8 @@ while.exit-merge:
   br label %while.end
 while.end:
   ; return
-  %t9 = load i32, ptr %result.addr
-  ret i32 %t9
+  %t10 = load i32, ptr %result.addr
+  ret i32 %t10
 }
 
 ; function: main

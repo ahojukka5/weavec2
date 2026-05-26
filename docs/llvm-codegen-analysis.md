@@ -129,7 +129,7 @@ scope until basic float loops promote.
 | 0173 | i64 sum 1..200, i32 index |
 | 0174 | 3×3 f32 matvec on heap |
 
-Next free id: `0175`.
+Next free id: `0176`.
 
 ## Suggested implementation order
 

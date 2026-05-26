@@ -56,6 +56,39 @@
         (else (do)))
       (return (const_i32 0))))
 
+  ; Return the value-expression node for (let name ...) in body_do, or -1.
+  (fn loop_do_find_let_value_node
+    (params (ctx ptr) (body_do i64) (ns i64) (nl i64))
+    (returns i64)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (lt_i64 (param_get body_do) (const_i64 0)))
+        (then (do (return (const_i64 -1))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "let") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let let_name i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (if
+                (condition (ne_i32 (call_i32 slices_equal
+                  (local_get source)
+                  (param_get ns) (param_get nl)
+                  (call_i64 node_text_start (local_get tree) (local_get let_name))
+                  (call_i64 node_text_len (local_get tree) (local_get let_name))) (const_i32 0)))
+                (then (do
+                  (return (call_i64 nth_child (local_get tree) (local_get child) (const_i64 3)))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i64 -1))))
+
   ; Try to emit a direct %name.nextN expression for loop phi backedges.
   (fn try_emit_loop_phi_next
     (params (ctx ptr) (node i64) (name_node i64) (blk i64) (type_id i32))
@@ -89,7 +122,15 @@
                     (param_get ctx) (local_get loop_body) (local_get set_ns) (local_get set_nl)) (const_i32 0))))
                 (then (do))
                 (else (do (return (const_i32 2)))))))
-            (else (do)))))
+            (else (do
+              (let loop_body2 i64 (call_i64 ctx_get_loop_body_do (param_get ctx)))
+              (let let_val i64 (call_i64 loop_do_find_let_value_node
+                (param_get ctx) (local_get loop_body2) (local_get gs) (local_get gl)))
+              (if
+                (condition (ge_i64 (local_get let_val) (const_i64 0)))
+                (then (do (return (call_i32 try_emit_loop_phi_next
+                  (param_get ctx) (local_get let_val) (param_get name_node) (param_get blk) (param_get type_id)))))
+                (else (do))))))))
         (else (do)))
       (if
         (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)

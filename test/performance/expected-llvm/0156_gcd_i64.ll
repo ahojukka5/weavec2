@@ -30,7 +30,7 @@ while.body:
   ; let r
   ; set x
   ; set y
-  %y.next0 = add i64 %t1, 0
+  %y.next0 = srem i64 %x.phi0, %y.phi0
   br label %while.latch
 while.latch:
   br label %while.cond
