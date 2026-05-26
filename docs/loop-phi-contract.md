@@ -55,6 +55,12 @@ and/or else), emit:
   `emit_if_stmt`). The merge suffix and predecessor suffix may differ
   when control falls through later blocks before joining `%endifN`.
 
+### Else arm ingress
+
+Before emitting a non-empty `else` block inside a loop, call
+`restore_loop_carried_before_else` so `local_get` in the else arm sees
+header phis, not merge names from the sibling then arm.
+
 ### Else operand (`else_hit = 0`, local unchanged in else)
 
 Priority order in `emit_if_loop_phi_merges`:
@@ -84,7 +90,7 @@ Do not emit stack stores at `%while.endL` without dominating phis.
 
 | Script | Checks |
 |--------|--------|
-| `./test.sh` | 124 correctness programs |
+| `./test.sh` | Correctness programs |
 | `./test/performance/test.sh` | Golden LLVM diff + `llvm-as` + optional `opt -mem2reg` |
 | `./test/selfhost/test.sh` | `build/weavec2.wir` → LLVM → `llvm-as` |
 | `./test-all.sh` | All of the above after `./build.sh` |

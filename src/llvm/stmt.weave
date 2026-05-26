@@ -113,7 +113,14 @@
               (call_void emit_node_text (local_get fd) (local_get source) (local_get tree) (local_get name_node))
               (call_void write_cstr (local_get fd) (const_string_ptr ".addr = alloca "))
               (call_void emit_type (local_get fd) (local_get type_id))
-              (call_void write_byte (local_get fd) (const_i32 10))))
+              (call_void write_byte (local_get fd) (const_i32 10))
+              (if
+                (condition (eq_i32 (call_i32 local_binding_exists
+                  (param_get ctx) (local_get ns0) (local_get nl0)) (const_i32 0)))
+                (then (do
+                  (call_void add_local
+                    (param_get ctx) (local_get ns0) (local_get nl0) (local_get type_id) (const_i64 -1) (const_i64 0))))
+                (else (do)))))
             (else (do)))))
         (else (do)))
       (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
@@ -299,7 +306,20 @@
           (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (local_get expr_node) (const_i64 2))
           (return (const_i32 0))))
         (else (do)))
-      (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (const_i64 -1) (const_i64 0))
+      (if
+        (condition (eq_i32 (call_i32 local_binding_exists (param_get ctx) (local_get ns) (local_get nl)) (const_i32 0)))
+        (then (do
+          (call_void add_local (param_get ctx) (local_get ns) (local_get nl) (local_get type_id) (const_i64 -1) (const_i64 0))))
+        (else (do
+          (let existing_mode i64 (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl)))
+          (if
+            (condition (ne_i32 (call_i32 local_mode_is_loop_carried (local_get existing_mode)) (const_i32 0)))
+            (then (do
+              (call_void set_local_value
+                (param_get ctx) (local_get ns) (local_get nl) (local_get ev) (local_get existing_mode))))
+            (else (do
+              (call_void set_local_value
+                (param_get ctx) (local_get ns) (local_get nl) (local_get ev) (const_i64 0))))))))
       ; Emit: %name.addr = alloca TYPE
       (if
         (condition (eq_i32 (local_get is_set_local) (const_i32 0)))
@@ -601,6 +621,7 @@
       (let else_do i64 (call_i64 nth_child (local_get tree) (local_get else_wrapper) (const_i64 1)))
       (let else_empty i32 (call_i32 do_block_is_empty (param_get ctx) (local_get else_do)))
       (let parent_ingress i64 (call_i64 ctx_get_if_phi_blk (param_get ctx)))
+      (let parent_branch i64 (call_i64 ctx_get_if_branch (param_get ctx)))
       (let cond_ingress i64 (call_i64 ctx_get_emit_blk (param_get ctx)))
       (let blk i64 (call_i64 ctx_alloc_blk (param_get ctx)))
       ; Emit: ; if condition
@@ -677,6 +698,10 @@
           (call_void ctx_set_emit_blk (param_get ctx) (local_get blk))
           (call_void write_cstr (local_get fd) (const_string_ptr "  ; else"))
           (call_void write_byte (local_get fd) (const_i32 10))
+          (if
+            (condition (gt_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0)))
+            (then (do (call_void restore_loop_carried_before_else (param_get ctx))))
+            (else (do)))
           (call_void ctx_set_if_phi_blk (param_get ctx) (local_get blk))
           (call_void ctx_set_if_branch (param_get ctx) (const_i64 1))
           (if
@@ -710,7 +735,7 @@
             (condition (gt_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0)))
             (then (do (call_void emit_if_loop_phi_merges
               (param_get ctx) (local_get then_do) (local_get else_do) (local_get blk) (local_get else_empty)
-              (local_get parent_ingress) (local_get cond_ingress) (local_get then_rejoin))))
+              (local_get parent_ingress) (local_get parent_branch) (local_get cond_ingress) (local_get then_rejoin))))
             (else (do)))))
         (else (do)))
       (return (const_i32 0))))

@@ -95,6 +95,31 @@
           (set i (add_i64 (local_get i) (const_i64 1)))))
       (return (const_i32 0))))
 
+  ; Return non-zero when name is already in the locals table.
+  (fn local_binding_exists
+    (params (ctx ptr) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let n i64 (call_i64 ctx_get_n_locals (param_get ctx)))
+      (let base ptr (call_ptr ctx_get_locals (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let i i64 (const_i64 0))
+      (while
+        (condition (lt_i64 (local_get i) (local_get n)))
+        (do
+          (let rec ptr (ptr_add (local_get base) (mul_i64 (local_get i) (const_i64 40))))
+          (let rstart i64 (load_i64 (local_get rec)))
+          (let rlen i64 (load_i64 (ptr_add (local_get rec) (const_i64 8))))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (local_get rstart) (local_get rlen)) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (set i (add_i64 (local_get i) (const_i64 1)))))
+      (return (const_i32 0))))
+
   ; Look up a local's storage mode by name. Returns 0 when not found.
   (fn lookup_local_mode
     (params (ctx ptr) (name_start i64) (name_len i64))

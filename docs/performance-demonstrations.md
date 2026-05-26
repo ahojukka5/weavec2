@@ -31,8 +31,41 @@ Examples:
 | 0001–0059 | Language and codegen smoke (ops, control flow, calls) |
 | 0054–0060 | Integration-style WIR (nested control, memory flow) |
 | 0061–0080 | Classical algorithms and small benchmarks |
-| 0081–0130 | Hand-written algorithm demos (ongoing) |
-| 0131–9999 | Next free ids for new demonstrations |
+| 0081–0130 | Hand-written algorithm demos |
+| 0131–0152 | Hard stress demos (nested if/loop phis, DP, grids, sorts) |
+| 0139 | Reserved (twin parallel if ladders; needs extra phi pred fix) |
+| 0153–9999 | Next free ids for new demonstrations |
+
+Hard batch (0131–0140, except 0139):
+
+| Id | Fixture | Stress target |
+|----|---------|----------------|
+| 0131 | `0131_loop_triple_if_carried_i32` | 3-deep nested if, 3 carried locals |
+| 0132 | `0132_matmul3x3_i32` | Triple nested loop, heap 2D |
+| 0133 | `0133_sieve48_i32` | Sieve, nested marking loop |
+| 0134 | `0134_floyd_warshall4_i32` | Floyd–Warshall 4 nodes |
+| 0135 | `0135_bubble_sort8_i32` | Bubble sort n=8 |
+| 0136 | `0136_knapsack01_i32` | 0/1 knapsack DP table |
+| 0137 | `0137_mandelbrot_grid6_sum_i32` | 6x6 Mandelbrot sum |
+| 0138 | `0138_mod_div_nested_accum_i32` | mod/div in nested branches |
+| 0140 | `0140_selection_sort8_i32` | Selection sort n=8 |
+
+Second hard batch (0141–0152):
+
+| Id | Fixture | Stress target |
+|----|---------|----------------|
+| 0141 | `0141_lcs_table_i32` | LCS DP 9x9 table |
+| 0142 | `0142_heap_sift_down4_i32` | Heap sift-down |
+| 0143 | `0143_rolling_hash_i32` | Rolling hash 64 bytes |
+| 0144 | `0144_matmul4x4_i32` | 4x4 matrix multiply |
+| 0145 | `0145_insertion_sort10_i32` | Insertion sort n=10 |
+| 0146 | `0146_collatz_stats_i32` | Collatz max/sum batch |
+| 0147 | `0147_partition_dutch12_i32` | Dutch-flag partition |
+| 0148 | `0148_gcd_batch_i32` | Batch Euclidean GCD |
+| 0149 | `0149_binary_search_batch16_i32` | Repeated binary search |
+| 0150 | `0150_edit_distance6_i32` | Levenshtein DP 7x7 |
+| 0151 | `0151_counting_sort12_i32` | Counting sort n=12 |
+| 0152 | `0152_merge_sorted_halves8_i32` | Merge 4+4 sorted halves |
 
 Gaps in the low range (e.g. no `0006`) are historical; new smoke tests
 should use the next free id in the appropriate band.
