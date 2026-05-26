@@ -1,0 +1,14 @@
+weavec2 — Weave Surface-Language Compiler (self-hosted)
+Copyright 2026 Jukka Aho
+
+This product includes software developed as the surface-Weave
+compiler for the Weave programming language. It is itself written
+in surface Weave: the source under `src/**/*.weave` is lowered to
+WIR by `weavefront`, compiled to LLVM IR by `weavec1`, and linked
+with `weavec0`'s runtime — the same pipeline a stranger uses to
+build their own surface-Weave program through this chain.
+
+Upstream:    https://github.com/ahojukka5/weavec2
+Dependency:  https://github.com/ahojukka5/weavec0      (pinned via WEAVEC0_TAG)
+Dependency:  https://github.com/ahojukka5/weavec1      (pinned via WEAVEC1_TAG)
+Dependency:  https://github.com/ahojukka5/weavefront   (pinned via WEAVEFRONT_TAG)

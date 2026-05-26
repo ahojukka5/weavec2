@@ -1,0 +1,72 @@
+# Changelog
+
+All notable changes to `weavec2` are recorded here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning is
+[SemVer](https://semver.org/) with the caveat that `0.x` is the early
+phase: minor versions may break things until the surface-language
+contract stabilises.
+
+## [Unreleased]
+
+## [0.1.0] — 2026-05-27
+
+The first public release of `weavec2`.
+
+### Added
+- Apache-2.0 licensing (`LICENSE`, `NOTICE`, SPDX headers on every
+  owned source file).
+- `CONTRIBUTING.md` describing the merge bar.
+- `CHANGELOG.md` (this file).
+- `.editorconfig` and `.gitattributes` for consistent line endings /
+  indentation. `.gitattributes` covers `.weave`, `.wir`,
+  `.expected.ll`, `.expected.wir`, `.c`, `.h` in addition to the
+  weavec1 baseline.
+- GitHub Actions CI matrix (`ubuntu-latest`, `macos-latest`) that
+  fetches the pinned `weavec0` v0.2.0, `weavec1` v0.1.0, and
+  `weavefront` v0.1.0 dependencies and runs the full ladder.
+
+### Changed
+- `build.sh` no longer assumes `../weavec0/`, `../weavec1/`, and
+  `../weavefront/` siblings. It now honours `WEAVEC0`, `WEAVEC1`,
+  and `WEAVEFRONT` env vars (paths to existing source trees); when
+  unset, it git-clones the pinned `WEAVEC0_TAG` (default `v0.2.0`),
+  `WEAVEC1_TAG` (default `v0.1.0`), and `WEAVEFRONT_TAG` (default
+  `v0.1.0`) from GitHub into `build/vendor/`. Vendored copies are
+  gitignored. weavec1 is built with `WEAVEC0` pre-set; weavefront
+  with both `WEAVEC0` and `WEAVEC1` pre-set, so each dependency
+  builds exactly once.
+
+### Fixed
+- Loop-phi LLVM codegen produces invalid SSA for four interacting
+  patterns: (a) multi-set in the same do block, (b) `let`-binding
+  inside the loop body, (c) outer-if then-do containing a nested if
+  that doesn't touch the loop-carried local, and (d) if-branch
+  terminating with a return. The fix gates the mode-3 promotion on
+  per-pattern predicates and lands a small correction in
+  `emit_if_loop_phi_merges` for the nested-if-without-participation
+  case. Selfhost compilation of `build/weavec2.wir` now produces
+  LLVM IR that `llvm-as` accepts and `opt -passes=mem2reg`
+  verifies. See commit `2b2ed22`.
+- `emit_function` and `emit_extern_decl` now handle the
+  `(params ())` form produced by surface lowering (alongside the
+  canonical `(params)`). Previously triggered a segfault in
+  `parse_type` via a -1 sentinel. See commit `bb7bec1`.
+
+### Known limitations
+- **`selfhost.sh` is incomplete.** `test/selfhost/test.sh` (run by
+  `./test-all.sh`) passes: the weavec2 binary compiles
+  `build/weavec2.wir` and the output verifies through `llvm-as` and
+  `opt -passes=mem2reg`. The deeper `./selfhost.sh` workflow that
+  re-runs the surface → WIR pass with the bootstrapped weavec2
+  hits a separate, pre-existing string-constant emission bug
+  (`[1 x i8]` array length for a 12-byte string) in the frontend
+  surface → WIR pipeline. Fixing that bug is tracked separately.
+- **`surface-matrix.sh` reports compile counts**, not pass/fail
+  thresholds. It is a development aid, not a CI gate.
+- **The vendored dependency caches** at `build/vendor/{weavec0,
+  weavec1, weavefront}/` are not auto-updated when their `_TAG`
+  pins change. Delete the directories and re-run `./build.sh` to
+  refetch.
+- **No source-style checker** for `.weave` modules yet — the
+  weavec1 checker only validates WIR style. Adding a surface-Weave
+  checker is a follow-up.
