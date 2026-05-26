@@ -66,6 +66,14 @@ for src in "$FIXTURE_DIR"/*.wir; do
     continue
   fi
 
+  if command -v opt >/dev/null 2>&1; then
+    opt_bc="$BC_DIR/$name-mem2reg.bc"
+    if ! opt -passes=mem2reg -disable-output "$bc" -o "$opt_bc" 2>/dev/null; then
+      fail "$name: opt -mem2reg failed"
+      continue
+    fi
+  fi
+
   log "ok $name"
   pass_count=$((pass_count + 1))
 done
