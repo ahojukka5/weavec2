@@ -1,3 +1,7 @@
+; Performance: 0020_call_i64
+; Why hard: Smoke baseline for i64 return call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: call_i64 across function
+; If LLVM regresses: Return value in wrong register; caller uses i32 ops.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: selection sort on five heap-backed i32 values
-; Tests: nested loops finding minimum index and swapping
+; Performance: 0123_selection_sort5_i32
+; Why hard: Selection sort five. Argmin inner loop.
+; Reveals: nested loops, swaps.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

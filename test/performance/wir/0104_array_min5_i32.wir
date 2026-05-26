@@ -1,5 +1,7 @@
-; Algorithm: minimum of five heap-backed i32 values
-; Tests: reduction loop with conditional min update
+; Performance: 0104_array_min5_i32
+; Why hard: Min reduction five elements. Mirror of max5.
+; Reveals: load, lt, conditional update.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

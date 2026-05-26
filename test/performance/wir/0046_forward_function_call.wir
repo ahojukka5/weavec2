@@ -1,3 +1,7 @@
+; Performance: 0046_forward_function_call
+; Why hard: Smoke baseline for forward ref call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: call before callee in module
+; If LLVM regresses: Callee not emitted or wrong linkage order.
 (core-module
   (core-version 1)
   (decls

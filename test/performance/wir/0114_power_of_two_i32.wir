@@ -1,5 +1,7 @@
-; Algorithm: return 1 if n is a power of two, else 0
-; Tests: shift loop and equality check
+; Performance: 0114_power_of_two_i32
+; Why hard: Power-of-two test. Shift loop until bit pattern.
+; Reveals: shl/shr style loop.
+; If LLVM regresses: Always false; uses popcount wrong.
 (core-module
   (core-version 1)
   (decls

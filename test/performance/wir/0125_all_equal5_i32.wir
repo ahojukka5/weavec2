@@ -1,5 +1,7 @@
-; Algorithm: return 1 if all five array elements are equal
-; Tests: load-compare chain in loop
+; Performance: 0125_all_equal5_i32
+; Why hard: All equal test. Early false on mismatch.
+; Reveals: compare chain in loop.
+; If LLVM regresses: Returns true on different array.
 (core-module
   (core-version 1)
   (decls

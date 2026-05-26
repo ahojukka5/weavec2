@@ -1,3 +1,7 @@
+; Performance: 0032_codegen_join_and_i64_arg
+; Why hard: Smoke baseline for malloc size i64. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: mul_i64 in call arg position
+; If LLVM regresses: Size computation widened/narrowed wrong; malloc gets i32.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: median of three i32 values via min/max reduction
-; Tests: multi-function calls and arithmetic combine
+; Performance: 0113_median_of_three_i32
+; Why hard: Median of three. Multiple calls/min-max logic.
+; Reveals: function calls + compares.
+; If LLVM regresses: Returns mean not median.
 (core-module
   (core-version 1)
   (decls

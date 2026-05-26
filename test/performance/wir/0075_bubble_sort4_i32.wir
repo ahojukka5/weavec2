@@ -1,5 +1,7 @@
-; Algorithm: bubble sort over four heap-backed i32 values
-; Tests: nested loops, compare-swap branches, and memory traffic
+; Performance: 0075_bubble_sort4_i32
+; Why hard: O(n^2) compare-swap on four elements.
+; Reveals: Nested loops, load/compare/store swap.
+; If LLVM regresses: Swap stores to wrong indices; inner loop bound wrong.
 (core-module
   (core-version 1)
   (decls

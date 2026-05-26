@@ -1,0 +1,23 @@
+; Performance: 0165_const_f32_add
+; Why hard: Smoke for f32 arithmetic and fptosi return path.
+; Reveals: const_f32 literal text, fadd, cast_f32_to_i32.
+; If LLVM regresses: Uses i32 add; fadd typed double; cast missing or wrong.
+(core-module
+  (core-version 1)
+  (decls
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (cast_f32_to_i32
+            (add_f32
+              (const_f32 2)
+              (const_f32 3)
+            ) ;; add_f32
+          ) ;; cast_f32_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

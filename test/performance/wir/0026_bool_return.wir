@@ -1,3 +1,7 @@
+; Performance: 0026_bool_return
+; Why hard: Smoke baseline for bool as i1. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: returns boolean from helper
+; If LLVM regresses: Returns i32 0/1 with wrong width at callsite.
 (core-module
   (core-version 1)
   (decls

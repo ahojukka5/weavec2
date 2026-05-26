@@ -1,5 +1,7 @@
-; Algorithm: count primes up to 16 with a small sieve
-; Tests: nested memory loops, branchy loop bodies, and typed array addressing
+; Performance: 0069_sieve_count_i32
+; Why hard: Sieve variant; boolean flags on heap.
+; Reveals: Store i32 flags, nested marking loop.
+; If LLVM regresses: Flags not cleared; inner loop reads stale composite.
 (core-module
   (core-version 1)
   (decls

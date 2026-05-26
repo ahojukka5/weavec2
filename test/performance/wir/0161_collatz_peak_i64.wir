@@ -1,5 +1,7 @@
-; Stress: Collatz on i64 starting values, track peak (i64 arithmetic)
-; Reveals: div_i64, mod_i64, mul_i64, gt_i64, nested if
+; Performance: 0161_collatz_peak_i64
+; Why hard: Collatz on i64 with peak tracking over batch.
+; Reveals: div_i64/mod_i64/mul_i64, nested if, outer batch.
+; If LLVM regresses: Peak uses i32 compare; 3n+1 overflows wrong width.
 (core-module
   (core-version 1)
   (decls

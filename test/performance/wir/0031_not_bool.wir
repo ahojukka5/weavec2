@@ -1,3 +1,7 @@
+; Performance: 0031_not_bool
+; Why hard: Smoke baseline for boolean not. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: not_bool on predicate
+; If LLVM regresses: Emits xor i32 1 instead of xor i1.
 (core-module
   (core-version 1)
   (decls

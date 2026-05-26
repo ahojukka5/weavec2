@@ -1,3 +1,7 @@
+; Performance: 0040_call_bool_direct
+; Why hard: Smoke baseline for bool call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: call_bool + branch
+; If LLVM regresses: Caller compares i32 instead of i1.
 (core-module
   (core-version 1)
   (decls

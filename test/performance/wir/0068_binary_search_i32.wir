@@ -1,5 +1,7 @@
-; Algorithm: binary search over seven heap-backed i32 values
-; Tests: branch-heavy loop state, typed array addressing, and early exit flag
+; Performance: 0068_binary_search_i32
+; Why hard: Binary search on sorted array; nested compares.
+; Reveals: low/high/mid carried, load at mid.
+; If LLVM regresses: Infinite loop on bounds; mid computed with div rounding error.
 (core-module
   (core-version 1)
   (decls

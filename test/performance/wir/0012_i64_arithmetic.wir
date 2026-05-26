@@ -1,3 +1,7 @@
+; Performance: 0012_i64_arithmetic
+; Why hard: Smoke baseline for i64 add/sub. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: add_i64/sub_i64
+; If LLVM regresses: 32-bit ops used where i64 required; nsw flags inconsistent.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: selection sort over four heap-backed i32 values
-; Tests: outer loop with inner min-scan and index tracking
+; Performance: 0077_selection_sort4_i32
+; Why hard: Selection sort with argmin scan.
+; Reveals: Nested loops, min index, swap stores.
+; If LLVM regresses: Min index not updated; swap uses stale min.
 (core-module
   (core-version 1)
   (decls

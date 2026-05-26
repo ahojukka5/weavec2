@@ -1,3 +1,7 @@
+; Performance: 0025_ptr_params_call_i32
+; Why hard: Smoke baseline for ptr param + load. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: ptr param, load_i32, call
+; If LLVM regresses: By-value vs by-pointer confusion for array param.
 (core-module
   (core-version 1)
   (decls

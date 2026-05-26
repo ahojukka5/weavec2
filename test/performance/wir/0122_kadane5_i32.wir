@@ -1,5 +1,7 @@
-; Algorithm: maximum subarray sum (Kadane) on five elements
-; Tests: running max/current with loads in loop
+; Performance: 0122_kadane5_i32
+; Why hard: Kadane max subarray (n=5). Running cur/best with negatives.
+; Reveals: max of cur+best pattern.
+; If LLVM regresses: Best not updated; cur resets wrongly.
 (core-module
   (core-version 1)
   (decls

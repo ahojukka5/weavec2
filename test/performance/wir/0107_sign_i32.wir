@@ -1,5 +1,7 @@
-; Algorithm: sign of i32 (-1, 0, 1)
-; Tests: compare branches only
+; Performance: 0107_sign_i32
+; Why hard: Sign function -1/0/1. Three-way branch.
+; Reveals: nested compares.
+; If LLVM regresses: Sign always 0; compares swapped.
 (core-module
   (core-version 1)
   (decls

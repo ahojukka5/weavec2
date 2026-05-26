@@ -1,3 +1,7 @@
+; Performance: 0018_store_load_i8
+; Why hard: Smoke baseline for i8 memory. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: store_i8/load_i8
+; If LLVM regresses: Extends/truncates wrong around i8 access.
 (core-module
   (core-version 1)
   (decls

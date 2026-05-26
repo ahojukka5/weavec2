@@ -1,5 +1,7 @@
-; Algorithm: count positive divisors of n by trial division
-; Tests: nested if on modulo and incrementing trial divisor
+; Performance: 0084_count_divisors_i32
+; Why hard: Count divisors by trial. Many mod operations on growing trial.
+; Reveals: mod_i32 in loop with increment.
+; If LLVM regresses: Counts wrong divisor; includes n twice.
 (core-module
   (core-version 1)
   (decls

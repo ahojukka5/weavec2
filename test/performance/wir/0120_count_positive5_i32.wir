@@ -1,5 +1,7 @@
-; Algorithm: count strictly positive values in five-element array
-; Tests: load-compare-increment loop
+; Performance: 0120_count_positive5_i32
+; Why hard: Count positives. Compare load > 0.
+; Reveals: load, gt, add count.
+; If LLVM regresses: Counts zero as positive.
 (core-module
   (core-version 1)
   (decls

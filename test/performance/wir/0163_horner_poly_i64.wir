@@ -1,5 +1,7 @@
-; Stress: Horner evaluation of degree-6 polynomial (i64)
-; Reveals: mul_i64/add_i64 chain, i32 index loop
+; Performance: 0163_horner_poly_i64
+; Why hard: Horner evaluation degree-6 in i64.
+; Reveals: mul_i64/add_i64 chain, i32 index.
+; If LLVM regresses: Polynomial order wrong; acc stays constant.
 (core-module
   (core-version 1)
   (decls

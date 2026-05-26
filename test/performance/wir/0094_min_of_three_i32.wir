@@ -1,5 +1,7 @@
-; Algorithm: minimum of three i32 values
-; Tests: nested compares without loops
+; Performance: 0094_min_of_three_i32
+; Why hard: Min of three. Branch-only like max_of_three.
+; Reveals: Nested compares.
+; If LLVM regresses: Returns middle value always.
 (core-module
   (core-version 1)
   (decls

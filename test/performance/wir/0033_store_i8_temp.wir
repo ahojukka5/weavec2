@@ -1,3 +1,7 @@
+; Performance: 0033_store_i8_temp
+; Why hard: Smoke baseline for byte temp. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: store_i8 to alloca
+; If LLVM regresses: Zext/sext missing before i32 use of byte.
 (core-module
   (core-version 1)
   (decls

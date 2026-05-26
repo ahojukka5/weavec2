@@ -1,5 +1,7 @@
-; Stress: 2x2 matrix multiply row-major on heap (i64)
-; Reveals: triple nested loops, mul_i64/add_i64, array_i64_at
+; Performance: 0164_matmul2x2_i64
+; Why hard: 2x2 i64 matrix multiply on heap.
+; Reveals: Triple nested loops, array_i64_at, i64 mul/add.
+; If LLVM regresses: Same indexing bugs as i32 matmul; i64 store size 4 bytes.
 (core-module
   (core-version 1)
   (decls

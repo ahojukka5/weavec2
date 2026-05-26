@@ -1,5 +1,7 @@
-; Algorithm: absolute value of i32 (branch on sign)
-; Tests: compare and select without loops
+; Performance: 0095_abs_i32
+; Why hard: Absolute value. Sign test without overflow edge (MIN).
+; Reveals: compare + select pattern via if.
+; If LLVM regresses: Negates MIN incorrectly or always negative path.
 (core-module
   (core-version 1)
   (decls

@@ -1,0 +1,54 @@
+; Performance: 0166_sum_range_f32
+; Why hard: f32 accumulator in loop; loop-carried float on stack (no f32 phis yet).
+; Reveals: add_f32 recurrence, cast_i32_to_f32 for index, fcmp not used.
+; If LLVM regresses: sum stays i32; reloads acc from alloca every trip; fadd becomes fmul.
+(core-module
+  (core-version 1)
+  (decls
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (let i i32
+          (const_i32 1)
+        ) ;; let
+
+        (let sum f32
+          (const_f32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get i)
+              (const_i32 120)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (set sum
+              (add_f32
+                (local_get sum)
+                (cast_i32_to_f32
+                  (local_get i)
+                ) ;; cast_i32_to_f32
+              ) ;; add_f32
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (cast_f32_to_i32
+            (local_get sum)
+          ) ;; cast_f32_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

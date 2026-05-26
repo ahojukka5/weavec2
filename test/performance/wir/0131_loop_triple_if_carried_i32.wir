@@ -1,5 +1,7 @@
-; Stress: one loop, three nested if levels, three loop-carried locals
-; Reveals: deep if-merge phi chains inside a single loop header
+; Performance: 0131_loop_triple_if_carried_i32
+; Why hard: One loop, three nested if levels, three loop-carried i32 locals—deep merge graph.
+; Reveals: Nested if inside while; multiple carried locals; merge/phi suffix chain.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

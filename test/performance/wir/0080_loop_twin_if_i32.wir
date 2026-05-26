@@ -1,5 +1,7 @@
-; Loop body with two sequential ifs updating the same carried local.
-; Tests: merge suffix allocation across sibling ifs in one iteration.
+; Performance: 0080_loop_twin_if_i32
+; Why hard: Two sibling ifs updating same carried local in one iteration.
+; Reveals: Twin if merges, loop-carried x, merge suffix allocation.
+; If LLVM regresses: Missing .merge block or wrong backedge to phi; second if clobbers first update.
 (core-module
   (core-version 1)
   (decls

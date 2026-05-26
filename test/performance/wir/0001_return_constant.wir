@@ -1,3 +1,7 @@
+; Performance: 0001_return_constant
+; Why hard: Smoke baseline for minimal return. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: const_i32 return, empty prologue
+; If LLVM regresses: Wrong return type or extra unreachable blocks after ret.
 (core-module
   (core-version 1)
   (decls

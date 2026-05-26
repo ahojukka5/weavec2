@@ -1,5 +1,7 @@
-; Algorithm: reverse four heap-backed i32 values in place
-; Tests: two-pointer walk with conditional swaps and symmetric indexing
+; Performance: 0078_reverse_array4_i32
+; Why hard: In-place reverse with two pointers.
+; Reveals: Two indices, load/store swap on heap.
+; If LLVM regresses: Pointers cross without stopping; reads after free if paired wrong.
 (core-module
   (core-version 1)
   (decls

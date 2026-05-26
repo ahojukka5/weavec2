@@ -1,5 +1,7 @@
-; Stress: merge two sorted halves (4+4) into output buffer
-; Reveals: twin-pointer loop, compare branches, heap stores
+; Performance: 0152_merge_sorted_halves8_i32
+; Why hard: Merge two sorted halves 4+4.
+; Reveals: Twin-pointer loop, compare, store to out.
+; If LLVM regresses: Skips elements; writes past buffer; compares wrong side.
 (core-module
   (core-version 1)
   (decls

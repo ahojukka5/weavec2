@@ -1,5 +1,7 @@
-; Algorithm: count even values among five heap-backed i32 elements
-; Tests: load, mod, and conditional increment in loop
+; Performance: 0093_count_evens5_i32
+; Why hard: Count evens in five elements. Mod 2 on loaded values.
+; Reveals: load, mod, branch, add count.
+; If LLVM regresses: Counts odds; mod lowered to and wrong.
 (core-module
   (core-version 1)
   (decls

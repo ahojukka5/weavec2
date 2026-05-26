@@ -1,3 +1,7 @@
+; Performance: 0048_string_escape
+; Why hard: Smoke baseline for escaped string. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: special chars in literal
+; If LLVM regresses: Broken escape in .ll string constant.
 (core-module
   (core-version 1)
   (decls

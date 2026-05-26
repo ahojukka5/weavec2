@@ -1,5 +1,7 @@
-; Stress: 0/1 knapsack DP (5 items, capacity 11)
-; Reveals: 2D table on heap, triple nested structure, max of two paths
+; Performance: 0136_knapsack01_i32
+; Why hard: 0/1 knapsack DP table 5x11—2D recurrence.
+; Reveals: 2D heap table, max of take/skip, triple structure.
+; If LLVM regresses: DP recurrence uses wrong index; table row stride wrong; max path broken.
 (core-module
   (core-version 1)
   (decls

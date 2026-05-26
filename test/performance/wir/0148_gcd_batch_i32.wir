@@ -1,5 +1,7 @@
-; Stress: batch Euclidean GCD over twelve (a,b) pairs
-; Reveals: nested while with mod, loop-carried x/y, outer accumulator
+; Performance: 0148_gcd_batch_i32
+; Why hard: Batch GCD over twelve pairs.
+; Reveals: Nested GCD while inside outer accumulator loop.
+; If LLVM regresses: Outer acc wrong; inner GCD uses stale x/y between pairs.
 (core-module
   (core-version 1)
   (decls

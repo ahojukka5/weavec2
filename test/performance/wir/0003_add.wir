@@ -1,3 +1,7 @@
+; Performance: 0003_add
+; Why hard: Smoke baseline for binary add. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: add_i32 of two constants
+; If LLVM regresses: Uses sub/mul or leaves add in wrong width (i64 vs i32).
 (core-module
   (core-version 1)
   (decls

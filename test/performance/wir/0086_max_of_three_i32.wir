@@ -1,5 +1,7 @@
-; Algorithm: maximum of three i32 values with nested compares
-; Tests: branch-only control flow without loops
+; Performance: 0086_max_of_three_i32
+; Why hard: Max of three without loop. Nested compares only—joins must be clean.
+; Reveals: Chained if/compare, no loop.
+; If LLVM regresses: Wrong compare polarity picks min instead of max.
 (core-module
   (core-version 1)
   (decls

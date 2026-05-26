@@ -1,5 +1,7 @@
-; Algorithm: Horner-style polynomial recurrence
-; Tests: body-local next value copied into a loop-carried accumulator
+; Performance: 0070_horner_polynomial_i32
+; Why hard: Horner scheme; mul-add chain per coefficient.
+; Reveals: mul_i32/add_i32 recurrence in loop.
+; If LLVM regresses: Polynomial evaluated in wrong order; acc not updated.
 (core-module
   (core-version 1)
   (decls

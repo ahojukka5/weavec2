@@ -1,3 +1,7 @@
+; Performance: 0009_two_arg_function
+; Why hard: Smoke baseline for two-parameter call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: two param_get values into call
+; If LLVM regresses: Second argument clobbers first or uses wrong attribute/sign.
 (core-module
   (core-version 1)
   (decls

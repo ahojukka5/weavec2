@@ -1,5 +1,7 @@
-; Algorithm: insertion sort on five heap-backed i32 values (in-place)
-; Tests: nested loops with stores and indexed loads
+; Performance: 0109_insertion_sort5_i32
+; Why hard: Insertion sort five elements. Inner while shift with stores.
+; Reveals: nested loops, array stores.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

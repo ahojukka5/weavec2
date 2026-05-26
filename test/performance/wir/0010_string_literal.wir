@@ -1,3 +1,7 @@
+; Performance: 0010_string_literal
+; Why hard: Smoke baseline for string symbol. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: const_string_ptr in IR
+; If LLVM regresses: Missing private constant or bad pointer type for string data.
 (core-module
   (core-version 1)
   (decls

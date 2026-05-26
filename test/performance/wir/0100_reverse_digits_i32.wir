@@ -1,5 +1,7 @@
-; Algorithm: reverse decimal digits of a positive integer
-; Tests: mod/div loop building reversed number
+; Performance: 0100_reverse_digits_i32
+; Why hard: Reverse decimal digits. Build reversed with mod/div.
+; Reveals: mod 10, div 10, accumulate rev.
+; If LLVM regresses: Digits appended wrong order.
 (core-module
   (core-version 1)
   (decls

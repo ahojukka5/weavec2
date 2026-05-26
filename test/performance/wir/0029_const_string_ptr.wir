@@ -1,3 +1,7 @@
+; Performance: 0029_const_string_ptr
+; Why hard: Smoke baseline for string in expr. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: const_string_ptr as value
+; If LLVM regresses: Double indirection or string not merged as constant.
 (core-module
   (core-version 1)
   (decls

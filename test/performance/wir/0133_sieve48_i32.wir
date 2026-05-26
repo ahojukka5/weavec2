@@ -1,5 +1,7 @@
-; Stress: Eratosthenes sieve to 48 with nested marking loop
-; Reveals: store-heavy inner loop, boolean flags, branch on flags
+; Performance: 0133_sieve48_i32
+; Why hard: Sieve to 48 with inner marking loop—store-heavy.
+; Reveals: Nested loops, flag array stores, branch on flags.
+; If LLVM regresses: Marks composites wrong; inner loop starts at wrong multiple.
 (core-module
   (core-version 1)
   (decls

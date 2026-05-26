@@ -33,9 +33,10 @@ Examples:
 | 0061–0080 | Classical algorithms and small benchmarks |
 | 0081–0130 | Hand-written algorithm demos |
 | 0131–0152 | Hard stress demos (nested if/loop phis, DP, grids, sorts) |
-| 0139 | Reserved (twin parallel if ladders; needs extra phi pred fix) |
+| 0139 | Twin parallel if ladders (loop phi merge stress) |
 | 0153–0164 | i64 arithmetic and heap demos (see below) |
-| 0165–9999 | Next free ids for new demonstrations |
+| 0165–0168 | f32 arithmetic demos (see below) |
+| 0169–9999 | Next free ids for new demonstrations |
 
 Hard batch (0131–0140, except 0139):
 
@@ -85,9 +86,18 @@ i64 batch (0153–0161):
 | 0163 | `0163_horner_poly_i64` | Horner polynomial evaluation |
 | 0164 | `0164_matmul2x2_i64` | 2x2 matrix multiply on heap |
 
-Loop-phi promotion in weavec2 is i32-only today; i64 locals in loops use
-stack slots. Floating-point (`f32`/`f64`) is not in the weavec2 emitter
-yet—add `types`/`expr` support first, then fixtures in the 0165+ band.
+Loop-phi promotion in weavec2 is i32-only today; i64 and f32 locals in loops
+use stack slots. `const_f32` / `const_f64` lower via `sitofp` from integer
+literal tokens until the WIR lexer accepts decimal fractions.
+
+f32 batch (0165–0168):
+
+| Id | Fixture | Stress target |
+|----|---------|----------------|
+| 0165 | `0165_const_f32_add` | f32 smoke: fadd + fptosi return |
+| 0166 | `0166_sum_range_f32` | f32 sum 1..120 on stack |
+| 0167 | `0167_dot_product4_f32` | f32 dot product (register-only) |
+| 0168 | `0168_newton_sqrt_f32` | Newton sqrt with fdiv/fmul loop |
 
 GPU-oriented codegen is out of scope for this suite for now; these fixtures
 stay CPU-focused while we broaden type and control-flow coverage.
@@ -95,13 +105,41 @@ stay CPU-focused while we broaden type and control-flow coverage.
 Gaps in the low range (e.g. no `0006`) are historical; new smoke tests
 should use the next free id in the appropriate band.
 
+## WIR file header (required)
+
+Every `test/performance/wir/NNNN_name.wir` file must start with four comment
+lines before `(core-module)`:
+
+```
+; Performance: NNNN_short_name
+; Why hard: What makes this fixture demanding for weavec2 (algorithm,
+;   control-flow depth, phi merges, memory traffic, width, etc.).
+; Reveals: Which WIR constructs and LLVM shapes the test is meant to exercise.
+; If LLVM regresses: Concrete bad outcomes in the golden IR (wrong phis,
+;   redundant alloca reloads, wrong icmp/div kind, broken loop bounds, etc.).
+```
+
+Smoke tests (0001–0059) should say they are baselines whose failure usually
+implies broken lowering shared by later fixtures. Stress tests (0131+) should
+name phi/merge, DP stride, or batch-loop failure modes explicitly.
+
+To refresh headers on all fixtures after editing metadata:
+
+```bash
+python3 scripts/annotate-performance-wir-headers.py
+```
+
+Metadata lives in `scripts/annotate-performance-wir-headers.py` (`META` dict).
+New fixtures need an entry there (or extend the script), then run the annotator.
+
 ## Workflow for a new demonstration
 
 1. Pick a classical problem or micro-benchmark (sort, search, GCD, sieve,
    numeric kernel, etc.).
 2. Implement it in `test/performance/wir/NNNN_name.wir` (Core WIR; i32 is
    the default for loop-carried locals, i64 for wide arithmetic, pointers
-   for heap arrays).
+   for heap arrays). Add the four-line header (or register in the annotator
+   script and run it).
 3. Run `./build.sh`, then generate and verify LLVM:
 
    ```bash

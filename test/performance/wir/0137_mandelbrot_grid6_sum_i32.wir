@@ -1,5 +1,7 @@
-; Stress: sum Mandelbrot escape counts over 6x6 pixel grid
-; Reveals: nested loops, div/mul in inner kernel, call-heavy inner body
+; Performance: 0137_mandelbrot_grid6_sum_i32
+; Why hard: 6x6 grid Mandelbrot escape sum—heavy inner kernel.
+; Reveals: Nested pixel loops, div/mul in escape loop.
+; If LLVM regresses: Escape count wrong; inner loop never advances z.
 (core-module
   (core-version 1)
   (decls

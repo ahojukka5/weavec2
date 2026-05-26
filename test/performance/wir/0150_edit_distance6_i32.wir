@@ -1,5 +1,7 @@
-; Stress: Levenshtein DP 7x7 table (strings length 6)
-; Reveals: min of three paths, 2D heap, nested loops
+; Performance: 0150_edit_distance6_i32
+; Why hard: Levenshtein DP 7x7 for length-6 strings.
+; Reveals: min of three, 2D table, nested loops.
+; If LLVM regresses: Insertion cost wrong; diagonal not initialized.
 (core-module
   (core-version 1)
   (decls

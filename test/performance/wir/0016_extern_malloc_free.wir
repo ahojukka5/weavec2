@@ -1,3 +1,7 @@
+; Performance: 0016_extern_malloc_free
+; Why hard: Smoke baseline for extern calls. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: declare malloc/free, call_ptr/call_void
+; If LLVM regresses: Missing declare; wrong signature; call not marked correctly.
 (core-module
   (core-version 1)
   (decls

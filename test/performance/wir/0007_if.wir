@@ -1,3 +1,7 @@
+; Performance: 0007_if
+; Why hard: Smoke baseline for conditional branch. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: if with then/else joining
+; If LLVM regresses: Missing join block, wrong branch condition polarity, or divergent types at merge.
 (core-module
   (core-version 1)
   (decls

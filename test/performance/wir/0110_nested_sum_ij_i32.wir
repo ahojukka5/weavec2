@@ -1,5 +1,7 @@
-; Algorithm: sum of i*j for 1 <= i,j <= n (nested loops)
-; Tests: doubly nested loop with multiply-add inner body
+; Performance: 0110_nested_sum_ij_i32
+; Why hard: Double sum i*j. Triply nested induction if extended—here O(n^2).
+; Reveals: outer/inner loops, mul add.
+; If LLVM regresses: Inner bound uses outer wrong; sum formula off.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Stress: 20! in i64
-; Reveals: mul_i64 loop, i64 locals on stack
+; Performance: 0154_factorial20_i64
+; Why hard: 20! in i64—large product recurrence.
+; Reveals: mul_i64 loop on stack-carried fact.
+; If LLVM regresses: Product width wrong; mul overflows silently in IR type.
 (core-module
   (core-version 1)
   (decls

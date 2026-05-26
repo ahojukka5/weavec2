@@ -1,5 +1,7 @@
-; Algorithm: count trailing zero bits (divide by 2 while even)
-; Tests: mod/div loop similar to popcount
+; Performance: 0116_trailing_zeros_i32
+; Why hard: Count trailing zeros. Tight div/mod 2 loop like popcount.
+; Reveals: mod 2, div 2, increment count.
+; If LLVM regresses: Counts leading not trailing; extra urem per step.
 (core-module
   (core-version 1)
   (decls

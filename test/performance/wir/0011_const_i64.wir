@@ -1,3 +1,7 @@
+; Performance: 0011_const_i64
+; Why hard: Smoke baseline for i64 constant. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: const_i64 materialization
+; If LLVM regresses: Truncation/extension errors; i64 value wrong in IR.
 (core-module
   (core-version 1)
   (decls

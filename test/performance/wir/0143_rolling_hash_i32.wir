@@ -1,5 +1,7 @@
-; Stress: rolling polynomial hash over 64 bytes
-; Reveals: mul/add recurrence, mod on every step
+; Performance: 0143_rolling_hash_i32
+; Why hard: Polynomial rolling hash over 64 bytes.
+; Reveals: mul/add/mod recurrence each byte.
+; If LLVM regresses: Hash forgets to subtract outgoing term; mod applied once not per step.
 (core-module
   (core-version 1)
   (decls

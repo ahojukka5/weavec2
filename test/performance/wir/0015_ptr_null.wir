@@ -1,3 +1,7 @@
+; Performance: 0015_ptr_null
+; Why hard: Smoke baseline for null pointer. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: const_null, eq_ptr
+; If LLVM regresses: null not typed as pointer; comparison lowered to integer eq.
 (core-module
   (core-version 1)
   (decls

@@ -1,3 +1,7 @@
+; Performance: 0047_multiple_externs_used_subset
+; Why hard: Smoke baseline for multiple extern. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: subset of externs used
+; If LLVM regresses: Unused declare removed but wrong one kept.
 (core-module
   (core-version 1)
   (decls

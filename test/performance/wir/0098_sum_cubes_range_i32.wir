@@ -1,5 +1,7 @@
-; Algorithm: sum of cubes 1^3 + 2^3 + ... + n^3
-; Tests: mul in loop for cube then add
+; Performance: 0098_sum_cubes_range_i32
+; Why hard: Sum of cubes. Two muls per iteration.
+; Reveals: cube via mul twice, add.
+; If LLVM regresses: Cube computed as i*i+i wrong.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: sum of even integers from 2 to n
-; Tests: stride-2 loop starting at 2
+; Performance: 0112_sum_evens_to_n_i32
+; Why hard: Sum even numbers. Pair to odds test.
+; Reveals: even accumulation loop.
+; If LLVM regresses: Starts at 1; double-counts.
 (core-module
   (core-version 1)
   (decls

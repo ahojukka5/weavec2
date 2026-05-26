@@ -1,5 +1,7 @@
-; Algorithm: XOR reduction of five heap-backed i32 values
-; Tests: xor_i32 in loop with loads
+; Performance: 0126_xor_reduce5_i32
+; Why hard: XOR reduction. xor_i32 in loop.
+; Reveals: xor recurrence with loads.
+; If LLVM regresses: Uses or instead of xor.
 (core-module
   (core-version 1)
   (decls

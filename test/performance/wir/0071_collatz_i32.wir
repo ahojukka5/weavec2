@@ -1,5 +1,7 @@
-; Algorithm: Collatz steps for a small integer
-; Tests: branch-heavy scalar loop state and modulo condition lowering
+; Performance: 0071_collatz_i32
+; Why hard: Collatz step; branch on parity with div/mul.
+; Reveals: if on mod 2, div and 3n+1 paths.
+; If LLVM regresses: Odd branch uses wrong formula; infinite loop on 1.
 (core-module
   (core-version 1)
   (decls

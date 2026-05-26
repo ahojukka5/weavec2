@@ -1,5 +1,7 @@
-; Algorithm: check whether n is a perfect number (sum of proper divisors)
-; Tests: divisor loop with running sum compare
+; Performance: 0099_is_perfect_i32
+; Why hard: Perfect number test. Divisor sum loop then compare.
+; Reveals: Inner divisor loop + outer compare.
+; If LLVM regresses: Sum includes n itself; wrong equality.
 (core-module
   (core-version 1)
   (decls

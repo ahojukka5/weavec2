@@ -1,5 +1,7 @@
-; Stress: 4x4 matrix multiply on heap
-; Reveals: O(n^3) nested loops, 2D indexing
+; Performance: 0144_matmul4x4_i32
+; Why hard: 4x4 matrix multiply on heap.
+; Reveals: O(n^3) loops, 2D indexing like 0132 at larger n.
+; If LLVM regresses: Same indexing failures as 0132; result cell wrong.
 (core-module
   (core-version 1)
   (decls

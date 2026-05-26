@@ -1,5 +1,7 @@
-; Algorithm: population count (Hamming weight) by shift loop
-; Tests: shift-right style division and add in loop
+; Performance: 0087_popcount_i32
+; Why hard: Population count by halving. Repeated div/mod 2 until zero.
+; Reveals: shr or div by 2, add to count.
+; If LLVM regresses: Counts one extra; uses arithmetic shift on negative.
 (core-module
   (core-version 1)
   (decls

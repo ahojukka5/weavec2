@@ -1,5 +1,7 @@
-; Algorithm: linear search in five heap-backed i32 elements
-; Tests: indexed load loop with early exit index
+; Performance: 0091_linear_search5_i32
+; Why hard: Linear search five elements. Early-exit index pattern.
+; Reveals: load, compare, break index.
+; If LLVM regresses: Always returns last index; never finds match.
 (core-module
   (core-version 1)
   (decls

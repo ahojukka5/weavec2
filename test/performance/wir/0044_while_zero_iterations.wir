@@ -1,3 +1,7 @@
+; Performance: 0044_while_zero_iterations
+; Why hard: Smoke baseline for zero-trip loop. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: while with false initial condition
+; If LLVM regresses: Header executes body once anyway.
 (core-module
   (core-version 1)
   (decls

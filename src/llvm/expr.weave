@@ -345,6 +345,53 @@
       (call_void write_byte (local_get fd) (const_i32 10))
       (return (local_get t))))
 
+  ; Emit an fcmp operation: %tN = fcmp CMP TYPE left, right
+  (fn emit_fcmp
+    (params (ctx ptr) (node i64) (cmp_op ptr) (type_id i32))
+    (returns i64)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let left i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+      (let right i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 2)))
+      (let lv i64 (call_i64 emit_expr (param_get ctx) (local_get left)))
+      (let rv i64 (call_i64 emit_expr (param_get ctx) (local_get right)))
+      (if
+        (condition (or_bool (eq_i64 (local_get lv) (const_i64 -1)) (eq_i64 (local_get rv) (const_i64 -1))))
+        (then (do (return (const_i64 -1))))
+        (else (do)))
+      (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
+      (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
+      (call_void write_i64_dec (local_get fd) (local_get t))
+      (call_void write_cstr (local_get fd) (const_string_ptr " = fcmp "))
+      (call_void write_cstr (local_get fd) (param_get cmp_op))
+      (call_void write_byte (local_get fd) (const_i32 32))
+      (call_void emit_type (local_get fd) (param_get type_id))
+      (call_void write_byte (local_get fd) (const_i32 32))
+      (call_void emit_operand (param_get ctx) (local_get left) (local_get lv))
+      (call_void write_cstr (local_get fd) (const_string_ptr ", "))
+      (call_void emit_operand (param_get ctx) (local_get right) (local_get rv))
+      (call_void write_byte (local_get fd) (const_i32 10))
+      (return (local_get t))))
+
+  ; Emit const_f32 / const_f64 from integer literal token (WIR has no decimal lexer yet).
+  (fn emit_const_float
+    (params (ctx ptr) (node i64) (dst_type_id i32))
+    (returns i64)
+    (do
+      (let fd i32 (call_i32 ctx_get_fd (param_get ctx)))
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let val_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+      (let t i64 (call_i64 ctx_alloc_temp (param_get ctx)))
+      (call_void write_cstr (local_get fd) (const_string_ptr "  %t"))
+      (call_void write_i64_dec (local_get fd) (local_get t))
+      (call_void write_cstr (local_get fd) (const_string_ptr " = sitofp i32 "))
+      (call_void write_i64_dec (local_get fd) (call_i64 node_value (local_get tree) (local_get val_node)))
+      (call_void write_cstr (local_get fd) (const_string_ptr " to "))
+      (call_void emit_type (local_get fd) (param_get dst_type_id))
+      (call_void write_byte (local_get fd) (const_i32 10))
+      (return (local_get t))))
+
   ; Emit a cast operation: %tN = CAST src_type operand to dst_type
   (fn emit_cast
     (params (ctx ptr) (node i64) (cast_op ptr) (src_type_id i32) (dst_type_id i32))
@@ -707,6 +754,18 @@
         (then (do (return (call_i64 emit_const_string_ptr (param_get ctx) (param_get node)))))
         (else (do)))
 
+      ; const_f32 / const_f64
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "const_f32") (const_i64 9)) (const_i32 0)))
+        (then (do (return (call_i64 emit_const_float (param_get ctx) (param_get node) (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "const_f64") (const_i64 9)) (const_i32 0)))
+        (then (do (return (call_i64 emit_const_float (param_get ctx) (param_get node) (const_i32 6)))))
+        (else (do)))
+
       ; local_get
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
@@ -818,6 +877,60 @@
         (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "xor") (const_i32 2)))))
         (else (do)))
 
+      ; Arithmetic f32
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "add_f32") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fadd") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "sub_f32") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fsub") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "mul_f32") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fmul") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "div_f32") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fdiv") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "mod_f32") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "frem") (const_i32 5)))))
+        (else (do)))
+
+      ; Arithmetic f64
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "add_f64") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fadd") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "sub_f64") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fsub") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "mul_f64") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fmul") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "div_f64") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "fdiv") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "mod_f64") (const_i64 7)) (const_i32 0)))
+        (then (do (return (call_i64 emit_binary (param_get ctx) (param_get node) (const_string_ptr "frem") (const_i32 6)))))
+        (else (do)))
+
       ; Boolean ops
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
@@ -914,6 +1027,70 @@
         (then (do (return (call_i64 emit_icmp (param_get ctx) (param_get node) (const_string_ptr "sge") (const_i32 2)))))
         (else (do)))
 
+      ; Comparisons f32
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "eq_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "oeq") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "ne_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "une") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "lt_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "olt") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "le_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "ole") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "gt_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "ogt") (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "ge_f32") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "oge") (const_i32 5)))))
+        (else (do)))
+
+      ; Comparisons f64
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "eq_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "oeq") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "ne_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "une") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "lt_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "olt") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "le_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "ole") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "gt_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "ogt") (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "ge_f64") (const_i64 6)) (const_i32 0)))
+        (then (do (return (call_i64 emit_fcmp (param_get ctx) (param_get node) (const_string_ptr "oge") (const_i32 6)))))
+        (else (do)))
+
       ; Pointer comparisons
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
@@ -937,6 +1114,36 @@
           (const_string_ptr "cast_i32_to_i64") (const_i64 15)) (const_i32 0)))
         (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "sext") (const_i32 1) (const_i32 2)))))
         (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_i32_to_f32") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "sitofp") (const_i32 1) (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_i32_to_f64") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "sitofp") (const_i32 1) (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_f32_to_i32") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "fptosi") (const_i32 5) (const_i32 1)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_f64_to_i32") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "fptosi") (const_i32 6) (const_i32 1)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_f32_to_f64") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "fpext") (const_i32 5) (const_i32 6)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "cast_f64_to_f32") (const_i64 15)) (const_i32 0)))
+        (then (do (return (call_i64 emit_cast (param_get ctx) (param_get node) (const_string_ptr "fptrunc") (const_i32 6) (const_i32 5)))))
+        (else (do)))
 
       ; Loads
       (if
@@ -948,6 +1155,16 @@
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
           (const_string_ptr "load_i64") (const_i64 8)) (const_i32 0)))
         (then (do (return (call_i64 emit_load (param_get ctx) (param_get node) (const_i32 2)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "load_f32") (const_i64 8)) (const_i32 0)))
+        (then (do (return (call_i64 emit_load (param_get ctx) (param_get node) (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "load_f64") (const_i64 8)) (const_i32 0)))
+        (then (do (return (call_i64 emit_load (param_get ctx) (param_get node) (const_i32 6)))))
         (else (do)))
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
@@ -992,6 +1209,16 @@
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
           (const_string_ptr "call_i64") (const_i64 8)) (const_i32 0)))
         (then (do (return (call_i64 emit_call_expr (param_get ctx) (param_get node) (const_i32 2)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "call_f32") (const_i64 8)) (const_i32 0)))
+        (then (do (return (call_i64 emit_call_expr (param_get ctx) (param_get node) (const_i32 5)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "call_f64") (const_i64 8)) (const_i32 0)))
+        (then (do (return (call_i64 emit_call_expr (param_get ctx) (param_get node) (const_i32 6)))))
         (else (do)))
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)

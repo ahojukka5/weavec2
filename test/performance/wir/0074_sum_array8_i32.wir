@@ -1,5 +1,7 @@
-; Algorithm: sum eight heap-backed i32 values
-; Tests: load-heavy reduction loop and typed array addressing
+; Performance: 0074_sum_array8_i32
+; Why hard: Eight-element heap sum.
+; Reveals: load_i32 through array_i32_at in loop.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

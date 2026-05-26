@@ -1,5 +1,7 @@
-; Stress: sum 1..120 in i64 accumulator (i32 loop index)
-; Reveals: cast_i32_to_i64, add_i64, loop-carried i32 only
+; Performance: 0153_sum_range_i64
+; Why hard: Sum 1..120 in i64—wide accumulator with i32 index.
+; Reveals: cast_i32_to_i64, add_i64, i32 loop index only.
+; If LLVM regresses: Accumulator truncated to i32; i64 add uses i32 ops.
 (core-module
   (core-version 1)
   (decls

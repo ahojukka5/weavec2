@@ -1,5 +1,7 @@
-; Algorithm: Euclid GCD over i32 values
-; Tests: scalar loop recurrence, mod_i32, and phi-to-phi copies
+; Performance: 0067_euclid_gcd_i32
+; Why hard: Euclidean GCD; mod in tight while.
+; Reveals: mod_i32, carried x/y until y==0.
+; If LLVM regresses: Uses subtraction loop wrong; mod with div by zero guard missing.
 (core-module
   (core-version 1)
   (decls

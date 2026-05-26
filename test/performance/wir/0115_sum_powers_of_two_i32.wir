@@ -1,5 +1,7 @@
-; Algorithm: sum 2^0 + 2^1 + ... + 2^k by repeated doubling
-; Tests: shift/add loop building powers of two
+; Performance: 0115_sum_powers_of_two_i32
+; Why hard: Sum 2^k. Doubling add recurrence.
+; Reveals: shl/add loop.
+; If LLVM regresses: Doubles wrong register; sum not geometric.
 (core-module
   (core-version 1)
   (decls

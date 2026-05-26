@@ -1,5 +1,7 @@
-; Algorithm: product 1 * 2 * ... * n (factorial shape)
-; Tests: multiply recurrence in loop
+; Performance: 0097_product_range_i32
+; Why hard: Factorial-shaped product. mul recurrence like 0073.
+; Reveals: mul_i32 carried product.
+; If LLVM regresses: Product zeroed each trip; starts at 0.
 (core-module
   (core-version 1)
   (decls

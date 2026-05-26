@@ -1,5 +1,7 @@
-; Stress: Fibonacci F(30) with i64 values, i32 index loop
-; Reveals: add_i64, carried i32 a/b, i64 results on stack
+; Performance: 0158_fibonacci30_i64
+; Why hard: Fibonacci F(30) with i64 values.
+; Reveals: add_i64, carried prev/cur on stack, mod at end.
+; If LLVM regresses: i64 add truncated; prev/cur not swapped.
 (core-module
   (core-version 1)
   (decls

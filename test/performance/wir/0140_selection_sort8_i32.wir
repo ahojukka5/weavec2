@@ -1,5 +1,7 @@
-; Stress: selection sort on eight elements (min-scan inner loop)
-; Reveals: nested loops with argmin index, fewer swaps than bubble but more compares
+; Performance: 0140_selection_sort8_i32
+; Why hard: Selection sort eight elements—argmin scan inner loop.
+; Reveals: Nested loops, min index, swap stores.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Stress: insertion sort on ten elements
-; Reveals: inner while shifting, many loads/stores
+; Performance: 0145_insertion_sort10_i32
+; Why hard: Insertion sort ten elements.
+; Reveals: Inner shift while with many stores.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

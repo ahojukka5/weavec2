@@ -1,5 +1,7 @@
-; Algorithm: sum of odd integers from 1 to n
-; Tests: stride-2 loop with add recurrence
+; Performance: 0111_sum_odds_to_n_i32
+; Why hard: Sum odd numbers. Stride-2 style loop.
+; Reveals: add with i+=2 or equivalent.
+; If LLVM regresses: Includes evens; starts at wrong parity.
 (core-module
   (core-version 1)
   (decls

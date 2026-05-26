@@ -1,3 +1,7 @@
+; Performance: 0041_load_store_ptr
+; Why hard: Smoke baseline for ptr load/store. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: load_i32 through ptr
+; If LLVM regresses: Missing align on load; TBAA broken for heap slot.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: integer floor sqrt by incrementing trial
-; Tests: loop with square compare and tracked root candidate
+; Performance: 0090_floor_sqrt_i32
+; Why hard: Integer sqrt by trial. Compare i*i <= n each step.
+; Reveals: mul_i32 for square, carried root.
+; If LLVM regresses: Off-by-one sqrt; square overflows silently in i32.
 (core-module
   (core-version 1)
   (decls

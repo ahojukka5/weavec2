@@ -1,5 +1,7 @@
-; Algorithm: GCD by repeated subtraction (classical Euclid)
-; Tests: subtract loop until equal
+; Performance: 0096_gcd_subtraction_i32
+; Why hard: GCD by subtraction. Many iterations vs modulo GCD.
+; Reveals: sub in loop until equal.
+; If LLVM regresses: Infinite loop when equal case not handled.
 (core-module
   (core-version 1)
   (decls

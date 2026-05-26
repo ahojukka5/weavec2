@@ -1,5 +1,7 @@
-; Algorithm: peak value reached in Collatz sequence from start
-; Tests: branchy loop with max tracking
+; Performance: 0108_hailstone_peak_i32
+; Why hard: Collatz peak tracking. Inner while + max on carried peak.
+; Reveals: div/mod branch, gt update.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

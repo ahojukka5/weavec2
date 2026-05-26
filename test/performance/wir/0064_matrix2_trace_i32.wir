@@ -1,5 +1,7 @@
-; Algorithm: 2x2 matrix multiply trace
-; Tests: tensor-style arithmetic with immutable scalar intermediates
+; Performance: 0064_matrix2_trace_i32
+; Why hard: 2x2 indexing on heap; diagonal sum.
+; Reveals: array_i32_at, load_i32, add.
+; If LLVM regresses: Row-major index formula wrong; trace sums off-diagonal.
 (core-module
   (core-version 1)
   (decls

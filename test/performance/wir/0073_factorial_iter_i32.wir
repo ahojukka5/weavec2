@@ -1,5 +1,7 @@
-; Algorithm: iterative factorial
-; Tests: single loop with multiply recurrence and phi-friendly scalar locals
+; Performance: 0073_factorial_iter_i32
+; Why hard: Factorial product loop; classic benchmark shape.
+; Reveals: mul_i32 on carried fact, i32 index.
+; If LLVM regresses: Product resets each iteration; off-by-one on range.
 (core-module
   (core-version 1)
   (decls

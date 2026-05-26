@@ -1,5 +1,7 @@
-; Stress: modular exponentiation base^exp mod m (i64)
-; Reveals: mul_i64, mod_i64, div_i64 on i64 in loop
+; Performance: 0159_power_mod_i64
+; Why hard: Modular exponentiation i64.
+; Reveals: mul_i64 and mod_i64 each square step.
+; If LLVM regresses: Square without mod; exp bit test uses wrong mask.
 (core-module
   (core-version 1)
   (decls

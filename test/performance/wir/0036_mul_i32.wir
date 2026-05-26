@@ -1,3 +1,7 @@
+; Performance: 0036_mul_i32
+; Why hard: Smoke baseline for multiplication. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: mul_i32
+; If LLVM regresses: mul lowered to shifts incorrectly for non-power-of-two.
 (core-module
   (core-version 1)
   (decls

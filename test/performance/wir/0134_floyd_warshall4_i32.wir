@@ -1,5 +1,7 @@
-; Stress: Floyd-Warshall all-pairs shortest paths on 4 nodes
-; Reveals: triple nested loop, min relax, 2D heap indexing
+; Performance: 0134_floyd_warshall4_i32
+; Why hard: All-pairs shortest paths—triple loop with relax.
+; Reveals: k,i,j loops, min relax on heap matrix.
+; If LLVM regresses: Relax uses max not min; k/i/j order wrong for FW.
 (core-module
   (core-version 1)
   (decls

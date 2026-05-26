@@ -1,3 +1,7 @@
+; Performance: 0037_div_i32
+; Why hard: Smoke baseline for signed division. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: div_i32 -> sdiv
+; If LLVM regresses: Uses udiv or divides before sign extension.
 (core-module
   (core-version 1)
   (decls

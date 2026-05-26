@@ -1,3 +1,7 @@
+; Performance: 0060_discard_call_i32
+; Why hard: Return value intentionally unused; must not keep bogus uses alive.
+; Reveals: call_i32 result discarded.
+; If LLVM regresses: Dead code keeps alloca for unused return; extra stores to dead slots.
 (core-module
   (core-version 1)
   (decls

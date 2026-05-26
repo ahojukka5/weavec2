@@ -1,5 +1,7 @@
-; Algorithm: maximum of five heap-backed i32 values
-; Tests: reduction loop with conditional max update
+; Performance: 0092_array_max5_i32
+; Why hard: Max of five heap values. Conditional update on carried max.
+; Reveals: load, gt, set max in if.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

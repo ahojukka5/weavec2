@@ -1,3 +1,7 @@
+; Performance: 0023_mod_i32
+; Why hard: Smoke baseline for signed remainder. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: mod_i32 lowering to srem
+; If LLVM regresses: Uses urem or div without rem; wrong sign on negative inputs.
 (core-module
   (core-version 1)
   (decls

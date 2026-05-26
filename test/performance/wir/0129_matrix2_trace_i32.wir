@@ -1,5 +1,7 @@
-; Algorithm: trace of a 2x2 i32 matrix stored row-major on heap
-; Tests: small fixed-size array addressing
+; Performance: 0129_matrix2_trace_i32
+; Why hard: 2x2 trace on heap. Same family as 0064.
+; Reveals: diagonal loads, add.
+; If LLVM regresses: Off-diagonal included.
 (core-module
   (core-version 1)
   (decls

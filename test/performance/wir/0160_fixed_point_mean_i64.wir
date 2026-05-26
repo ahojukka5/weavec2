@@ -1,5 +1,7 @@
-; Stress: fixed-point mean of i64 samples (scale 1000)
-; Reveals: div_i64, add_i64; float-like math without f32
+; Performance: 0160_fixed_point_mean_i64
+; Why hard: Fixed-point mean of i64 samples (float proxy).
+; Reveals: div_i64 after sum loop over heap array.
+; If LLVM regresses: Division before sum complete; scale factor applied twice.
 (core-module
   (core-version 1)
   (decls

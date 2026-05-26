@@ -1,3 +1,7 @@
+; Performance: 0038_i32_comparisons_full
+; Why hard: Smoke baseline for full icmp set. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: eq/ne/lt/le/gt/ge i32
+; If LLVM regresses: Any one icmp kind wrong breaks all later branchy code.
 (core-module
   (core-version 1)
   (decls

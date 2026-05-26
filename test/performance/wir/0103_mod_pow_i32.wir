@@ -1,5 +1,7 @@
-; Algorithm: modular exponentiation (base^exp mod modv) by squaring
-; Tests: same shape as pow_i32 with mod on each multiply
+; Performance: 0103_mod_pow_i32
+; Why hard: Modular exponentiation. Square-and-multiply with mod each step.
+; Reveals: mul+mod in loop on bits of exp.
+; If LLVM regresses: Forgot mod; overflow changes semantic mod result.
 (core-module
   (core-version 1)
   (decls

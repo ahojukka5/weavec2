@@ -1,5 +1,7 @@
-; Algorithm: check if decimal representation is a palindrome
-; Tests: reverse digits and compare to original
+; Performance: 0101_palindrome_number_i32
+; Why hard: Palindrome check. Depends on reverse_digits correctness.
+; Reveals: reverse then compare.
+; If LLVM regresses: Always true; compares n to partial reverse.
 (core-module
   (core-version 1)
   (decls

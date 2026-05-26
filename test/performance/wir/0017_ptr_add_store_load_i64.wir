@@ -1,3 +1,7 @@
+; Performance: 0017_ptr_add_store_load_i64
+; Why hard: Smoke baseline for pointer arithmetic. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: ptr add, store_i64, load_i64
+; If LLVM regresses: GEP off-by-element-size; load width mismatch.
 (core-module
   (core-version 1)
   (decls

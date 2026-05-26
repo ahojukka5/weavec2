@@ -1,5 +1,7 @@
-; Stress: 200 iterations with mod, div, and nested if on residues
-; Reveals: sdiv/urem lowering, branchy inner loop, loop-carried accumulator
+; Performance: 0138_mod_div_nested_accum_i32
+; Why hard: 200 steps with mod/div in nested if on residues.
+; Reveals: sdiv/srem in branchy loop, carried acc.
+; If LLVM regresses: Uses udiv/urem; acc updated on wrong branch only.
 (core-module
   (core-version 1)
   (decls

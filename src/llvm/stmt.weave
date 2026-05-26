@@ -185,18 +185,30 @@
           (call_void write_byte (local_get fd) (const_i32 10))
           (return (const_i32 0))))
         (else (do)))
-      ; store_i32, store_i64, store_ptr
-      (call_void write_cstr (local_get fd) (const_string_ptr "  store "))
+      ; store_i32, store_i64, store_f32, store_f64, store_ptr
+      (let store_type_id i32 (const_i32 4))
       (if
         (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
           (const_string_ptr "store_i32") (const_i64 9)) (const_i32 0)))
-        (then (do (call_void write_cstr (local_get fd) (const_string_ptr "i32"))))
-        (else (do
-          (if
-            (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
-              (const_string_ptr "store_i64") (const_i64 9)) (const_i32 0)))
-            (then (do (call_void write_cstr (local_get fd) (const_string_ptr "i64"))))
-            (else (do (call_void write_cstr (local_get fd) (const_string_ptr "ptr"))))))))
+        (then (do (set store_type_id (const_i32 1))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "store_i64") (const_i64 9)) (const_i32 0)))
+        (then (do (set store_type_id (const_i32 2))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "store_f32") (const_i64 9)) (const_i32 0)))
+        (then (do (set store_type_id (const_i32 5))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 ident_equals (local_get tree) (local_get source) (local_get op)
+          (const_string_ptr "store_f64") (const_i64 9)) (const_i32 0)))
+        (then (do (set store_type_id (const_i32 6))))
+        (else (do)))
+      (call_void write_cstr (local_get fd) (const_string_ptr "  store "))
+      (call_void emit_type (local_get fd) (local_get store_type_id))
       (call_void write_byte (local_get fd) (const_i32 32))
       (call_void emit_operand (param_get ctx) (local_get val_node) (local_get vv))
       (call_void write_cstr (local_get fd) (const_string_ptr ", ptr "))
@@ -955,6 +967,16 @@
       (if
         (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
           (const_string_ptr "store_i64") (const_i64 9)) (const_i32 0)))
+        (then (do (return (call_i32 emit_store_stmt (param_get ctx) (param_get node)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "store_f32") (const_i64 9)) (const_i32 0)))
+        (then (do (return (call_i32 emit_store_stmt (param_get ctx) (param_get node)))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "store_f64") (const_i64 9)) (const_i32 0)))
         (then (do (return (call_i32 emit_store_stmt (param_get ctx) (param_get node)))))
         (else (do)))
       (if

@@ -1,6 +1,7 @@
-; Integration test: multi-function interaction
-; Tests: function calling function, forward declarations, multiple functions
-
+; Performance: 0056_integration_multi_function_chain
+; Why hard: Several small functions inlined by hand; call chain must preserve ABI.
+; Reveals: call_i32 across three functions, args and returns threaded.
+; If LLVM regresses: Broken tail call or wrong return value register at end of chain.
 (core-module
   (core-version 1)
   (decls

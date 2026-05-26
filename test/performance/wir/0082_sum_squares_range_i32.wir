@@ -1,5 +1,7 @@
-; Algorithm: sum of squares 1^2 + 2^2 + ... + n^2
-; Tests: loop with mul_i32 inside add recurrence
+; Performance: 0082_sum_squares_range_i32
+; Why hard: Sum of squares 1^2+..+n^2. Mul inside add recurrence stresses licm/prevent hoisting bugs.
+; Reveals: mul_i32 then add_i32 each step.
+; If LLVM regresses: Square not squared (add instead of mul); sum uses stale i.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: binary search on six sorted heap-backed i32 values
-; Tests: classic binary search loop with pointer indexing
+; Performance: 0128_binary_search6_i32
+; Why hard: Binary search six elements. Classic bisection.
+; Reveals: low/high/mid, load mid.
+; If LLVM regresses: Infinite loop; off-by-one on bounds.
 (core-module
   (core-version 1)
   (decls

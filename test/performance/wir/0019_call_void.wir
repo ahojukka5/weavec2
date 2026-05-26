@@ -1,3 +1,7 @@
+; Performance: 0019_call_void
+; Why hard: Smoke baseline for void return call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: call_void side effect only
+; If LLVM regresses: Treats void call as value-producing; dead ret of undefined.
 (core-module
   (core-version 1)
   (decls

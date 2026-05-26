@@ -1,3 +1,7 @@
+; Performance: 0013_i64_comparisons
+; Why hard: Smoke baseline for i64 compares. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: eq/ne/lt i64 predicates
+; If LLVM regresses: Signed vs unsigned icmp wrong; compare operands swapped.
 (core-module
   (core-version 1)
   (decls

@@ -1,5 +1,7 @@
-; Algorithm: count primes up to n by trial division per candidate
-; Tests: nested loops with inner primality check
+; Performance: 0102_count_primes_to_n_i32
+; Why hard: Count primes <= n. Nested primality loops.
+; Reveals: Outer candidate, inner trial division.
+; If LLVM regresses: Overcounts 1 or composites.
 (core-module
   (core-version 1)
   (decls

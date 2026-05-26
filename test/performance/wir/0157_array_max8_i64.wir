@@ -1,5 +1,7 @@
-; Stress: maximum of eight i64 heap values
-; Reveals: gt_i64, load_i64, nested if on i64 compare
+; Performance: 0157_array_max8_i64
+; Why hard: Max of eight i64 heap values.
+; Reveals: gt_i64, load_i64, conditional set maxv.
+; If LLVM regresses: Max not updated in loop (let shadowing); compares signed as unsigned.
 (core-module
   (core-version 1)
   (decls

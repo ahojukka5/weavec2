@@ -1,6 +1,7 @@
-; Integration test: nested control flow with mixed arithmetic
-; Tests: nested if + while + i64 arithmetic + mutable locals in loops
-
+; Performance: 0055_integration_nested_control_flow
+; Why hard: Combines nested if/while; easy to mis-wire merge edges.
+; Reveals: Nested if inside while, multiple join points.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

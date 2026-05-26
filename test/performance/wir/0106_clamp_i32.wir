@@ -1,5 +1,7 @@
-; Algorithm: clamp value to [lo, hi] inclusive
-; Tests: chained comparisons without loops
+; Performance: 0106_clamp_i32
+; Why hard: Clamp to interval. Two compares without loop.
+; Reveals: le/ge compares, if chain.
+; If LLVM regresses: Returns lo when should return hi.
 (core-module
   (core-version 1)
   (decls

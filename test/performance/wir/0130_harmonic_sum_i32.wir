@@ -1,5 +1,7 @@
-; Algorithm: truncated harmonic sum sum_{i=1..n} (1000 / i) using integer division
-; Tests: div_i32 in accumulating loop
+; Performance: 0130_harmonic_sum_i32
+; Why hard: Truncated harmonic sum with int div. div_i32 each step—rounding sensitive.
+; Reveals: div in accumulating loop.
+; If LLVM regresses: Uses fp div; sum uses mul instead of div.
 (core-module
   (core-version 1)
   (decls

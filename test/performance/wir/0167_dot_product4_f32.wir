@@ -1,0 +1,59 @@
+; Performance: 0167_dot_product4_f32
+; Why hard: f32 dot product on stack array (no heap); mul/add chain.
+; Reveals: fmul, fadd, load_f32/store_f32 on alloca slots.
+; If LLVM regresses: widens to double unexpectedly; products not accumulated.
+(core-module
+  (core-version 1)
+  (decls
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (let a0 f32
+          (const_f32 1)
+        ) ;; let
+        (let a1 f32
+          (const_f32 2)
+        ) ;; let
+        (let a2 f32
+          (const_f32 3)
+        ) ;; let
+        (let a3 f32
+          (const_f32 4)
+        ) ;; let
+
+        (let b0 f32
+          (const_f32 1)
+        ) ;; let
+        (let b1 f32
+          (const_f32 2)
+        ) ;; let
+        (let b2 f32
+          (const_f32 3)
+        ) ;; let
+        (let b3 f32
+          (const_f32 4)
+        ) ;; let
+
+        (let sum f32
+          (add_f32
+            (add_f32
+              (mul_f32 (local_get a0) (local_get b0))
+              (mul_f32 (local_get a1) (local_get b1))
+            ) ;; add_f32
+            (add_f32
+              (mul_f32 (local_get a2) (local_get b2))
+              (mul_f32 (local_get a3) (local_get b3))
+            ) ;; add_f32
+          ) ;; add_f32
+        ) ;; let
+
+        (return
+          (cast_f32_to_i32
+            (local_get sum)
+          ) ;; cast_f32_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

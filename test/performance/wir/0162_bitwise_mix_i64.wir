@@ -1,5 +1,7 @@
-; Stress: i64 bitwise ops in a tight loop (xor/and/shl/shr)
-; Reveals: shl_i64, shr_i64, and_i64, xor_i64 lowering
+; Performance: 0162_bitwise_mix_i64
+; Why hard: i64 xor/and/shl/shr mix in 64-step loop.
+; Reveals: bitwise i64 ops chained per iteration.
+; If LLVM regresses: Shr uses shl; and mask wrong width; xor optimized away incorrectly.
 (core-module
   (core-version 1)
   (decls

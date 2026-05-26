@@ -1,5 +1,7 @@
-; Algorithm: exponentiation by squaring
-; Tests: branch-aware loop-carried state and repeated division/modulo
+; Performance: 0072_pow_square_i32
+; Why hard: Repeated squaring; overflow not goal but mul recurrence matters.
+; Reveals: mul_i32 in loop on carried base.
+; If LLVM regresses: Square done once; exponent counter does not advance.
 (core-module
   (core-version 1)
   (decls

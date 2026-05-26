@@ -1,5 +1,7 @@
-; Algorithm: count elements less than threshold in five-element array
-; Tests: load-compare-increment
+; Performance: 0127_count_less_than5_i32
+; Why hard: Count below threshold. Compare load < T.
+; Reveals: lt, add count.
+; If LLVM regresses: Uses le vs lt wrong.
 (core-module
   (core-version 1)
   (decls

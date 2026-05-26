@@ -1,5 +1,7 @@
-; Algorithm: sum of decimal digits (digital sum)
-; Tests: mod/div loop until n becomes zero
+; Performance: 0088_digital_sum_i32
+; Why hard: Sum of decimal digits. Mod/div loop until n=0.
+; Reveals: mod 10, div 10, accumulate.
+; If LLVM regresses: Loses high digits; infinite loop if div wrong.
 (core-module
   (core-version 1)
   (decls

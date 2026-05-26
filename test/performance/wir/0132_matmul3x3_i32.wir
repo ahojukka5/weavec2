@@ -1,5 +1,7 @@
-; Stress: 3x3 matrix multiply row-major on heap
-; Reveals: nested loops, repeated loads/stores, induction on 2D index
+; Performance: 0132_matmul3x3_i32
+; Why hard: O(n^3) triple nested loops with 2D heap indexing.
+; Reveals: Three loops, array_i32_at, mul/add inner, many loads/stores.
+; If LLVM regresses: Wrong stride on row-major index; inner k bound wrong; C[i,j] never written.
 (core-module
   (core-version 1)
   (decls

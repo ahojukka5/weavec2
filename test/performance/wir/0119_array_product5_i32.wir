@@ -1,5 +1,7 @@
-; Algorithm: product of five heap-backed i32 values
-; Tests: multiply reduction loop with loads
+; Performance: 0119_array_product5_i32
+; Why hard: Product reduction. mul instead of add.
+; Reveals: mul_i32 chain with loads.
+; If LLVM regresses: Product stuck at 1; overflow not relevant to shape.
 (core-module
   (core-version 1)
   (decls

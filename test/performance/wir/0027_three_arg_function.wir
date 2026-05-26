@@ -1,3 +1,7 @@
+; Performance: 0027_three_arg_function
+; Why hard: Smoke baseline for three-arg call. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: three param_get + call
+; If LLVM regresses: Register/stack misalignment from third argument onward.
 (core-module
   (core-version 1)
   (decls

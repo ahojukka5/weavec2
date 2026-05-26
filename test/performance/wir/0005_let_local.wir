@@ -1,3 +1,7 @@
+; Performance: 0005_let_local
+; Why hard: Smoke baseline for local binding. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: let + local_get without control flow
+; If LLVM regresses: Local name maps to wrong SSA name or duplicate alloca for one binding.
 (core-module
   (core-version 1)
   (decls

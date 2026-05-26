@@ -1,5 +1,7 @@
-; Algorithm: primality test by trial division up to sqrt(n)
-; Tests: loop with square bound and early exit flag
+; Performance: 0085_is_prime_i32
+; Why hard: Primality test. Early exit branch must preserve flag phi.
+; Reveals: Trial division to sqrt.
+; If LLVM regresses: Composite reported prime; loop does not exit at sqrt.
 (core-module
   (core-version 1)
   (decls

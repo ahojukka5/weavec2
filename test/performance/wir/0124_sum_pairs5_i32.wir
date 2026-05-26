@@ -1,5 +1,7 @@
-; Algorithm: sum of adjacent pairs in five-element array
-; Tests: indexed load pairs and add
+; Performance: 0124_sum_pairs5_i32
+; Why hard: Sum adjacent pairs. Index i and i+1 loads.
+; Reveals: two loads per iteration.
+; If LLVM regresses: Reads past end; pairs overlap wrong.
 (core-module
   (core-version 1)
   (decls

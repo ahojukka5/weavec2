@@ -1,5 +1,7 @@
-; Stress: Collatz steps for n=1..80, track max steps and sum
-; Reveals: inner while, div/mod on n, multiple carried locals
+; Performance: 0146_collatz_stats_i32
+; Why hard: Collatz for n=1..80 with max steps and sum.
+; Reveals: Inner collatz while + outer batch, multiple carried locals.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
 (core-module
   (core-version 1)
   (decls

@@ -1,6 +1,7 @@
-; Integration test: memory flow with malloc/free
-; Tests: malloc, ptr_add, store/load, function call with ptr parameter, free
-
+; Performance: 0057_integration_memory_flow
+; Why hard: Malloc, stores, loads, free in one flow; alias mistakes show up quickly.
+; Reveals: Heap alloc, multiple stores, reloads, free.
+; If LLVM regresses: Load before store visible; free before last load; redundant reload of same slot.
 (core-module
   (core-version 1)
   (decls

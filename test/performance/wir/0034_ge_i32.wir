@@ -1,3 +1,7 @@
+; Performance: 0034_ge_i32
+; Why hard: Smoke baseline for signed compare ge. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: ge_i32 predicate
+; If LLVM regresses: Uses uge or swaps operands silently.
 (core-module
   (core-version 1)
   (decls

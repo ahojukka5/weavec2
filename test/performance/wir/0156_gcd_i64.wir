@@ -1,5 +1,7 @@
-; Stress: Euclidean GCD on i64 pair in a loop
-; Reveals: mod_i64, div_i64, ne_i64, loop-carried i64 on stack
+; Performance: 0156_gcd_i64
+; Why hard: Euclidean GCD on i64 pair.
+; Reveals: mod_i64, carried x/y on stack slots.
+; If LLVM regresses: mod uses i32 remainder; swap order wrong.
 (core-module
   (core-version 1)
   (decls

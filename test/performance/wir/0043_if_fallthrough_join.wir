@@ -1,3 +1,7 @@
+; Performance: 0043_if_fallthrough_join
+; Why hard: Smoke baseline for if join. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: then/else paths merge
+; If LLVM regresses: Phi missing at join; one arm falls through wrong block.
 (core-module
   (core-version 1)
   (decls

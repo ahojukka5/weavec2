@@ -1,5 +1,7 @@
-; Algorithm: least common multiple via Euclidean GCD
-; Tests: nested loop state and reuse of mod/div recurrence
+; Performance: 0083_lcm_i32
+; Why hard: LCM via GCD. Combines two algorithms and reuse of mod state.
+; Reveals: GCD loop then div/mul combine.
+; If LLVM regresses: LCM formula uses wrong GCD; division by zero.
 (core-module
   (core-version 1)
   (decls

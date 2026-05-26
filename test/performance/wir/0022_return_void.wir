@@ -1,3 +1,7 @@
+; Performance: 0022_return_void
+; Why hard: Smoke baseline for void function. Failures here usually indicate broken lowering shared by every later fixture.
+; Reveals: return_void in helper
+; If LLVM regresses: Inserts i32 ret in void function.
 (core-module
   (core-version 1)
   (decls
