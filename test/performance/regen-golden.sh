@@ -3,8 +3,8 @@
 #
 # Usage:
 #   ./test/performance/regen-golden.sh              # all fixtures
-#   ./test/performance/regen-golden.sh 73_factorial_iter_i32
-#   ./test/performance/regen-golden.sh 08_while 73_factorial_iter_i32
+#   ./test/performance/regen-golden.sh 0073_factorial_iter_i32
+#   ./test/performance/regen-golden.sh 0008_while 0073_factorial_iter_i32
 
 set -euo pipefail
 
