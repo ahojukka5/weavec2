@@ -246,6 +246,7 @@
       (store_i64 (ptr_add (param_get ctx) (const_i64 112)) (const_i64 -1))
       (store_i64 (ptr_add (param_get ctx) (const_i64 120)) (const_i64 0))
       (store_i64 (ptr_add (param_get ctx) (const_i64 128)) (const_i64 -1))
+      (store_i64 (ptr_add (param_get ctx) (const_i64 136)) (const_i64 -1))
       (return_void)))
 
   (fn ctx_get_emit_blk

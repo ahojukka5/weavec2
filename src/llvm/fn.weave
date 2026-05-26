@@ -41,6 +41,20 @@
         (then (do
           (set param_child (call_i64 node_next_sibling (local_get tree) (local_get param_child)))))
         (else (do)))
+      ; Skip past an explicit empty inner list — the canonical `(params)` and
+      ; the surface-derived `(params ())` are semantically identical, but the
+      ; latter inserts an empty list that must not be treated as a (name type)
+      ; pair. Use nested `if` for short-circuit evaluation (WIR's and_bool is
+      ; strict and would call node_first_child on -1 when param_child = -1).
+      (if
+        (condition (ne_i64 (local_get param_child) (const_i64 -1)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 node_first_child (local_get tree) (local_get param_child)) (const_i64 -1)))
+            (then (do
+              (set param_child (call_i64 node_next_sibling (local_get tree) (local_get param_child)))))
+            (else (do)))))
+        (else (do)))
       (let first_param i32 (const_i32 1))
       (while
         (condition (ne_i64 (local_get param_child) (const_i64 -1)))
@@ -104,6 +118,20 @@
         (condition (ne_i64 (local_get param_child) (const_i64 -1)))
         (then (do
           (set param_child (call_i64 node_next_sibling (local_get tree) (local_get param_child)))))
+        (else (do)))
+      ; Skip past an explicit empty inner list — the canonical `(params)` and
+      ; the surface-derived `(params ())` are semantically identical, but the
+      ; latter inserts an empty list that must not be treated as a (name type)
+      ; pair. Use nested `if` for short-circuit evaluation (WIR's and_bool is
+      ; strict and would call node_first_child on -1 when param_child = -1).
+      (if
+        (condition (ne_i64 (local_get param_child) (const_i64 -1)))
+        (then (do
+          (if
+            (condition (eq_i64 (call_i64 node_first_child (local_get tree) (local_get param_child)) (const_i64 -1)))
+            (then (do
+              (set param_child (call_i64 node_next_sibling (local_get tree) (local_get param_child)))))
+            (else (do)))))
         (else (do)))
       (if
         (condition (eq_i64 (local_get param_child) (const_i64 -1)))
