@@ -31,8 +31,7 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
-  %t1 = add i64 %prev.phi0, %cur.phi0
-  ; let next
+  ; let next (deferred)
   ; set prev
   ; set cur
   %cur.next0 = add i64 %prev.phi0, %cur.phi0
@@ -49,9 +48,9 @@ while.exit-merge:
   br label %while.end
 while.end:
   ; return
-  %t2 = load i64, ptr %cur.addr
-  %t3 = srem i64 %t2, 1000000007
-  %t4 = trunc i64 %t3 to i32
-  ret i32 %t4
+  %t1 = load i64, ptr %cur.addr
+  %t2 = srem i64 %t1, 1000000007
+  %t3 = trunc i64 %t2 to i32
+  ret i32 %t3
 }
 

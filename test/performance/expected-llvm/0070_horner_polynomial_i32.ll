@@ -26,12 +26,10 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
-  %t1 = mul i32 %acc.phi0, %x
-  %t2 = add i32 %t1, 2
-  ; let next
+  ; let next (deferred)
   ; set acc
-  %t3 = mul i32 %acc.phi0, %x
-  %acc.next0 = add i32 %t3, 2
+  %t1 = mul i32 %acc.phi0, %x
+  %acc.next0 = add i32 %t1, 2
   ; set i
   %i.next0 = add i32 %i.phi0, 1
   br label %while.latch
@@ -44,8 +42,8 @@ while.exit-merge:
   br label %while.end
 while.end:
   ; return
-  %t4 = load i32, ptr %acc.addr
-  ret i32 %t4
+  %t2 = load i32, ptr %acc.addr
+  ret i32 %t2
 }
 
 ; function: main

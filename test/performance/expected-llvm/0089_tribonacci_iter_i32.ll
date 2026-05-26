@@ -52,14 +52,12 @@ while.cond2:
   br i1 %t2, label %while.body2, label %while.exit-merge2
 while.body2:
   ; while body
-  %t3 = add i32 %a.phi2, %b.phi2
-  %t4 = add i32 %t3, %c.phi2
-  ; let next
+  ; let next (deferred)
   ; set a
   ; set b
   ; set c
-  %t5 = add i32 %a.phi2, %b.phi2
-  %c.next2 = add i32 %t5, %c.phi2
+  %t3 = add i32 %a.phi2, %b.phi2
+  %c.next2 = add i32 %t3, %c.phi2
   ; set i
   %i.next2 = add i32 %i.phi2, 1
   br label %while.latch2
@@ -74,8 +72,8 @@ while.exit-merge2:
   br label %while.end2
 while.end2:
   ; return
-  %t6 = load i32, ptr %c.addr
-  ret i32 %t6
+  %t4 = load i32, ptr %c.addr
+  ret i32 %t4
 }
 
 ; function: main

@@ -101,11 +101,11 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
+  ; let start (deferred)
+  ; set acc
   %t1 = sext i32 %k.phi0 to i64
   %t2 = mul i64 %t1, 37
   %t3 = add i64 %t2, 100
-  ; let start
-  ; set acc
   %t4 = call i64 @collatz_peak(i64 %t3)
   %acc.next0 = add i64 %acc.phi0, %t4
   ; set k

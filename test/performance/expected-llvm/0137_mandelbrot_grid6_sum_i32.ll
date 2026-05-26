@@ -131,9 +131,9 @@ while.body1:
   %t6 = mul i32 %t5, 500
   %t7 = sub i32 %t6, 1500
   ; let cy
-  %t8 = call i32 @escape_count(i32 %t4, i32 %t7, i32 32)
-  ; let esc
+  ; let esc (deferred)
   ; set total
+  %t8 = call i32 @escape_count(i32 %t4, i32 %t7, i32 32)
   %total.next1 = add i32 %total.phi1, %t8
   ; set px
   %px.next1 = add i32 %px.phi1, 1

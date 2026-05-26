@@ -26,8 +26,7 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
-  %t1 = srem i32 %x.phi0, %y.phi0
-  ; let r
+  ; let r (deferred)
   ; set x
   ; set y
   %y.next0 = srem i32 %x.phi0, %y.phi0
@@ -41,8 +40,8 @@ while.exit-merge:
   br label %while.end
 while.end:
   ; return
-  %t2 = load i32, ptr %x.addr
-  ret i32 %t2
+  %t1 = load i32, ptr %x.addr
+  ret i32 %t1
 }
 
 ; function: main
@@ -75,9 +74,9 @@ while.body:
   %t3 = mul i32 %k.phi0, 53
   %t4 = add i32 %t3, 200
   ; let b
-  %t5 = call i32 @gcd_pair(i32 %t2, i32 %t4)
-  ; let g
+  ; let g (deferred)
   ; set acc
+  %t5 = call i32 @gcd_pair(i32 %t2, i32 %t4)
   %acc.next0 = add i32 %acc.phi0, %t5
   ; set k
   %k.next0 = add i32 %k.phi0, 1

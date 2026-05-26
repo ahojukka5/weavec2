@@ -26,9 +26,9 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
-  %t1 = mul i32 %i.phi0, %i.phi0
-  ; let sq
+  ; let sq (deferred)
   ; set total
+  %t1 = mul i32 %i.phi0, %i.phi0
   %t2 = mul i32 %t1, %i.phi0
   %total.next0 = add i32 %total.phi0, %t2
   ; set i

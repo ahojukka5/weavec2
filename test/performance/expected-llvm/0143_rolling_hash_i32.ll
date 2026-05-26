@@ -31,13 +31,13 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
-  %t1 = sext i32 %i.phi0 to i64
-  %t2 = getelementptr i32, ptr %data, i64 %t1
-  %t3 = load i32, ptr %t2
-  ; let b
+  ; let b (deferred)
   ; set h
-  %t4 = mul i32 %h.phi0, 31
-  %t5 = add i32 %t4, %t3
+  %t1 = mul i32 %h.phi0, 31
+  %t2 = sext i32 %i.phi0 to i64
+  %t3 = getelementptr i32, ptr %data, i64 %t2
+  %t4 = load i32, ptr %t3
+  %t5 = add i32 %t1, %t4
   %t6 = add i32 %t5, 1
   %h.next0 = srem i32 %t6, 1000003
   ; set i

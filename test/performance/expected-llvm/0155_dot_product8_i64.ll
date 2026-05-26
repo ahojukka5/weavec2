@@ -42,13 +42,13 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
+  ; let va (deferred)
+  ; let vb (deferred)
+  ; set sum
   %t1 = call ptr @elem(ptr %a, i32 %i.phi0)
   %t2 = load i64, ptr %t1
-  ; let va
   %t3 = call ptr @elem(ptr %b, i32 %i.phi0)
   %t4 = load i64, ptr %t3
-  ; let vb
-  ; set sum
   %t5 = mul i64 %t2, %t4
   %sum.next0 = add i64 %sum.phi0, %t5
   ; set i

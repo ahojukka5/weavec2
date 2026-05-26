@@ -26,11 +26,11 @@ while.cond:
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
+  ; let sq (deferred)
+  ; set sum
   %t1 = sext i32 %i.phi0 to i64
   %t2 = sext i32 %i.phi0 to i64
   %t3 = mul i64 %t1, %t2
-  ; let sq
-  ; set sum
   %sum.next0 = add i64 %sum.phi0, %t3
   ; set i
   %i.next0 = add i32 %i.phi0, 1

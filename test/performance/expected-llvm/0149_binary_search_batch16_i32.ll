@@ -171,9 +171,9 @@ while.body1:
   %t19 = mul i32 %t.phi1, 3
   %t20 = add i32 %t19, 7
   ; let target
-  %t21 = call i32 @search16(ptr %t0, i32 %t20)
-  ; let idx
+  ; let idx (deferred)
   ; set sum
+  %t21 = call i32 @search16(ptr %t0, i32 %t20)
   %sum.next1 = add i32 %sum.phi1, %t21
   ; set t
   %t.next1 = add i32 %t.phi1, 1
