@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Continuous integration for weavec2.
+#
+# Builds weavec2 from source and runs the full test ladder on Linux
+# and macOS using the platform's stable LLVM toolchain. test-all.sh
+# invokes build.sh, which auto-fetches the pinned dependency tags
+# (weavec0 v0.2.0, weavec1 v0.1.0, weavefront v0.1.0) from GitHub
+# into build/vendor/.
+#
+# The full ladder covered here:
+#   - 124 correctness tests (.weave fixtures, surface-Weave inputs)
+#   - 168 performance tests (.wir fixtures with .expected.ll goldens)
+#   -   4 quantum validation tests
+#   -   1 quantum e2e test (links against runtime/quantum_runtime.c)
+#   -   1 self-host basic test (weavec2 recompiles build/weavec2.wir)
+#
+# `./selfhost.sh` (the deeper stage1/stage2 bootstrap) is not run here
+# — it hits a separate, pre-existing string-constant emission bug in
+# the frontend that's tracked as a known limitation in CHANGELOG.md.
+
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: build & test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    env:
+      # Pin the dependency tags CI builds against. Bump these when
+      # the upstream repos cut new releases that weavec2 has actually
+      # been validated against.
+      WEAVEC0_TAG: v0.2.0
+      WEAVEC1_TAG: v0.1.0
+      WEAVEFRONT_TAG: v0.1.0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install LLVM toolchain (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm clang
+          echo "Tool versions:"
+          clang --version
+          llvm-as --version
+          llvm-link --version
+
+      - name: Install LLVM toolchain (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
+
+      - name: Verify toolchain (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          clang --version
+          llvm-as --version
+          llvm-link --version
+
+      - name: Build all dependencies + weavec2, run full ladder
+        run: ./test-all.sh
