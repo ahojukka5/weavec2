@@ -36,7 +36,8 @@ Examples:
 | 0139 | Twin parallel if ladders (loop phi merge stress) |
 | 0153–0164 | i64 arithmetic and heap demos (see below) |
 | 0165–0168 | f32 arithmetic demos (see below) |
-| 0169–9999 | Next free ids for new demonstrations |
+| 0169–0174 | f64 demos, wide-acc stack-gap demos, f32 matvec (see below) |
+| 0175–9999 | Next free ids for new demonstrations |
 
 Hard batch (0131–0140, except 0139):
 
@@ -98,6 +99,20 @@ f32 batch (0165–0168):
 | 0166 | `0166_sum_range_f32` | f32 sum 1..120 on stack |
 | 0167 | `0167_dot_product4_f32` | f32 dot product (register-only) |
 | 0168 | `0168_newton_sqrt_f32` | Newton sqrt with fdiv/fmul loop |
+
+f64 / wide-acc batch (0169–0174):
+
+| Id | Fixture | Stress target |
+|----|---------|----------------|
+| 0169 | `0169_const_f64_add` | f64 smoke |
+| 0170 | `0170_sum_range_f64` | f64 sum; stack acc (phi gap) |
+| 0171 | `0171_factorial12_i64` | i64 product; acc on stack |
+| 0172 | `0172_horner_poly_f32` | f32 mul/add recurrence |
+| 0173 | `0173_sum_range_i64_acc` | i64 sum 1..200 |
+| 0174 | `0174_matvec3_f32` | f32 heap matvec |
+
+See [llvm-codegen-analysis.md](llvm-codegen-analysis.md) for LLVM review notes
+and `scripts/analyze-performance-llvm.py` for a hotspot table.
 
 GPU-oriented codegen is out of scope for this suite for now; these fixtures
 stay CPU-focused while we broaden type and control-flow coverage.
@@ -174,6 +189,8 @@ New fixtures need an entry there (or extend the script), then run the annotator.
 4. Run `./test/performance/test.sh` (or `./test-all.sh`).
 5. Review the golden IR: structure, redundant loads, branch layout. That
    is the baseline before discussing weavec2 or LLVM optimizations.
+6. Run `python3 scripts/analyze-performance-llvm.py` for a ranked table of
+   fixtures with stack-carried locals and high load counts.
 
 ## Commands
 

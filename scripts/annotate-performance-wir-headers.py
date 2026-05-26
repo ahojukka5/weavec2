@@ -574,6 +574,42 @@ STRESS(
     "fdiv/fmul/fadd in loop, call_f32 helper.",
     "Guess not updated; fdiv by zero; comparison uses icmp.",
 )
+STRESS(
+    "0169_const_f64_add",
+    "f64 smoke: literal add and fptosi return.",
+    "const_f64, fadd, cast_f64_to_i32.",
+    "fadd typed as double; sitofp used where f64 literal expected.",
+)
+STRESS(
+    "0170_sum_range_f64",
+    "f64 sum 1..120; i64/f64 acc on stack like f32 batch.",
+    "add_f64, cast_i32_to_f64, i32 loop index.",
+    "Double-width accumulator; per-iteration sitofp of index.",
+)
+STRESS(
+    "0171_factorial12_i64",
+    "Factorial 12 with i64 product (phi gap vs i32 factorial).",
+    "mul_i64, cast_i32_to_i64, mod_i64.",
+    MEM_FAIL,
+)
+STRESS(
+    "0172_horner_poly_f32",
+    "Horner-style f32 recurrence acc*3+i for eight steps.",
+    "fmul/fadd, f32 acc on stack in loop.",
+    "Uses i32 mul for f32 acc; sitofp each step.",
+)
+STRESS(
+    "0173_sum_range_i64_acc",
+    "Sum 1..200 into i64 total; i32 index only promoted.",
+    "add_i64, cast_i32_to_i64, wide accumulator.",
+    MEM_FAIL,
+)
+STRESS(
+    "0174_matvec3_f32",
+    "3x3 by 3 f32 matvec on heap; identity matrix smoke.",
+    "load_f32/store_f32, ptr_add, call_f32.",
+    "GEP stride 4 vs 8; row/column major swap in loads.",
+)
 
 
 def wrap_field(label: str, text: str) -> list[str]:
@@ -672,8 +708,10 @@ def infer_tags(stem: str, reveals: str, failure: str) -> list[str]:
         tags.append("memory")
     if any(k in name for k in ("xor", "popcount", "bitwise", "trailing", "rolling_hash")):
         tags.append("bitwise")
-    if "_f32" in stem or "newton" in name or "float" in name:
+    if "_f32" in stem or "_f64" in stem or "newton" in name or "float" in name:
         tags.append("float")
+    if "_i64" in stem and "i32" not in stem:
+        tags.append("i64")
     if "mod" in name or "pow" in name or "gcd" in name:
         tags.append("numeric")
 
@@ -701,6 +739,12 @@ def infer_expected(stem: str) -> str:
         "0166_sum_range_f32": "main returns 7260 (float sum 1..120, fptosi).",
         "0167_dot_product4_f32": "main returns 30 (dot of 1..4 · 1..4, fptosi).",
         "0168_newton_sqrt_f32": "main returns ~1414 (sqrt(2)*1000, fptosi; see golden).",
+        "0169_const_f64_add": "main returns 5 (double 2+3, fptosi).",
+        "0170_sum_range_f64": "main returns 7260 (f64 sum 1..120, fptosi).",
+        "0171_factorial12_i64": "main returns 12! mod 1_000_000_007 as i32.",
+        "0172_horner_poly_f32": "main returns 1636 (f32 Horner acc*3+i for i=0..7, fptosi).",
+        "0173_sum_range_i64_acc": "main returns 20100 (sum 1..200 as i32).",
+        "0174_matvec3_f32": "main returns 1 (identity matvec, first component).",
     }
     if stem in known:
         base = known[stem]
