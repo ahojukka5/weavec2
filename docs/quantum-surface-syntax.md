@@ -1,7 +1,7 @@
 # Quantum surface syntax (proposal)
 
-Status: Partially implemented in weavec2 (`qgate`, `qmeasure` lowering in
-`src/frontend/emit.weave`; tests in `test/quantum/`)  
+Status: Partially implemented in weavec2 (`qgate`, `qmeasure`, `Qubit` type,
+H nativization in `src/frontend/quantum_nativize.weave`; tests in `test/quantum/`)  
 Date: 2026-05-25  
 See also: [representation-lowering.md](representation-lowering.md)
 
@@ -118,11 +118,11 @@ side effects happen through the runtime.
 | Step | Component | Status |
 |------|-----------|--------|
 | 1 | Sexpr parse: `qgate`, `qmeasure` as lists | Done (generic parser) |
-| 2 | `emit.weave`: lower to `qrt_*` extern calls | Done (H nativized) |
-| 3 | Typecheck: `Qubit` type | Not started (uses `i64` handles) |
-| 4 | Transform registry: move nativize out of emitter | Planned |
-| 5 | Backend: LLVM for quantum runtime | Not started |
-| 6 | Tests: `test/quantum/test.sh` | Done (2 goldens) |
+| 2 | `emit.weave`: lower to `qrt_*` extern calls | Done |
+| 3 | `quantum_nativize.weave`: H -> RY+RZ | Done (emit hook) |
+| 4 | Typecheck: `Qubit` + qgate arity | In progress (`quantum_typecheck.weave` not in build) |
+| 5 | E2E: stub `runtime/quantum_runtime.c` | Done (`test/quantum/test-e2e.sh`) |
+| 6 | Transform registry: first-class pass | Planned |
 
 ## Tests
 

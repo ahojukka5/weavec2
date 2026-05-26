@@ -29,7 +29,6 @@ while.body:
   %t1 = srem i32 %x.phi0, %y.phi0
   ; let r
   ; set x
-  %x.next0 = add i32 %y.phi0, 0
   ; set y
   %y.next0 = add i32 %t1, 0
   br label %while.latch

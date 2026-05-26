@@ -69,6 +69,16 @@
       (call_void write_bytes (param_get fd) (ptr_add (param_get source) (local_get ts)) (local_get tl))
       (return_void)))
 
+  ; Emit (local_get <ident>) for a bare identifier operand.
+  (fn emit_local_get_ident
+    (params (fd i32) (source ptr) (tree ptr) (ident_node i64))
+    (returns void)
+    (do
+      (call_void write_cstr (param_get fd) (const_string_ptr "(local_get "))
+      (call_void emit_node_text (param_get fd) (param_get source) (param_get tree) (param_get ident_node))
+      (call_void write_byte (param_get fd) (const_i32 41))
+      (return_void)))
+
   (fn emit_slice_text
     (params (fd i32) (source ptr) (start i64) (len i64))
     (returns void)

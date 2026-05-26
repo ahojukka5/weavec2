@@ -32,20 +32,20 @@ entry:
   ; while condition
   br label %while.pre
 while.pre:
+  %sum.init0 = load i64, ptr %sum.addr
   %i.init0 = load i32, ptr %i.addr
   br label %while.cond
 while.cond:
+  %sum.phi0 = phi i64 [%sum.init0, %while.pre], [%sum.next0, %while.latch]
   %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.latch]
   %t0 = icmp slt i32 %i.phi0, %count
   br i1 %t0, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   ; set sum
-  %t1 = load i64, ptr %sum.addr
-  %t2 = call ptr @elem(ptr %a, i32 %i.phi0)
-  %t3 = load i64, ptr %t2
-  %t4 = add i64 %t1, %t3
-  store i64 %t4, ptr %sum.addr
+  %t1 = call ptr @elem(ptr %a, i32 %i.phi0)
+  %t2 = load i64, ptr %t1
+  %sum.next0 = add i64 %sum.phi0, %t2
   ; set i
   %i.next0 = add i32 %i.phi0, 1
   br label %while.latch
@@ -53,14 +53,15 @@ while.latch:
   br label %while.cond
 while.exit-merge:
   ; sync loop-carried locals to stack
+  store i64 %sum.phi0, ptr %sum.addr
   store i32 %i.phi0, ptr %i.addr
   br label %while.end
 while.end:
   ; return
-  %t5 = load i64, ptr %sum.addr
-  %t6 = sext i32 %count to i64
-  %t7 = sdiv i64 %t5, %t6
-  ret i64 %t7
+  %t3 = load i64, ptr %sum.addr
+  %t4 = sext i32 %count to i64
+  %t5 = sdiv i64 %t3, %t4
+  ret i64 %t5
 }
 
 ; function: main

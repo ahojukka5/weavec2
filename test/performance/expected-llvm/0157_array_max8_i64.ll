@@ -34,9 +34,11 @@ entry:
   ; while condition
   br label %while.pre
 while.pre:
+  %maxv.init0 = load i64, ptr %maxv.addr
   %i.init0 = load i32, ptr %i.addr
   br label %while.cond
 while.cond:
+  %maxv.phi0 = phi i64 [%maxv.init0, %while.pre], [%maxv.merge1, %while.latch]
   %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.latch]
   %t2 = icmp slt i32 %i.phi0, 8
   br i1 %t2, label %while.body, label %while.exit-merge
@@ -46,15 +48,15 @@ while.body:
   %t4 = load i64, ptr %t3
   ; let v
   ; if condition
-  %t5 = load i64, ptr %maxv.addr
-  %t6 = icmp sgt i64 %t4, %t5
-  br i1 %t6, label %then1, label %endif1
+  %t5 = icmp sgt i64 %t4, %maxv.phi0
+  br i1 %t5, label %then1, label %endif1
 then1:
   ; then
   ; set maxv
-  store i64 %t4, ptr %maxv.addr
+  %maxv.next10 = add i64 %t4, 0
   br label %endif1
 endif1:
+  %maxv.merge1 = phi i64 [%maxv.next10, %then1], [%maxv.phi0, %while.body]
   ; set i
   %i.next0 = add i32 %i.phi0, 1
   br label %while.latch
@@ -62,12 +64,13 @@ while.latch:
   br label %while.cond
 while.exit-merge:
   ; sync loop-carried locals to stack
+  store i64 %maxv.phi0, ptr %maxv.addr
   store i32 %i.phi0, ptr %i.addr
   br label %while.end
 while.end:
   ; return
-  %t7 = load i64, ptr %maxv.addr
-  ret i64 %t7
+  %t6 = load i64, ptr %maxv.addr
+  ret i64 %t6
 }
 
 ; function: main

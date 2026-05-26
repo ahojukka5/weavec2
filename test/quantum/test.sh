@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Quantum surface tests: weavec2 --frontend only (WIR golden).
+# Quantum surface tests: WIR goldens (nativization/) and expect-fail validation/.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -30,6 +30,7 @@ normalize_wir() {
 
 mkdir -p "$OUT_DIR"
 
+# WIR golden tests (nativization/ only).
 while IFS= read -r -d '' src; do
   dir="$(dirname "$src")"
   base="$(basename "$src" .weave)"
@@ -37,7 +38,7 @@ while IFS= read -r -d '' src; do
   expected="$dir/$base.expected.wir"
   wir="$OUT_DIR/${rel//\//-}-$base.wir"
 
-  log "frontend $rel/$base"
+  log "golden $rel/$base"
 
   if [[ ! -f "$expected" ]]; then
     fail "$rel/$base: missing $expected"
@@ -55,7 +56,24 @@ while IFS= read -r -d '' src; do
   fi
 
   pass_count=$((pass_count + 1))
-done < <(find "$FIXTURE_ROOT" -name '*.weave' ! -name '*.expected.weave' -print0)
+done < <(find "$FIXTURE_ROOT/nativization" -name '*.weave' -print0)
+
+# Validation fixtures must fail the frontend before WIR is written.
+while IFS= read -r -d '' src; do
+  dir="$(dirname "$src")"
+  base="$(basename "$src" .weave)"
+  rel="${dir#$FIXTURE_ROOT/}"
+  wir="$OUT_DIR/${rel//\//-}-$base-should-fail.wir"
+
+  log "reject $rel/$base"
+
+  if "$WEAVEC2" --frontend "$wir" "$src"; then
+    fail "$rel/$base: expected frontend failure, got success"
+    continue
+  fi
+
+  pass_count=$((pass_count + 1))
+done < <(find "$FIXTURE_ROOT/validation" -name '*.weave' -print0)
 
 log "passed $pass_count"
 if [[ "$fail_count" -gt 0 ]]; then

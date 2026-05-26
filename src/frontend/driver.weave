@@ -131,6 +131,17 @@
           (call_void free (local_get source))
           (return (const_i32 1))))
         (else (do)))
+      (if
+        (condition (eq_i32 (param_get pass_kind) (const_i32 0)))
+        (then (do
+          (if
+            (condition (ne_i32 (call_i32 validate_quantum_program
+              (local_get tree) (local_get source)) (const_i32 0)))
+            (then (do
+              (call_void free (local_get source))
+              (return (const_i32 1))))
+            (else (do)))))
+        (else (do)))
       (let status i32 (const_i32 0))
       (if
         (condition (eq_i32 (param_get pass_kind) (const_i32 0)))

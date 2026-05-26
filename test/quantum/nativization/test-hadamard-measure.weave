@@ -9,7 +9,7 @@
     (params)
     (returns i32)
     (do
-      (let q0 i64 (const_i64 0))
+      (let q0 Qubit (const_i64 0))
       (qgate H q0)
       (qmeasure q0 c0)
       (return (local_get c0)))))

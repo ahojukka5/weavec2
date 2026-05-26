@@ -34,6 +34,7 @@ FILES=(
   src/core/io.weave
   src/core/util.weave
   # frontend: surface Weave → WIR lowering
+  src/frontend/quantum_nativize.weave
   src/frontend/emit.weave
   src/frontend/struct.weave
   src/frontend/lower.weave

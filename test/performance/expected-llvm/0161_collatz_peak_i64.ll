@@ -17,58 +17,64 @@ entry:
   ; let steps
   store i64 0, ptr %steps.addr
   ; while condition
+  br label %while.pre
+while.pre:
+  %n.init0 = load i64, ptr %n.addr
+  %peak.init0 = load i64, ptr %peak.addr
+  %steps.init0 = load i64, ptr %steps.addr
   br label %while.cond
 while.cond:
-  %t0 = load i64, ptr %n.addr
-  %t1 = icmp ne i64 %t0, 1
-  %t2 = load i64, ptr %steps.addr
-  %t3 = icmp slt i64 %t2, 200
-  %t4 = and i1 %t1, %t3
-  br i1 %t4, label %while.body, label %while.end
+  %n.phi0 = phi i64 [%n.init0, %while.pre], [%n.merge1, %while.latch]
+  %peak.phi0 = phi i64 [%peak.init0, %while.pre], [%peak.merge2, %while.latch]
+  %steps.phi0 = phi i64 [%steps.init0, %while.pre], [%steps.next0, %while.latch]
+  %t0 = icmp ne i64 %n.phi0, 1
+  %t1 = icmp slt i64 %steps.phi0, 200
+  %t2 = and i1 %t0, %t1
+  br i1 %t2, label %while.body, label %while.exit-merge
 while.body:
   ; while body
   ; if condition
-  %t5 = load i64, ptr %n.addr
-  %t6 = srem i64 %t5, 2
-  %t7 = icmp eq i64 %t6, 0
-  br i1 %t7, label %then1, label %else1
+  %t3 = srem i64 %n.phi0, 2
+  %t4 = icmp eq i64 %t3, 0
+  br i1 %t4, label %then1, label %else1
 then1:
   ; then
   ; set n
-  %t8 = load i64, ptr %n.addr
-  %t9 = sdiv i64 %t8, 2
-  store i64 %t9, ptr %n.addr
+  %n.next10 = sdiv i64 %n.phi0, 2
   br label %endif1
 else1:
   ; else
   ; set n
-  %t10 = load i64, ptr %n.addr
-  %t11 = mul i64 %t10, 3
-  %t12 = add i64 %t11, 1
-  store i64 %t12, ptr %n.addr
+  %t5 = mul i64 %n.phi0, 3
+  %n.next11 = add i64 %t5, 1
   br label %endif1
 endif1:
+  %n.merge1 = phi i64 [%n.next10, %then1], [%n.next11, %else1]
   ; if condition
-  %t13 = load i64, ptr %n.addr
-  %t14 = load i64, ptr %peak.addr
-  %t15 = icmp sgt i64 %t13, %t14
-  br i1 %t15, label %then2, label %endif2
+  %t6 = icmp sgt i64 %n.merge1, %peak.phi0
+  br i1 %t6, label %then2, label %endif2
 then2:
   ; then
   ; set peak
-  %t16 = load i64, ptr %n.addr
-  store i64 %t16, ptr %peak.addr
+  %peak.next20 = add i64 %n.merge1, 0
   br label %endif2
 endif2:
+  %peak.merge2 = phi i64 [%peak.next20, %then2], [%peak.phi0, %endif1]
   ; set steps
-  %t17 = load i64, ptr %steps.addr
-  %t18 = add i64 %t17, 1
-  store i64 %t18, ptr %steps.addr
+  %steps.next0 = add i64 %steps.phi0, 1
+  br label %while.latch
+while.latch:
   br label %while.cond
+while.exit-merge:
+  ; sync loop-carried locals to stack
+  store i64 %n.phi0, ptr %n.addr
+  store i64 %peak.phi0, ptr %peak.addr
+  store i64 %steps.phi0, ptr %steps.addr
+  br label %while.end
 while.end:
   ; return
-  %t19 = load i64, ptr %peak.addr
-  ret i64 %t19
+  %t7 = load i64, ptr %peak.addr
+  ret i64 %t7
 }
 
 ; function: main
@@ -85,9 +91,11 @@ entry:
   ; while condition
   br label %while.pre
 while.pre:
+  %acc.init0 = load i64, ptr %acc.addr
   %k.init0 = load i32, ptr %k.addr
   br label %while.cond
 while.cond:
+  %acc.phi0 = phi i64 [%acc.init0, %while.pre], [%acc.next0, %while.latch]
   %k.phi0 = phi i32 [%k.init0, %while.pre], [%k.next0, %while.latch]
   %t0 = icmp sle i32 %k.phi0, 40
   br i1 %t0, label %while.body, label %while.exit-merge
@@ -98,10 +106,8 @@ while.body:
   %t3 = add i64 %t2, 100
   ; let start
   ; set acc
-  %t4 = load i64, ptr %acc.addr
-  %t5 = call i64 @collatz_peak(i64 %t3)
-  %t6 = add i64 %t4, %t5
-  store i64 %t6, ptr %acc.addr
+  %t4 = call i64 @collatz_peak(i64 %t3)
+  %acc.next0 = add i64 %acc.phi0, %t4
   ; set k
   %k.next0 = add i32 %k.phi0, 1
   br label %while.latch
@@ -109,13 +115,14 @@ while.latch:
   br label %while.cond
 while.exit-merge:
   ; sync loop-carried locals to stack
+  store i64 %acc.phi0, ptr %acc.addr
   store i32 %k.phi0, ptr %k.addr
   br label %while.end
 while.end:
   ; return
-  %t7 = load i64, ptr %acc.addr
-  %t8 = srem i64 %t7, 1000000007
-  %t9 = trunc i64 %t8 to i32
-  ret i32 %t9
+  %t5 = load i64, ptr %acc.addr
+  %t6 = srem i64 %t5, 1000000007
+  %t7 = trunc i64 %t6 to i32
+  ret i32 %t7
 }
 

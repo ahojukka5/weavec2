@@ -56,25 +56,25 @@ while.body1:
   ; while condition
   br label %while.pre2
 while.pre2:
+  %sum.init2 = load i64, ptr %sum.addr
   %k.init2 = load i32, ptr %k.addr
   br label %while.cond2
 while.cond2:
+  %sum.phi2 = phi i64 [%sum.init2, %while.pre2], [%sum.next2, %while.latch2]
   %k.phi2 = phi i32 [%k.init2, %while.pre2], [%k.next2, %while.latch2]
   %t4 = icmp slt i32 %k.phi2, 2
   br i1 %t4, label %while.body2, label %while.exit-merge2
 while.body2:
   ; while body
   ; set sum
-  %t5 = load i64, ptr %sum.addr
-  %t6 = load i32, ptr %i.addr
-  %t7 = call ptr @at(ptr %a, i32 %t6, i32 %k.phi2)
-  %t8 = load i64, ptr %t7
-  %t9 = load i32, ptr %j.addr
-  %t10 = call ptr @at(ptr %b, i32 %k.phi2, i32 %t9)
-  %t11 = load i64, ptr %t10
-  %t12 = mul i64 %t8, %t11
-  %t13 = add i64 %t5, %t12
-  store i64 %t13, ptr %sum.addr
+  %t5 = load i32, ptr %i.addr
+  %t6 = call ptr @at(ptr %a, i32 %t5, i32 %k.phi2)
+  %t7 = load i64, ptr %t6
+  %t8 = load i32, ptr %j.addr
+  %t9 = call ptr @at(ptr %b, i32 %k.phi2, i32 %t8)
+  %t10 = load i64, ptr %t9
+  %t11 = mul i64 %t7, %t10
+  %sum.next2 = add i64 %sum.phi2, %t11
   ; set k
   %k.next2 = add i32 %k.phi2, 1
   br label %while.latch2
@@ -82,24 +82,25 @@ while.latch2:
   br label %while.cond2
 while.exit-merge2:
   ; sync loop-carried locals to stack
+  store i64 %sum.phi2, ptr %sum.addr
   store i32 %k.phi2, ptr %k.addr
   br label %while.end2
 while.end2:
-  %t14 = load i32, ptr %i.addr
-  %t15 = load i32, ptr %j.addr
-  %t16 = call ptr @at(ptr %out, i32 %t14, i32 %t15)
-  %t17 = load i64, ptr %sum.addr
-  store i64 %t17, ptr %t16
+  %t12 = load i32, ptr %i.addr
+  %t13 = load i32, ptr %j.addr
+  %t14 = call ptr @at(ptr %out, i32 %t12, i32 %t13)
+  %t15 = load i64, ptr %sum.addr
+  store i64 %t15, ptr %t14
   ; set j
-  %t18 = load i32, ptr %j.addr
-  %t19 = add i32 %t18, 1
-  store i32 %t19, ptr %j.addr
+  %t16 = load i32, ptr %j.addr
+  %t17 = add i32 %t16, 1
+  store i32 %t17, ptr %j.addr
   br label %while.cond1
 while.end1:
   ; set i
-  %t20 = load i32, ptr %i.addr
-  %t21 = add i32 %t20, 1
-  store i32 %t21, ptr %i.addr
+  %t18 = load i32, ptr %i.addr
+  %t19 = add i32 %t18, 1
+  store i32 %t19, ptr %i.addr
   br label %while.cond
 while.end:
   ret void

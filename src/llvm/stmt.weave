@@ -393,9 +393,13 @@
             (then (do (return (const_i32 0))))
             (else (do
               (if
-                (condition (eq_i32 (local_get named_result) (const_i32 -1)))
-                (then (do (return (const_i32 1))))
-                (else (do))))))))
+                (condition (eq_i32 (local_get named_result) (const_i32 2)))
+                (then (do (return (const_i32 0))))
+                (else (do
+                  (if
+                    (condition (eq_i32 (local_get named_result) (const_i32 -1)))
+                    (then (do (return (const_i32 1))))
+                    (else (do)))))))))))
         (else (do)))
       ; Evaluate expr
       (let ev i64 (call_i64 emit_expr (param_get ctx) (local_get expr_node)))
@@ -778,12 +782,14 @@
         (then (do
           (set use_loop_phi (const_i32 1))
           (call_void ctx_set_loop_phi_blk (param_get ctx) (local_get blk))
+          (call_void ctx_set_loop_body_do (param_get ctx) (local_get body_do))
           (if
             (condition (gt_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 0)))
             (then (do (set nested_loop_phi (const_i32 1))))
             (else (do)))))
         (else (do
-          (call_void ctx_set_loop_phi_blk (param_get ctx) (const_i64 -1)))))
+          (call_void ctx_set_loop_phi_blk (param_get ctx) (const_i64 -1))
+          (call_void ctx_set_loop_body_do (param_get ctx) (const_i64 -1)))))
       ; Jump to condition
       (call_void write_cstr (local_get fd) (const_string_ptr "  ; while condition"))
       (call_void write_byte (local_get fd) (const_i32 10))
@@ -866,6 +872,10 @@
         (then (do (return (const_i32 1))))
         (else (do)))
       (call_void ctx_set_loop_depth (param_get ctx) (sub_i64 (call_i64 ctx_get_loop_depth (param_get ctx)) (const_i64 1)))
+      (if
+        (condition (ne_i32 (local_get use_loop_phi) (const_i32 0)))
+        (then (do (call_void ctx_set_loop_body_do (param_get ctx) (const_i64 -1))))
+        (else (do)))
       (if
         (condition (ne_i32 (local_get use_loop_phi) (const_i32 0)))
         (then (do

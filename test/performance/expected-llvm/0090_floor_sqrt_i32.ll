@@ -28,7 +28,6 @@ while.cond:
 while.body:
   ; while body
   ; set r
-  %r.next0 = add i32 %t.phi0, 0
   ; set t
   %t.next0 = add i32 %t.phi0, 1
   br label %while.latch

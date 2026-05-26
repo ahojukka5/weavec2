@@ -1,6 +1,6 @@
 ; ctx.weave — emission context for weavec2
 ;
-; Layout (136 bytes):
+; Layout (144 bytes):
 ;   offset  0: out_fd    i64  (output fd as i64 for alignment)
 ;   offset  8: source    ptr  (source bytes)
 ;   offset 16: tree      ptr  (s-expression tree)
@@ -18,6 +18,7 @@
 ;   offset 112: if_phi_blk i64 (active if block id for branch tags, else -1)
 ;   offset 120: if_branch i64 (0 = then, 1 = else)
 ;   offset 128: emit_blk i64 (suffix of block currently emitting, else -1)
+;   offset 136: loop_body_do i64 (active loop body node for phi helpers, else -1)
 ;
 ; Each binding record is 40 bytes:
 ;   {name_start i64, name_len i64, type i64, value_id i64, mode i64}.
@@ -31,7 +32,7 @@
     (params (fd i32) (source ptr) (tree ptr))
     (returns ptr)
     (do
-      (let ctx ptr (call_ptr malloc (const_i64 136)))
+      (let ctx ptr (call_ptr malloc (const_i64 144)))
       (if
         (condition (eq_ptr (local_get ctx) (const_null)))
         (then (do (return (const_null))))
@@ -68,6 +69,7 @@
       (store_i64 (ptr_add (local_get ctx) (const_i64 112)) (const_i64 -1))
       (store_i64 (ptr_add (local_get ctx) (const_i64 120)) (const_i64 0))
       (store_i64 (ptr_add (local_get ctx) (const_i64 128)) (const_i64 -1))
+      (store_i64 (ptr_add (local_get ctx) (const_i64 136)) (const_i64 -1))
       (return (local_get ctx))))
 
   (fn ctx_free
@@ -296,6 +298,19 @@
     (returns void)
     (do
       (store_i64 (ptr_add (param_get ctx) (const_i64 120)) (param_get branch))
+      (return_void)))
+
+  (fn ctx_get_loop_body_do
+    (params (ctx ptr))
+    (returns i64)
+    (do
+      (return (load_i64 (ptr_add (param_get ctx) (const_i64 136))))))
+
+  (fn ctx_set_loop_body_do
+    (params (ctx ptr) (body_do i64))
+    (returns void)
+    (do
+      (store_i64 (ptr_add (param_get ctx) (const_i64 136)) (param_get body_do))
       (return_void)))
 
   (fn ctx_phi_next_tag

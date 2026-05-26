@@ -56,9 +56,7 @@ while.body2:
   %t4 = add i32 %t3, %c.phi2
   ; let next
   ; set a
-  %a.next2 = add i32 %b.phi2, 0
   ; set b
-  %b.next2 = add i32 %c.phi2, 0
   ; set c
   %c.next2 = add i32 %t4, 0
   ; set i

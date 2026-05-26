@@ -19,6 +19,9 @@ log 'performance'
 log 'quantum'
 "$ROOT/test/quantum/test.sh"
 
+log 'quantum-e2e'
+"$ROOT/test/quantum/test-e2e.sh"
+
 log 'self-host'
 "$ROOT/test/selfhost/test.sh"
 
