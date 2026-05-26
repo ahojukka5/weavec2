@@ -1,7 +1,11 @@
 ; Performance: 0167_dot_product4_f32
-; Why hard: f32 dot product on stack array (no heap); mul/add chain.
-; Reveals: fmul, fadd, load_f32/store_f32 on alloca slots.
-; If LLVM regresses: widens to double unexpectedly; products not accumulated.
+; tags = f32, float, heap, stress
+; Why hard: f32 dot product of four pairs in registers.
+; Reveals: fmul/fadd tree, no heap.
+; Expected: main returns 30 (dot of 1..4 · 1..4, fptosi). llvm-as accepts
+;   emitted IR;
+;   opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Partial products dropped; uses fmul on i32 by mistake.
 (core-module
   (core-version 1)
   (decls

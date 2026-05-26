@@ -1,7 +1,12 @@
 ; Performance: 0132_matmul3x3_i32
+; tags = heap, i32, memory, stress
 ; Why hard: O(n^3) triple nested loops with 2D heap indexing.
 ; Reveals: Three loops, array_i32_at, mul/add inner, many loads/stores.
-; If LLVM regresses: Wrong stride on row-major index; inner k bound wrong; C[i,j] never written.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0132_matmul3x3_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Wrong stride on row-major index; inner k bound wrong;
+;   C[i,j] never written.
 (core-module
   (core-version 1)
   (decls

@@ -1,6 +1,10 @@
 ; Performance: 0150_edit_distance6_i32
+; tags = dp, i32, stress
 ; Why hard: Levenshtein DP 7x7 for length-6 strings.
 ; Reveals: min of three, 2D table, nested loops.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0150_edit_distance6_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Insertion cost wrong; diagonal not initialized.
 (core-module
   (core-version 1)

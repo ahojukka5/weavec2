@@ -1,6 +1,12 @@
 ; Performance: 0047_multiple_externs_used_subset
-; Why hard: Smoke baseline for multiple extern. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = call, i32, smoke
+; Why hard: Smoke baseline for multiple extern. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: subset of externs used
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0047_multiple_externs_used_subset.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Unused declare removed but wrong one kept.
 (core-module
   (core-version 1)

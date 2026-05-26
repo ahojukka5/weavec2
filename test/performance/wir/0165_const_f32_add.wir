@@ -1,7 +1,11 @@
 ; Performance: 0165_const_f32_add
-; Why hard: Smoke for f32 arithmetic and fptosi return path.
-; Reveals: const_f32 literal text, fadd, cast_f32_to_i32.
-; If LLVM regresses: Uses i32 add; fadd typed double; cast missing or wrong.
+; tags = f32, float, stress
+; Why hard: f32 smoke: literal add and fptosi return.
+; Reveals: const_f32, fadd, cast_f32_to_i32.
+; Expected: main returns 5 (float 2+3, fptosi). llvm-as accepts emitted IR; opt
+;   -passes=mem2reg is an optional extra check.
+; If LLVM regresses: fadd typed as double add; literal parsed as integer; cast
+;   omitted.
 (core-module
   (core-version 1)
   (decls

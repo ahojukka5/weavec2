@@ -1,6 +1,10 @@
 ; Performance: 0120_count_positive5_i32
+; tags = algorithm, i32, memory
 ; Why hard: Count positives. Compare load > 0.
 ; Reveals: load, gt, add count.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0120_count_positive5_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Counts zero as positive.
 (core-module
   (core-version 1)

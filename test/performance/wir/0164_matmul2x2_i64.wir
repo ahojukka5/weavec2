@@ -1,6 +1,10 @@
 ; Performance: 0164_matmul2x2_i64
+; tags = heap, i64, stress
 ; Why hard: 2x2 i64 matrix multiply on heap.
 ; Reveals: Triple nested loops, array_i64_at, i64 mul/add.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0164_matmul2x2_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Same indexing bugs as i32 matmul; i64 store size 4 bytes.
 (core-module
   (core-version 1)

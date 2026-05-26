@@ -1,6 +1,10 @@
 ; Performance: 0160_fixed_point_mean_i64
+; tags = i64, stress
 ; Why hard: Fixed-point mean of i64 samples (float proxy).
 ; Reveals: div_i64 after sum loop over heap array.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0160_fixed_point_mean_i64.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Division before sum complete; scale factor applied twice.
 (core-module
   (core-version 1)

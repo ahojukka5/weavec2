@@ -1,7 +1,14 @@
 ; Performance: 0016_extern_malloc_free
-; Why hard: Smoke baseline for extern calls. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = call, heap, i32, smoke
+; Why hard: Smoke baseline for extern calls. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: declare malloc/free, call_ptr/call_void
-; If LLVM regresses: Missing declare; wrong signature; call not marked correctly.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0016_extern_malloc_free.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Missing declare; wrong signature; call not marked
+;   correctly.
 (core-module
   (core-version 1)
   (decls

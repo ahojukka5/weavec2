@@ -1,7 +1,14 @@
 ; Performance: 0004_one_arg_function
-; Why hard: Smoke baseline for single-parameter call. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = call, i32, smoke
+; Why hard: Smoke baseline for single-parameter call. Failures here usually
+;   indicate
+;   broken lowering shared by every later fixture.
 ; Reveals: param_get, call_i32, small function
-; If LLVM regresses: Argument passed in wrong register/stack slot; broken calling convention.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0004_one_arg_function.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Argument passed in wrong register/stack slot; broken
+;   calling convention.
 (core-module
   (core-version 1)
   (decls

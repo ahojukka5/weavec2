@@ -1,6 +1,12 @@
 ; Performance: 0041_load_store_ptr
-; Why hard: Smoke baseline for ptr load/store. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, memory, smoke
+; Why hard: Smoke baseline for ptr load/store. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: load_i32 through ptr
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0041_load_store_ptr.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Missing align on load; TBAA broken for heap slot.
 (core-module
   (core-version 1)

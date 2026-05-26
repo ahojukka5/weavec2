@@ -1,6 +1,10 @@
 ; Performance: 0083_lcm_i32
+; tags = algorithm, i32
 ; Why hard: LCM via GCD. Combines two algorithms and reuse of mod state.
 ; Reveals: GCD loop then div/mul combine.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0083_lcm_i32.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: LCM formula uses wrong GCD; division by zero.
 (core-module
   (core-version 1)

@@ -1,7 +1,14 @@
 ; Performance: 0092_array_max5_i32
+; tags = algorithm, heap, i32, loop-phi, memory
 ; Why hard: Max of five heap values. Conditional update on carried max.
 ; Reveals: load, gt, set max in if.
-; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0092_array_max5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried
+;   locals reload from
+;   stack every iteration, wrong backedge operands, or SSA violations after
+;   llvm-as.
 (core-module
   (core-version 1)
   (decls

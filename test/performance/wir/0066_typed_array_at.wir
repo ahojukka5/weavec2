@@ -1,6 +1,10 @@
 ; Performance: 0066_typed_array_at
+; tags = algorithm, heap, i32
 ; Why hard: Typed array element address computation.
 ; Reveals: array_i32_at GEP lowering.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0066_typed_array_at.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: GEP uses wrong element size; pointers not i64-scaled.
 (core-module
   (core-version 1)

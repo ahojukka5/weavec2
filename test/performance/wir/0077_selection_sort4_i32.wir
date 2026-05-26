@@ -1,6 +1,10 @@
 ; Performance: 0077_selection_sort4_i32
+; tags = algorithm, i32, memory, sort
 ; Why hard: Selection sort with argmin scan.
 ; Reveals: Nested loops, min index, swap stores.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0077_selection_sort4_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Min index not updated; swap uses stale min.
 (core-module
   (core-version 1)

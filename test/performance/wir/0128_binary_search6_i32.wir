@@ -1,6 +1,10 @@
 ; Performance: 0128_binary_search6_i32
+; tags = algorithm, i32, memory, search
 ; Why hard: Binary search six elements. Classic bisection.
 ; Reveals: low/high/mid, load mid.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0128_binary_search6_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Infinite loop; off-by-one on bounds.
 (core-module
   (core-version 1)

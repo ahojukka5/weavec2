@@ -1,6 +1,10 @@
 ; Performance: 0127_count_less_than5_i32
+; tags = algorithm, i32
 ; Why hard: Count below threshold. Compare load < T.
 ; Reveals: lt, add count.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0127_count_less_than5_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Uses le vs lt wrong.
 (core-module
   (core-version 1)

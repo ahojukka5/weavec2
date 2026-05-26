@@ -1,6 +1,10 @@
 ; Performance: 0155_dot_product8_i64
+; tags = heap, i64, memory, stress
 ; Why hard: Dot product two length-8 i64 arrays.
 ; Reveals: array_i64_at, load_i64, mul_i64, add_i64.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0155_dot_product8_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Uses i32 mul on loaded i64; alignment 4 on i64 load.
 (core-module
   (core-version 1)

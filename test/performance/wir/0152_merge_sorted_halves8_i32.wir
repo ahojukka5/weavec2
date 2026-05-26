@@ -1,6 +1,10 @@
 ; Performance: 0152_merge_sorted_halves8_i32
+; tags = heap, i32, memory, sort, stress
 ; Why hard: Merge two sorted halves 4+4.
 ; Reveals: Twin-pointer loop, compare, store to out.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0152_merge_sorted_halves8_i32.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Skips elements; writes past buffer; compares wrong side.
 (core-module
   (core-version 1)

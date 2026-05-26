@@ -1,6 +1,10 @@
 ; Performance: 0122_kadane5_i32
+; tags = algorithm, i32
 ; Why hard: Kadane max subarray (n=5). Running cur/best with negatives.
 ; Reveals: max of cur+best pattern.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0122_kadane5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Best not updated; cur resets wrongly.
 (core-module
   (core-version 1)

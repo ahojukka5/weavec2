@@ -107,17 +107,40 @@ should use the next free id in the appropriate band.
 
 ## WIR file header (required)
 
-Every `test/performance/wir/NNNN_name.wir` file must start with four comment
-lines before `(core-module)`:
+Every `test/performance/wir/NNNN_name.wir` file must start with comment lines
+before `(core-module)`. Wrap prose at 80 columns (including the leading `; `).
 
 ```
 ; Performance: NNNN_short_name
+; tags = smoke, i32, loop
 ; Why hard: What makes this fixture demanding for weavec2 (algorithm,
 ;   control-flow depth, phi merges, memory traffic, width, etc.).
-; Reveals: Which WIR constructs and LLVM shapes the test is meant to exercise.
+; Reveals: Which WIR constructs and LLVM shapes the test exercises.
+; Expected: Semantic result when known; always note golden LLVM + llvm-as.
 ; If LLVM regresses: Concrete bad outcomes in the golden IR (wrong phis,
 ;   redundant alloca reloads, wrong icmp/div kind, broken loop bounds, etc.).
 ```
+
+Tag vocabulary (combine as needed):
+
+| Tag | Meaning |
+|-----|---------|
+| smoke | Baseline lowering (0001–0059) |
+| integration | Multi-feature glue (0054–0060) |
+| algorithm | Classical algorithm demo (0061–0130) |
+| stress | Hard codegen stress (0131+) |
+| i32 / i64 / f32 | Primary scalar width |
+| loop | while / carried state |
+| loop-phi | Loop-header phi promotion |
+| if-merge | If/merge blocks inside loops |
+| heap | malloc / array / 2D table |
+| dp | Dynamic-programming table |
+| sort / search | Sorting or search pattern |
+| memory | load/store heavy |
+| call | Calls / ABI |
+| numeric | mod/div/pow/gcd |
+| float | f32/f64 math |
+| bitwise | shifts / xor / and |
 
 Smoke tests (0001–0059) should say they are baselines whose failure usually
 implies broken lowering shared by later fixtures. Stress tests (0131+) should

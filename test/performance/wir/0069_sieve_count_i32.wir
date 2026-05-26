@@ -1,6 +1,10 @@
 ; Performance: 0069_sieve_count_i32
+; tags = algorithm, heap, i32, memory
 ; Why hard: Sieve variant; boolean flags on heap.
 ; Reveals: Store i32 flags, nested marking loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0069_sieve_count_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Flags not cleared; inner loop reads stale composite.
 (core-module
   (core-version 1)

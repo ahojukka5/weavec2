@@ -1,6 +1,10 @@
 ; Performance: 0117_multiples_sum_i32
+; tags = algorithm, i32
 ; Why hard: Sum multiples of 3 or 5. Mod in conditional add.
 ; Reveals: mod, branch, add acc.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0117_multiples_sum_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Double-counts lcm(3,5); mod wrong sign.
 (core-module
   (core-version 1)

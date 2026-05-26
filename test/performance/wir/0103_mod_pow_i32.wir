@@ -1,6 +1,10 @@
 ; Performance: 0103_mod_pow_i32
+; tags = algorithm, i32, numeric
 ; Why hard: Modular exponentiation. Square-and-multiply with mod each step.
 ; Reveals: mul+mod in loop on bits of exp.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0103_mod_pow_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Forgot mod; overflow changes semantic mod result.
 (core-module
   (core-version 1)

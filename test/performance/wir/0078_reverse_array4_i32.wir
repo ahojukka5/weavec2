@@ -1,7 +1,12 @@
 ; Performance: 0078_reverse_array4_i32
+; tags = algorithm, heap, i32, memory
 ; Why hard: In-place reverse with two pointers.
 ; Reveals: Two indices, load/store swap on heap.
-; If LLVM regresses: Pointers cross without stopping; reads after free if paired wrong.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0078_reverse_array4_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Pointers cross without stopping; reads after free if paired
+;   wrong.
 (core-module
   (core-version 1)
   (decls

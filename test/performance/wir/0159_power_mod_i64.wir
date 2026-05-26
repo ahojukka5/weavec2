@@ -1,6 +1,10 @@
 ; Performance: 0159_power_mod_i64
+; tags = i64, numeric, stress
 ; Why hard: Modular exponentiation i64.
 ; Reveals: mul_i64 and mod_i64 each square step.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0159_power_mod_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Square without mod; exp bit test uses wrong mask.
 (core-module
   (core-version 1)

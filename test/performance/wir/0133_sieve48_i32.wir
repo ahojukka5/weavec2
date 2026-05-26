@@ -1,7 +1,12 @@
 ; Performance: 0133_sieve48_i32
+; tags = heap, i32, memory, stress
 ; Why hard: Sieve to 48 with inner marking loop—store-heavy.
 ; Reveals: Nested loops, flag array stores, branch on flags.
-; If LLVM regresses: Marks composites wrong; inner loop starts at wrong multiple.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0133_sieve48_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Marks composites wrong; inner loop starts at wrong
+;   multiple.
 (core-module
   (core-version 1)
   (decls

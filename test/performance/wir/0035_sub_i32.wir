@@ -1,7 +1,14 @@
 ; Performance: 0035_sub_i32
-; Why hard: Smoke baseline for subtraction. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for subtraction. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: sub_i32
-; If LLVM regresses: Becomes add with negative wrong; nsw missing where expected.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0035_sub_i32.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Becomes add with negative wrong; nsw missing where
+;   expected.
 (core-module
   (core-version 1)
   (decls

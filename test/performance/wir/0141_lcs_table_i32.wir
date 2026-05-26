@@ -1,7 +1,12 @@
 ; Performance: 0141_lcs_table_i32
+; tags = dp, heap, i32, stress
 ; Why hard: LCS DP 9x9 table on two length-8 strings.
 ; Reveals: 2D heap DP, max of three predecessors, nested loops.
-; If LLVM regresses: Table fill order wrong; max of three paths broken; stride errors.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0141_lcs_table_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Table fill order wrong; max of three paths broken; stride
+;   errors.
 (core-module
   (core-version 1)
   (decls

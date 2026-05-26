@@ -1,6 +1,12 @@
 ; Performance: 0048_string_escape
-; Why hard: Smoke baseline for escaped string. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for escaped string. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: special chars in literal
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0048_string_escape.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Broken escape in .ll string constant.
 (core-module
   (core-version 1)

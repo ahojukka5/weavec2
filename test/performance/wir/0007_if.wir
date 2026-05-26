@@ -1,7 +1,15 @@
 ; Performance: 0007_if
-; Why hard: Smoke baseline for conditional branch. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, loop-phi, smoke
+; Why hard: Smoke baseline for conditional branch. Failures here usually
+;   indicate broken
+;   lowering shared by every later fixture.
 ; Reveals: if with then/else joining
-; If LLVM regresses: Missing join block, wrong branch condition polarity, or divergent types at merge.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0007_if.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Missing join block, wrong branch condition polarity, or
+;   divergent types at
+;   merge.
 (core-module
   (core-version 1)
   (decls

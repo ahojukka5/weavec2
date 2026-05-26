@@ -1,7 +1,12 @@
 ; Performance: 0068_binary_search_i32
+; tags = algorithm, i32, memory, search
 ; Why hard: Binary search on sorted array; nested compares.
 ; Reveals: low/high/mid carried, load at mid.
-; If LLVM regresses: Infinite loop on bounds; mid computed with div rounding error.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0068_binary_search_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Infinite loop on bounds; mid computed with div rounding
+;   error.
 (core-module
   (core-version 1)
   (decls

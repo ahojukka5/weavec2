@@ -1,7 +1,15 @@
 ; Performance: 0081_sum_range_i32
-; Why hard: Sum 1..n (triangular number). Simple but canonical loop-carried accumulator.
+; tags = algorithm, i32, loop, loop-phi
+; Why hard: Sum 1..n (triangular number). Simple but canonical loop-carried
+;   accumulator.
 ; Reveals: while, add_i32 on sum, i32 index.
-; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0081_sum_range_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried
+;   locals reload from
+;   stack every iteration, wrong backedge operands, or SSA violations after
+;   llvm-as.
 (core-module
   (core-version 1)
   (decls

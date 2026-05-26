@@ -1,6 +1,10 @@
 ; Performance: 0161_collatz_peak_i64
+; tags = i64, loop, stress
 ; Why hard: Collatz on i64 with peak tracking over batch.
 ; Reveals: div_i64/mod_i64/mul_i64, nested if, outer batch.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0161_collatz_peak_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Peak uses i32 compare; 3n+1 overflows wrong width.
 (core-module
   (core-version 1)

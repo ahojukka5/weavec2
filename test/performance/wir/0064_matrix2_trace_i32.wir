@@ -1,6 +1,10 @@
 ; Performance: 0064_matrix2_trace_i32
+; tags = algorithm, i32, memory
 ; Why hard: 2x2 indexing on heap; diagonal sum.
 ; Reveals: array_i32_at, load_i32, add.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0064_matrix2_trace_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Row-major index formula wrong; trace sums off-diagonal.
 (core-module
   (core-version 1)

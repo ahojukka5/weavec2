@@ -1,6 +1,12 @@
 ; Performance: 0014_bool_ops
-; Why hard: Smoke baseline for boolean logic. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for boolean logic. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: and_bool/or_bool/not_bool
+; Expected: Golden LLVM matches test/performance/expected-llvm/0014_bool_ops.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: i1 values widened to i32 incorrectly; short-circuit broken.
 (core-module
   (core-version 1)

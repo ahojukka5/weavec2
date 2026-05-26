@@ -1,6 +1,10 @@
 ; Performance: 0142_heap_sift_down4_i32
+; tags = heap, i32, stress
 ; Why hard: Sift-down on four-element max-heap.
 ; Reveals: While with parent/child index compares and swaps.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0142_heap_sift_down4_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Child index 2i+1/2i+2 wrong; sift stops early.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0153_sum_range_i64
+; tags = i64, loop, stress
 ; Why hard: Sum 1..120 in i64—wide accumulator with i32 index.
 ; Reveals: cast_i32_to_i64, add_i64, i32 loop index only.
+; Expected: main returns triangular sum 1..120 as i32 cast. llvm-as accepts
+;   emitted IR;
+;   opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Accumulator truncated to i32; i64 add uses i32 ops.
 (core-module
   (core-version 1)

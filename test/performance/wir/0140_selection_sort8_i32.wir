@@ -1,7 +1,13 @@
 ; Performance: 0140_selection_sort8_i32
+; tags = i32, memory, sort, stress
 ; Why hard: Selection sort eight elements—argmin scan inner loop.
 ; Reveals: Nested loops, min index, swap stores.
-; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0140_selection_sort8_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same
+;   slot each
+;   iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

@@ -1,7 +1,12 @@
 ; Performance: 0143_rolling_hash_i32
+; tags = bitwise, i32, stress
 ; Why hard: Polynomial rolling hash over 64 bytes.
 ; Reveals: mul/add/mod recurrence each byte.
-; If LLVM regresses: Hash forgets to subtract outgoing term; mod applied once not per step.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0143_rolling_hash_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Hash forgets to subtract outgoing term; mod applied once
+;   not per step.
 (core-module
   (core-version 1)
   (decls

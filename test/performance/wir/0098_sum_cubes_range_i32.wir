@@ -1,6 +1,10 @@
 ; Performance: 0098_sum_cubes_range_i32
+; tags = algorithm, i32, loop
 ; Why hard: Sum of cubes. Two muls per iteration.
 ; Reveals: cube via mul twice, add.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0098_sum_cubes_range_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Cube computed as i*i+i wrong.
 (core-module
   (core-version 1)

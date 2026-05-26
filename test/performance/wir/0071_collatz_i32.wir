@@ -1,6 +1,10 @@
 ; Performance: 0071_collatz_i32
+; tags = algorithm, i32, loop
 ; Why hard: Collatz step; branch on parity with div/mul.
 ; Reveals: if on mod 2, div and 3n+1 paths.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0071_collatz_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Odd branch uses wrong formula; infinite loop on 1.
 (core-module
   (core-version 1)

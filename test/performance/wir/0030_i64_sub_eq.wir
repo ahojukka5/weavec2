@@ -1,6 +1,12 @@
 ; Performance: 0030_i64_sub_eq
-; Why hard: Smoke baseline for i64 compare chain. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i64, smoke
+; Why hard: Smoke baseline for i64 compare chain. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: sub_i64 then eq_i64
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0030_i64_sub_eq.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Compare uses truncated subresult.
 (core-module
   (core-version 1)

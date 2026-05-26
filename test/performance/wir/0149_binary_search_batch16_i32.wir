@@ -1,6 +1,10 @@
 ; Performance: 0149_binary_search_batch16_i32
+; tags = i32, search, stress
 ; Why hard: Sixteen sorted values, twelve binary searches in loop.
 ; Reveals: Nested if in search, low/high/found carried, outer sum.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0149_binary_search_batch16_i32.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Search returns wrong index; outer sum double-counts.
 (core-module
   (core-version 1)

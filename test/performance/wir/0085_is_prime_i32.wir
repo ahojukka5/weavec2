@@ -1,6 +1,10 @@
 ; Performance: 0085_is_prime_i32
+; tags = algorithm, i32
 ; Why hard: Primality test. Early exit branch must preserve flag phi.
 ; Reveals: Trial division to sqrt.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0085_is_prime_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Composite reported prime; loop does not exit at sqrt.
 (core-module
   (core-version 1)

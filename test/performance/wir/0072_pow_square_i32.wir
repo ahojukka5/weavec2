@@ -1,6 +1,10 @@
 ; Performance: 0072_pow_square_i32
+; tags = algorithm, i32, numeric
 ; Why hard: Repeated squaring; overflow not goal but mul recurrence matters.
 ; Reveals: mul_i32 in loop on carried base.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0072_pow_square_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Square done once; exponent counter does not advance.
 (core-module
   (core-version 1)

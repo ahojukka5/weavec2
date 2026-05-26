@@ -1,6 +1,10 @@
 ; Performance: 0088_digital_sum_i32
+; tags = algorithm, i32
 ; Why hard: Sum of decimal digits. Mod/div loop until n=0.
 ; Reveals: mod 10, div 10, accumulate.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0088_digital_sum_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Loses high digits; infinite loop if div wrong.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0116_trailing_zeros_i32
+; tags = algorithm, bitwise, i32
 ; Why hard: Count trailing zeros. Tight div/mod 2 loop like popcount.
 ; Reveals: mod 2, div 2, increment count.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0116_trailing_zeros_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Counts leading not trailing; extra urem per step.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0163_horner_poly_i64
+; tags = i64, stress
 ; Why hard: Horner evaluation degree-6 in i64.
 ; Reveals: mul_i64/add_i64 chain, i32 index.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0163_horner_poly_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Polynomial order wrong; acc stays constant.
 (core-module
   (core-version 1)

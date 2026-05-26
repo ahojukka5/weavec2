@@ -1,6 +1,10 @@
 ; Performance: 0115_sum_powers_of_two_i32
+; tags = algorithm, i32, numeric
 ; Why hard: Sum 2^k. Doubling add recurrence.
 ; Reveals: shl/add loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0115_sum_powers_of_two_i32.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Doubles wrong register; sum not geometric.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0095_abs_i32
+; tags = algorithm, i32
 ; Why hard: Absolute value. Sign test without overflow edge (MIN).
 ; Reveals: compare + select pattern via if.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0095_abs_i32.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Negates MIN incorrectly or always negative path.
 (core-module
   (core-version 1)

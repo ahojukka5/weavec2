@@ -1,6 +1,10 @@
 ; Performance: 0126_xor_reduce5_i32
+; tags = algorithm, bitwise, i32, memory
 ; Why hard: XOR reduction. xor_i32 in loop.
 ; Reveals: xor recurrence with loads.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0126_xor_reduce5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Uses or instead of xor.
 (core-module
   (core-version 1)

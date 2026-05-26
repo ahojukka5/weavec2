@@ -1,6 +1,10 @@
 ; Performance: 0090_floor_sqrt_i32
+; tags = algorithm, i32
 ; Why hard: Integer sqrt by trial. Compare i*i <= n each step.
 ; Reveals: mul_i32 for square, carried root.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0090_floor_sqrt_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Off-by-one sqrt; square overflows silently in i32.
 (core-module
   (core-version 1)

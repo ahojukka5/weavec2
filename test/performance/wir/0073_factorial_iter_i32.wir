@@ -1,6 +1,10 @@
 ; Performance: 0073_factorial_iter_i32
+; tags = algorithm, i32, loop
 ; Why hard: Factorial product loop; classic benchmark shape.
 ; Reveals: mul_i32 on carried fact, i32 index.
+; Expected: main returns n! for configured n (see golden). llvm-as accepts
+;   emitted IR;
+;   opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Product resets each iteration; off-by-one on range.
 (core-module
   (core-version 1)

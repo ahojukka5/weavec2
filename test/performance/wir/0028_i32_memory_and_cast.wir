@@ -1,6 +1,12 @@
 ; Performance: 0028_i32_memory_and_cast
-; Why hard: Smoke baseline for casts + memory. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, memory, smoke
+; Why hard: Smoke baseline for casts + memory. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: cast_i32_to_i64, load/store mix
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0028_i32_memory_and_cast.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Extension/truncation on wrong edge of load.
 (core-module
   (core-version 1)

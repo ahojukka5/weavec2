@@ -1,6 +1,10 @@
 ; Performance: 0097_product_range_i32
+; tags = algorithm, i32, loop
 ; Why hard: Factorial-shaped product. mul recurrence like 0073.
 ; Reveals: mul_i32 carried product.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0097_product_range_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Product zeroed each trip; starts at 0.
 (core-module
   (core-version 1)

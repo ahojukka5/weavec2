@@ -1,6 +1,10 @@
 ; Performance: 0113_median_of_three_i32
+; tags = algorithm, i32
 ; Why hard: Median of three. Multiple calls/min-max logic.
 ; Reveals: function calls + compares.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0113_median_of_three_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Returns mean not median.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0138_mod_div_nested_accum_i32
+; tags = i32, numeric, stress
 ; Why hard: 200 steps with mod/div in nested if on residues.
 ; Reveals: sdiv/srem in branchy loop, carried acc.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0138_mod_div_nested_accum_i32.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Uses udiv/urem; acc updated on wrong branch only.
 (core-module
   (core-version 1)

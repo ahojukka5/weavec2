@@ -1,7 +1,13 @@
 ; Performance: 0105_array_sum5_i32
+; tags = algorithm, heap, i32, memory
 ; Why hard: Sum five heap elements. Baseline heap reduction.
 ; Reveals: indexed load, add.
-; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0105_array_sum5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same
+;   slot each
+;   iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

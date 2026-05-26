@@ -1,7 +1,14 @@
 ; Performance: 0021_call_ptr
-; Why hard: Smoke baseline for ptr return call. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = call, i32, smoke
+; Why hard: Smoke baseline for ptr return call. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: call_ptr
-; If LLVM regresses: Pointer return not marked noalias where needed; typed as i64.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0021_call_ptr.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Pointer return not marked noalias where needed; typed as
+;   i64.
 (core-module
   (core-version 1)
   (decls

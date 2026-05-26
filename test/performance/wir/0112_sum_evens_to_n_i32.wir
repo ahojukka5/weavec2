@@ -1,6 +1,10 @@
 ; Performance: 0112_sum_evens_to_n_i32
+; tags = algorithm, i32
 ; Why hard: Sum even numbers. Pair to odds test.
 ; Reveals: even accumulation loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0112_sum_evens_to_n_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Starts at 1; double-counts.
 (core-module
   (core-version 1)

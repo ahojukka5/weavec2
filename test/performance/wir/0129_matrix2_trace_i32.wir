@@ -1,6 +1,10 @@
 ; Performance: 0129_matrix2_trace_i32
+; tags = algorithm, i32, memory
 ; Why hard: 2x2 trace on heap. Same family as 0064.
 ; Reveals: diagonal loads, add.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0129_matrix2_trace_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Off-diagonal included.
 (core-module
   (core-version 1)

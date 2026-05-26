@@ -1,7 +1,14 @@
 ; Performance: 0045_nested_while
-; Why hard: Smoke baseline for nested loops. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, loop, smoke
+; Why hard: Smoke baseline for nested loops. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: outer/inner while
-; If LLVM regresses: Inner backedge wired to outer header; induction vars swapped.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0045_nested_while.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Inner backedge wired to outer header; induction vars
+;   swapped.
 (core-module
   (core-version 1)
   (decls

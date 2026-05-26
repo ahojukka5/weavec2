@@ -1,6 +1,10 @@
 ; Performance: 0144_matmul4x4_i32
+; tags = heap, i32, stress
 ; Why hard: 4x4 matrix multiply on heap.
 ; Reveals: O(n^3) loops, 2D indexing like 0132 at larger n.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0144_matmul4x4_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Same indexing failures as 0132; result cell wrong.
 (core-module
   (core-version 1)

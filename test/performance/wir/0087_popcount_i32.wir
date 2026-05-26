@@ -1,6 +1,10 @@
 ; Performance: 0087_popcount_i32
+; tags = algorithm, bitwise, i32
 ; Why hard: Population count by halving. Repeated div/mod 2 until zero.
 ; Reveals: shr or div by 2, add to count.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0087_popcount_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Counts one extra; uses arithmetic shift on negative.
 (core-module
   (core-version 1)

@@ -1,7 +1,14 @@
 ; Performance: 0108_hailstone_peak_i32
+; tags = algorithm, i32, loop-phi
 ; Why hard: Collatz peak tracking. Inner while + max on carried peak.
 ; Reveals: div/mod branch, gt update.
-; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried locals reload from stack every iteration, wrong backedge operands, or SSA violations after llvm-as.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0108_hailstone_peak_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried
+;   locals reload from
+;   stack every iteration, wrong backedge operands, or SSA violations after
+;   llvm-as.
 (core-module
   (core-version 1)
   (decls

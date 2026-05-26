@@ -1,7 +1,12 @@
 ; Performance: 0063_dot_product_i32
+; tags = algorithm, heap, i32, memory
 ; Why hard: Multiply-add reduction over array elements.
 ; Reveals: Indexed load, mul_i32, add_i32 in loop.
-; If LLVM regresses: Products computed but not accumulated; reloads array each k.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0063_dot_product_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Products computed but not accumulated; reloads array each
+;   k.
 (core-module
   (core-version 1)
   (decls

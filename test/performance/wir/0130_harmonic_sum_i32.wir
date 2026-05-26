@@ -1,6 +1,11 @@
 ; Performance: 0130_harmonic_sum_i32
-; Why hard: Truncated harmonic sum with int div. div_i32 each step—rounding sensitive.
+; tags = algorithm, i32
+; Why hard: Truncated harmonic sum with int div. div_i32 each step—rounding
+;   sensitive.
 ; Reveals: div in accumulating loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0130_harmonic_sum_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Uses fp div; sum uses mul instead of div.
 (core-module
   (core-version 1)

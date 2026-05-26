@@ -1,6 +1,10 @@
 ; Performance: 0100_reverse_digits_i32
+; tags = algorithm, i32
 ; Why hard: Reverse decimal digits. Build reversed with mod/div.
 ; Reveals: mod 10, div 10, accumulate rev.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0100_reverse_digits_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Digits appended wrong order.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0106_clamp_i32
+; tags = algorithm, i32
 ; Why hard: Clamp to interval. Two compares without loop.
 ; Reveals: le/ge compares, if chain.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0106_clamp_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Returns lo when should return hi.
 (core-module
   (core-version 1)

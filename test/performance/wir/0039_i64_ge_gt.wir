@@ -1,6 +1,12 @@
 ; Performance: 0039_i64_ge_gt
-; Why hard: Smoke baseline for i64 ordered compares. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i64, smoke
+; Why hard: Smoke baseline for i64 ordered compares. Failures here usually
+;   indicate
+;   broken lowering shared by every later fixture.
 ; Reveals: ge_i64/gt_i64
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0039_i64_ge_gt.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Treats i64 compares as unsigned incorrectly.
 (core-module
   (core-version 1)

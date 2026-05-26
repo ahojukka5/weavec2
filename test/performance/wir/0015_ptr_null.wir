@@ -1,7 +1,14 @@
 ; Performance: 0015_ptr_null
-; Why hard: Smoke baseline for null pointer. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for null pointer. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: const_null, eq_ptr
-; If LLVM regresses: null not typed as pointer; comparison lowered to integer eq.
+; Expected: Golden LLVM matches test/performance/expected-llvm/0015_ptr_null.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: null not typed as pointer; comparison lowered to integer
+;   eq.
 (core-module
   (core-version 1)
   (decls

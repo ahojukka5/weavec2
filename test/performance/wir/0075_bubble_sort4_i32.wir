@@ -1,6 +1,10 @@
 ; Performance: 0075_bubble_sort4_i32
+; tags = algorithm, i32, memory, sort
 ; Why hard: O(n^2) compare-swap on four elements.
 ; Reveals: Nested loops, load/compare/store swap.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0075_bubble_sort4_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Swap stores to wrong indices; inner loop bound wrong.
 (core-module
   (core-version 1)

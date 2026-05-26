@@ -1,7 +1,13 @@
 ; Performance: 0135_bubble_sort8_i32
+; tags = i32, sort, stress
 ; Why hard: Bubble sort eight elements—many compare-swaps.
 ; Reveals: O(n^2) nested loops on heap array.
-; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0135_bubble_sort8_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same
+;   slot each
+;   iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

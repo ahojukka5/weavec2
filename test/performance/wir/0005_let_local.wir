@@ -1,7 +1,14 @@
 ; Performance: 0005_let_local
-; Why hard: Smoke baseline for local binding. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for local binding. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: let + local_get without control flow
-; If LLVM regresses: Local name maps to wrong SSA name or duplicate alloca for one binding.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0005_let_local.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Local name maps to wrong SSA name or duplicate alloca for
+;   one binding.
 (core-module
   (core-version 1)
   (decls

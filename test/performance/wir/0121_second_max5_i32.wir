@@ -1,6 +1,10 @@
 ; Performance: 0121_second_max5_i32
+; tags = algorithm, i32
 ; Why hard: Second largest of five. Two-pass reduction.
 ; Reveals: two linear scans.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0121_second_max5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Returns max not second; first pass wrong.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0125_all_equal5_i32
+; tags = algorithm, i32
 ; Why hard: All equal test. Early false on mismatch.
 ; Reveals: compare chain in loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0125_all_equal5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Returns true on different array.
 (core-module
   (core-version 1)

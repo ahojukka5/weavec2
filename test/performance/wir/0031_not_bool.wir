@@ -1,6 +1,12 @@
 ; Performance: 0031_not_bool
-; Why hard: Smoke baseline for boolean not. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for boolean not. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: not_bool on predicate
+; Expected: Golden LLVM matches test/performance/expected-llvm/0031_not_bool.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Emits xor i32 1 instead of xor i1.
 (core-module
   (core-version 1)

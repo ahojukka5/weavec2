@@ -1,7 +1,12 @@
 ; Performance: 0136_knapsack01_i32
+; tags = dp, heap, i32, stress
 ; Why hard: 0/1 knapsack DP table 5x11—2D recurrence.
 ; Reveals: 2D heap table, max of take/skip, triple structure.
-; If LLVM regresses: DP recurrence uses wrong index; table row stride wrong; max path broken.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0136_knapsack01_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: DP recurrence uses wrong index; table row stride wrong; max
+;   path broken.
 (core-module
   (core-version 1)
   (decls

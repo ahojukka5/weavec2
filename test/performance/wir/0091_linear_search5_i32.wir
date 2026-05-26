@@ -1,6 +1,10 @@
 ; Performance: 0091_linear_search5_i32
+; tags = algorithm, i32, memory, search
 ; Why hard: Linear search five elements. Early-exit index pattern.
 ; Reveals: load, compare, break index.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0091_linear_search5_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Always returns last index; never finds match.
 (core-module
   (core-version 1)

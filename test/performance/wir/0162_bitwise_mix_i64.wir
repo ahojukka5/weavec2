@@ -1,7 +1,12 @@
 ; Performance: 0162_bitwise_mix_i64
+; tags = bitwise, i64, stress
 ; Why hard: i64 xor/and/shl/shr mix in 64-step loop.
 ; Reveals: bitwise i64 ops chained per iteration.
-; If LLVM regresses: Shr uses shl; and mask wrong width; xor optimized away incorrectly.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0162_bitwise_mix_i64.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Shr uses shl; and mask wrong width; xor optimized away
+;   incorrectly.
 (core-module
   (core-version 1)
   (decls

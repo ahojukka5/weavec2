@@ -1,7 +1,13 @@
 ; Performance: 0123_selection_sort5_i32
+; tags = algorithm, i32, sort
 ; Why hard: Selection sort five. Argmin inner loop.
 ; Reveals: nested loops, swaps.
-; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same slot each iteration instead of keeping values in registers after mem2reg.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0123_selection_sort5_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Redundant alloca traffic: repeated load/store of the same
+;   slot each
+;   iteration instead of keeping values in registers after mem2reg.
 (core-module
   (core-version 1)
   (decls

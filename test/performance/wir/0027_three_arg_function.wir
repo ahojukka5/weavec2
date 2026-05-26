@@ -1,6 +1,12 @@
 ; Performance: 0027_three_arg_function
-; Why hard: Smoke baseline for three-arg call. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = call, i32, smoke
+; Why hard: Smoke baseline for three-arg call. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: three param_get + call
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0027_three_arg_function.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Register/stack misalignment from third argument onward.
 (core-module
   (core-version 1)

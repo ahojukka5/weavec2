@@ -1,6 +1,10 @@
 ; Performance: 0114_power_of_two_i32
+; tags = algorithm, i32, numeric
 ; Why hard: Power-of-two test. Shift loop until bit pattern.
 ; Reveals: shl/shr style loop.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0114_power_of_two_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Always false; uses popcount wrong.
 (core-module
   (core-version 1)

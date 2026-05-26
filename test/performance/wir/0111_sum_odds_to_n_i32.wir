@@ -1,6 +1,10 @@
 ; Performance: 0111_sum_odds_to_n_i32
+; tags = algorithm, i32
 ; Why hard: Sum odd numbers. Stride-2 style loop.
 ; Reveals: add with i+=2 or equivalent.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0111_sum_odds_to_n_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Includes evens; starts at wrong parity.
 (core-module
   (core-version 1)

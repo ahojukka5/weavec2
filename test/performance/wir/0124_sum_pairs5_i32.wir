@@ -1,6 +1,10 @@
 ; Performance: 0124_sum_pairs5_i32
+; tags = algorithm, i32, memory
 ; Why hard: Sum adjacent pairs. Index i and i+1 loads.
 ; Reveals: two loads per iteration.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0124_sum_pairs5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Reads past end; pairs overlap wrong.
 (core-module
   (core-version 1)

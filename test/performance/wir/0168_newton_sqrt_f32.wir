@@ -1,7 +1,11 @@
 ; Performance: 0168_newton_sqrt_f32
-; Why hard: Newton iteration for sqrt(2) with f32 div/mul/add compare.
-; Reveals: fdiv, fmul, fsub, lt_f32, loop-carried guess on stack.
-; If LLVM regresses: div by zero guard missing; guess not updated; uses icmp not fcmp.
+; tags = f32, float, stress
+; Why hard: Newton sqrt(2) with eight f32 iterations.
+; Reveals: fdiv/fmul/fadd in loop, call_f32 helper.
+; Expected: main returns ~1414 (sqrt(2)*1000, fptosi; see golden). llvm-as
+;   accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Guess not updated; fdiv by zero; comparison uses icmp.
 (core-module
   (core-version 1)
   (decls

@@ -1,6 +1,10 @@
 ; Performance: 0154_factorial20_i64
+; tags = i64, stress
 ; Why hard: 20! in i64—large product recurrence.
 ; Reveals: mul_i64 loop on stack-carried fact.
+; Expected: main returns 20! mod 1_000_000_007 as i32. llvm-as accepts emitted
+;   IR; opt
+;   -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Product width wrong; mul overflows silently in IR type.
 (core-module
   (core-version 1)

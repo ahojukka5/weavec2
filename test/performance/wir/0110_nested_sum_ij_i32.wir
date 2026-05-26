@@ -1,6 +1,10 @@
 ; Performance: 0110_nested_sum_ij_i32
+; tags = algorithm, i32
 ; Why hard: Double sum i*j. Triply nested induction if extended—here O(n^2).
 ; Reveals: outer/inner loops, mul add.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0110_nested_sum_ij_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Inner bound uses outer wrong; sum formula off.
 (core-module
   (core-version 1)

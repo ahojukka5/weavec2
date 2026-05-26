@@ -1,6 +1,10 @@
 ; Performance: 0096_gcd_subtraction_i32
+; tags = algorithm, i32, numeric
 ; Why hard: GCD by subtraction. Many iterations vs modulo GCD.
 ; Reveals: sub in loop until equal.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0096_gcd_subtraction_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Infinite loop when equal case not handled.
 (core-module
   (core-version 1)

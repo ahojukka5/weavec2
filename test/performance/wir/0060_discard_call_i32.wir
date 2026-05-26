@@ -1,7 +1,12 @@
 ; Performance: 0060_discard_call_i32
+; tags = call, control-flow, i32, integration
 ; Why hard: Return value intentionally unused; must not keep bogus uses alive.
 ; Reveals: call_i32 result discarded.
-; If LLVM regresses: Dead code keeps alloca for unused return; extra stores to dead slots.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0060_discard_call_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Dead code keeps alloca for unused return; extra stores to
+;   dead slots.
 (core-module
   (core-version 1)
   (decls

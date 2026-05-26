@@ -1,6 +1,10 @@
 ; Performance: 0093_count_evens5_i32
+; tags = algorithm, i32, memory
 ; Why hard: Count evens in five elements. Mod 2 on loaded values.
 ; Reveals: load, mod, branch, add count.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0093_count_evens5_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Counts odds; mod lowered to and wrong.
 (core-module
   (core-version 1)

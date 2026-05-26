@@ -4,8 +4,10 @@
 Standard header (all lines are ';' comments before (core-module)):
 
   ; Performance: <stem>
-  ; Why hard: ...
+  ; tags = smoke, i32, loop
+  ; Why hard: ... (wrapped at 80 columns)
   ; Reveals: ...
+  ; Expected: ...
   ; If LLVM regresses: ...
 
 Golden LLVM text is unchanged; only WIR comments are updated.
@@ -15,12 +17,19 @@ from __future__ import annotations
 
 import re
 import sys
+import textwrap
 from pathlib import Path
 
 WIR_DIR = Path(__file__).resolve().parents[1] / "test" / "performance" / "wir"
 
+LINE_WIDTH = 80
+
 # stem -> (why_hard, reveals, failure_llvm)
 META: dict[str, tuple[str, str, str]] = {}
+
+# Optional per-fixture overrides (merged with inferred tags / expected).
+TAGS_OVERRIDE: dict[str, list[str]] = {}
+EXPECTED_OVERRIDE: dict[str, str] = {}
 
 PHI_FAIL = (
     "Broken loop header phis or missing .merge blocks: carried locals reload "
@@ -37,8 +46,20 @@ LOOP_FAIL = (
 )
 
 
-def reg(stem: str, why: str, reveals: str, failure: str) -> None:
+def reg(
+    stem: str,
+    why: str,
+    reveals: str,
+    failure: str,
+    *,
+    expected: str | None = None,
+    tags: list[str] | None = None,
+) -> None:
     META[stem] = (why, reveals, failure)
+    if expected is not None:
+        EXPECTED_OVERRIDE[stem] = expected
+    if tags is not None:
+        TAGS_OVERRIDE[stem] = tags
 
 
 def reg_smoke(stem: str, topic: str, reveals: str, failure: str) -> None:
@@ -555,13 +576,159 @@ STRESS(
 )
 
 
-def format_header(stem: str, why: str, reveals: str, failure: str) -> str:
-    return (
-        f"; Performance: {stem}\n"
-        f"; Why hard: {why}\n"
-        f"; Reveals: {reveals}\n"
-        f"; If LLVM regresses: {failure}\n"
+def wrap_field(label: str, text: str) -> list[str]:
+    """Wrap body so each output line is at most LINE_WIDTH characters."""
+    text = " ".join(text.split())
+    if not text:
+        return [f"; {label}".rstrip()]
+    suffix = label if label.endswith((" ", "=")) else f"{label} "
+    first = f"; {suffix}"
+    cont = ";   "
+    chunks = textwrap.wrap(
+        text,
+        width=LINE_WIDTH - len(cont),
+        break_long_words=False,
+        break_on_hyphens=False,
     )
+    lines: list[str] = []
+    for i, chunk in enumerate(chunks):
+        prefix = first if i == 0 else cont
+        room = LINE_WIDTH - len(prefix)
+        if len(chunk) <= room:
+            lines.append(prefix + chunk)
+        else:
+            sub = textwrap.wrap(
+                chunk,
+                width=room,
+                break_long_words=False,
+                break_on_hyphens=False,
+            )
+            for j, part in enumerate(sub):
+                lines.append((first if i == 0 and j == 0 else cont) + part)
+    return lines
+
+
+def infer_tags(stem: str, reveals: str, failure: str) -> list[str]:
+    n = int(stem[:4])
+    name = stem[5:].lower()
+    tags: list[str] = []
+
+    if n <= 53:
+        tags.append("smoke")
+    elif n <= 60:
+        tags.extend(["integration", "control-flow"])
+    elif n <= 130:
+        tags.append("algorithm")
+    else:
+        tags.append("stress")
+
+    if "_i64" in stem:
+        tags.append("i64")
+    elif "_f32" in stem:
+        tags.append("f32")
+    else:
+        tags.append("i32")
+
+    if any(k in name for k in ("while", "loop", "iter", "fibonacci", "collatz", "range")):
+        tags.append("loop")
+    if any(
+        k in stem
+        for k in (
+            "0080_loop_twin",
+            "0131_loop_triple",
+            "0139_loop_twin",
+            "loop_twin",
+            "loop_triple",
+        )
+    ):
+        tags.extend(["loop-phi", "if-merge"])
+    if "phi" in failure.lower() or "merge" in failure.lower():
+        if "loop-phi" not in tags:
+            tags.append("loop-phi")
+    if any(
+        k in name
+        for k in (
+            "malloc",
+            "array",
+            "matmul",
+            "heap",
+            "knapsack",
+            "table",
+            "sieve",
+            "dot_product",
+            "merge_sorted",
+        )
+    ):
+        tags.append("heap")
+    if any(k in name for k in ("knapsack", "lcs", "edit_distance", "floyd", "mandelbrot_grid")):
+        tags.append("dp")
+    if "sort" in name or "bubble" in name or "insertion" in name or "selection" in name:
+        tags.append("sort")
+    if "binary_search" in name or "linear_search" in name:
+        tags.append("search")
+    if any(k in name for k in ("extern", "call", "function")):
+        tags.append("call")
+    if any(k in reveals.lower() for k in ("store", "load", "alloca")):
+        tags.append("memory")
+    if any(k in name for k in ("xor", "popcount", "bitwise", "trailing", "rolling_hash")):
+        tags.append("bitwise")
+    if "_f32" in stem or "newton" in name or "float" in name:
+        tags.append("float")
+    if "mod" in name or "pow" in name or "gcd" in name:
+        tags.append("numeric")
+
+    merged = TAGS_OVERRIDE.get(stem, [])
+    out = sorted(set(tags + merged))
+    return out
+
+
+def infer_expected(stem: str) -> str:
+    if stem in EXPECTED_OVERRIDE:
+        return EXPECTED_OVERRIDE[stem]
+
+    known: dict[str, str] = {
+        "0002_return_42": "main returns 42.",
+        "0003_add": "main returns 42 (20 + 22).",
+        "0008_while": "main returns sum 0..n for configured n (see golden).",
+        "0023_mod_i32": "main returns remainder-focused smoke value (see golden).",
+        "0073_factorial_iter_i32": "main returns n! for configured n (see golden).",
+        "0080_loop_twin_if_i32": "main returns 3 (x=0+1 then +2 on i=0,1).",
+        "0139_loop_twin_parallel_if_i32": "main returns 110 (x+=10 at i=0, +=100 at i=1).",
+        "0153_sum_range_i64": "main returns triangular sum 1..120 as i32 cast.",
+        "0154_factorial20_i64": "main returns 20! mod 1_000_000_007 as i32.",
+        "0158_fibonacci30_i64": "main returns fib(30) mod 1_000_000_007 as i32.",
+        "0165_const_f32_add": "main returns 5 (float 2+3, fptosi).",
+        "0166_sum_range_f32": "main returns 7260 (float sum 1..120, fptosi).",
+        "0167_dot_product4_f32": "main returns 30 (dot of 1..4 · 1..4, fptosi).",
+        "0168_newton_sqrt_f32": "main returns ~1414 (sqrt(2)*1000, fptosi; see golden).",
+    }
+    if stem in known:
+        base = known[stem]
+    elif stem.endswith("_42") or "return_42" in stem:
+        base = "main returns 42 (conventional success marker)."
+    else:
+        base = f"Golden LLVM matches test/performance/expected-llvm/{stem}.ll."
+
+    return (
+        f"{base} llvm-as accepts emitted IR; "
+        "opt -passes=mem2reg is an optional extra check."
+    )
+
+
+def format_header(stem: str, why: str, reveals: str, failure: str) -> str:
+    tags = infer_tags(stem, reveals, failure)
+    expected = infer_expected(stem)
+    lines: list[str] = [f"; Performance: {stem}"]
+    tag_text = ", ".join(tags)
+    if len(f"; tags = {tag_text}") <= LINE_WIDTH:
+        lines.append(f"; tags = {tag_text}")
+    else:
+        lines.extend(wrap_field("tags =", tag_text))
+    lines.extend(wrap_field("Why hard:", why))
+    lines.extend(wrap_field("Reveals:", reveals))
+    lines.extend(wrap_field("Expected:", expected))
+    lines.extend(wrap_field("If LLVM regresses:", failure))
+    return "\n".join(lines) + "\n"
 
 
 def strip_old_header(text: str) -> str:

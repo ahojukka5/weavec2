@@ -1,7 +1,14 @@
 ; Performance: 0139_loop_twin_parallel_if_i32
-; Why hard: Two parallel if ladders (i==0 and i==1) each update x in one iteration.
-; Reveals: sequential sibling if merges, loop header phi for x, merge suffix preds.
-; If LLVM regresses: missing .merge after first if; second set clobbers phi; wrong latch edge.
+; tags = i32, if-merge, loop, loop-phi, stress
+; Why hard: Twin parallel if ladders updating x when i is 0 and 1 in same trip.
+; Reveals: Sibling if merges, loop phi on x, merge/latch operand wiring.
+; Expected: main returns 110 (x+=10 at i=0, +=100 at i=1). llvm-as accepts
+;   emitted IR;
+;   opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Broken loop header phis or missing .merge blocks: carried
+;   locals reload from
+;   stack every iteration, wrong backedge operands, or SSA violations after
+;   llvm-as.
 (core-module
   (core-version 1)
   (decls

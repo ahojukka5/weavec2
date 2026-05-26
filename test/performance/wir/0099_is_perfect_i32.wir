@@ -1,6 +1,10 @@
 ; Performance: 0099_is_perfect_i32
+; tags = algorithm, i32
 ; Why hard: Perfect number test. Divisor sum loop then compare.
 ; Reveals: Inner divisor loop + outer compare.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0099_is_perfect_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Sum includes n itself; wrong equality.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0101_palindrome_number_i32
+; tags = algorithm, i32
 ; Why hard: Palindrome check. Depends on reverse_digits correctness.
 ; Reveals: reverse then compare.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0101_palindrome_number_i32.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Always true; compares n to partial reverse.
 (core-module
   (core-version 1)

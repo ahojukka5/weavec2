@@ -1,6 +1,12 @@
 ; Performance: 0042_empty_do
-; Why hard: Smoke baseline for empty block. Failures here usually indicate broken lowering shared by every later fixture.
+; tags = i32, smoke
+; Why hard: Smoke baseline for empty block. Failures here usually indicate
+;   broken
+;   lowering shared by every later fixture.
 ; Reveals: do with no statements
+; Expected: Golden LLVM matches test/performance/expected-llvm/0042_empty_do.ll.
+;   llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Empty block eliminated incorrectly breaking join.
 (core-module
   (core-version 1)

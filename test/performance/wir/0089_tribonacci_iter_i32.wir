@@ -1,6 +1,10 @@
 ; Performance: 0089_tribonacci_iter_i32
+; tags = algorithm, i32, loop
 ; Why hard: Three-term recurrence. Three carried locals—phi arity 3.
 ; Reveals: Three updates per iteration.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0089_tribonacci_iter_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Terms rotate wrong; T(n) drift.
 (core-module
   (core-version 1)

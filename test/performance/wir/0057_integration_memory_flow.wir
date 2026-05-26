@@ -1,7 +1,14 @@
 ; Performance: 0057_integration_memory_flow
-; Why hard: Malloc, stores, loads, free in one flow; alias mistakes show up quickly.
+; tags = control-flow, i32, integration, memory
+; Why hard: Malloc, stores, loads, free in one flow; alias mistakes show up
+;   quickly.
 ; Reveals: Heap alloc, multiple stores, reloads, free.
-; If LLVM regresses: Load before store visible; free before last load; redundant reload of same slot.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0057_integration_memory_flow.ll. llvm-as
+;   accepts emitted IR; opt -passes=mem2reg is an optional extra check.
+; If LLVM regresses: Load before store visible; free before last load; redundant
+;   reload of same
+;   slot.
 (core-module
   (core-version 1)
   (decls

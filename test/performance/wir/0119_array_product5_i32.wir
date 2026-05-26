@@ -1,6 +1,10 @@
 ; Performance: 0119_array_product5_i32
+; tags = algorithm, heap, i32, memory
 ; Why hard: Product reduction. mul instead of add.
 ; Reveals: mul_i32 chain with loads.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0119_array_product5_i32.ll. llvm-as accepts
+;   emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Product stuck at 1; overflow not relevant to shape.
 (core-module
   (core-version 1)

@@ -1,6 +1,10 @@
 ; Performance: 0094_min_of_three_i32
+; tags = algorithm, i32
 ; Why hard: Min of three. Branch-only like max_of_three.
 ; Reveals: Nested compares.
+; Expected: Golden LLVM matches
+;   test/performance/expected-llvm/0094_min_of_three_i32.ll.
+;   llvm-as accepts emitted IR; opt -passes=mem2reg is an optional extra check.
 ; If LLVM regresses: Returns middle value always.
 (core-module
   (core-version 1)
