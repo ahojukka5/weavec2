@@ -14,4 +14,5 @@ nativization/expected/test-hadamard-single.wir   # or LLVM / dump golden
 Run via a `test.sh` sibling to `test/performance/test.sh`, driven by weavec2
 after `./build.sh`.
 
-Design: `docs/representation-lowering.md`.
+Design: `docs/representation-lowering.md`, concrete syntax:
+`docs/quantum-surface-syntax.md`.

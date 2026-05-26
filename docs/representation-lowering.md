@@ -151,6 +151,7 @@ grammar when implemented; the invariant is: one language, many lowering passes.
 
 ## See also
 
+- [Quantum surface syntax (proposal)](quantum-surface-syntax.md)
 - [Performance demonstrations](performance-demonstrations.md)
 - [Quantum computing design (concepts)](../../../docs/design/quantum-computing/README.md)
 - [Transformations proposal](../../../docs/design/transformations/README.md)
