@@ -1,0 +1,18 @@
+; Rigetti-style nativization rules (declarative; transform engine TBD).
+;
+; Today weavec2 applies the H decomposition in emit.weave (emit_qgate_h_nativized).
+; When first-class transform passes land, move these rules out of the emitter.
+
+(program
+  (name "rigetti-nativize")
+  (version "0.1")
+
+  ; Documented rule shape (not executed yet):
+  ; (transform-rule nativize-hadamard
+  ;   (pattern (qgate H ?q))
+  ;   (replacement
+  ;     (seq
+  ;       (qgate RY ?q 1570796327)
+  ;       (qgate RZ ?q 3141592653)))
+  ;   (when (native? RY RZ)))
+)

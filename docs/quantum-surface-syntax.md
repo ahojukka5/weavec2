@@ -1,6 +1,7 @@
 # Quantum surface syntax (proposal)
 
-Status: Proposal for weavec2 frontend and transform passes  
+Status: Partially implemented in weavec2 (`qgate`, `qmeasure` lowering in
+`src/frontend/emit.weave`; tests in `test/quantum/`)  
 Date: 2026-05-25  
 See also: [representation-lowering.md](representation-lowering.md)
 
@@ -114,20 +115,23 @@ side effects happen through the runtime.
 
 ## Parser / frontend checklist
 
-| Step | Component |
-|------|-----------|
-| 1 | Lexer: `qgate`, `qmeasure` keywords |
-| 2 | Parser: statement variants in `src/frontend/` |
-| 3 | Typecheck: `Qubit` only where required |
-| 4 | Transform registry: nativize pass before `lower.weave` |
-| 5 | `lower.weave`: emit WIR for remaining `qgate` nodes |
-| 6 | Test: `test/quantum/nativization/test-hadamard-single.weave` |
+| Step | Component | Status |
+|------|-----------|--------|
+| 1 | Sexpr parse: `qgate`, `qmeasure` as lists | Done (generic parser) |
+| 2 | `emit.weave`: lower to `qrt_*` extern calls | Done (H nativized) |
+| 3 | Typecheck: `Qubit` type | Not started (uses `i64` handles) |
+| 4 | Transform registry: move nativize out of emitter | Planned |
+| 5 | Backend: LLVM for quantum runtime | Not started |
+| 6 | Tests: `test/quantum/test.sh` | Done (2 goldens) |
 
-## First test (planned)
+## Tests
 
-`test/quantum/nativization/test-hadamard-single.weave` — one `H`, assert dump
-after nativize shows `RY` + `RZ` only. Golden: text from `--dump-surface` or a
-small WIR snippet, not a new file extension.
+```bash
+./test/quantum/test.sh
+```
+
+`test/quantum/nativization/test-hadamard-single.weave` — golden WIR shows
+`qrt_ry` + `qrt_rz` after `(qgate H q0)`.
 
 ## Open questions
 

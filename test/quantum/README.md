@@ -1,18 +1,21 @@
-# Quantum tests (planned)
+# Quantum tests
 
-Quantum behavior is tested through surface `.weave` programs, not a separate
-file format.
+Surface `.weave` programs; goldens are `.expected.wir` beside each source.
 
-When the frontend accepts `Qubit`, `gate`, and `measure`, add fixtures here, for
-example:
+Run (after `./build.sh`):
 
-```text
-nativization/test-hadamard-single.weave
-nativization/expected/test-hadamard-single.wir   # or LLVM / dump golden
+```bash
+./test/quantum/test.sh
 ```
 
-Run via a `test.sh` sibling to `test/performance/test.sh`, driven by weavec2
-after `./build.sh`.
+Fixtures:
 
-Design: `docs/representation-lowering.md`, concrete syntax:
-`docs/quantum-surface-syntax.md`.
+| File | Checks |
+|------|--------|
+| `nativization/test-hadamard-single.weave` | `(qgate H q0)` → `qrt_ry` + `qrt_rz` |
+| `nativization/test-hadamard-measure.weave` | H nativize + `(qmeasure q0 c0)` |
+
+Lowering lives in `src/frontend/emit.weave` until transform passes replace it.
+Declarative rules: `src/frontend/targets/rigetti-nativize.weave`.
+
+Design: `docs/representation-lowering.md`, `docs/quantum-surface-syntax.md`.

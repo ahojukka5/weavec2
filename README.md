@@ -93,7 +93,7 @@ That path does not link `../weavec0/runtime.c`, `../weavefront/build/*.ll`, or
 ## Tests
 
 - WIR → LLVM goldens: `./test/performance/test.sh` (requires `./build.sh` first)
-- Quantum (planned): `test/quantum/` — surface `.weave` programs, same compiler
+- Quantum surface: `./test/quantum/test.sh` — `qgate` / `qmeasure` → WIR goldens
 
 Design: `docs/representation-lowering.md` (quantum baked into surface Weave).
 

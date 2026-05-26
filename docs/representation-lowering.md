@@ -135,9 +135,9 @@ grammar when implemented; the invariant is: one language, many lowering passes.
 | Component | Status |
 |-----------|--------|
 | weavec0 / weavec1 / weavec2 classical path | Active |
-| Surface quantum syntax | Not implemented |
-| Transform engine in Weave | Spec only |
-| Nativize-hadamard rule | Designed; no surface test yet |
+| Surface `qgate` / `qmeasure` | Implemented in `emit.weave` (v1) |
+| Transform engine in Weave | Spec only; rules stub in `targets/rigetti-nativize.weave` |
+| Quantum frontend goldens | `test/quantum/test.sh` (2 tests) |
 | Separate `.qir` files | Rejected — not used |
 
 ## Recommended order
