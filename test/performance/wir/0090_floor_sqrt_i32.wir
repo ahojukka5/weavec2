@@ -1,0 +1,62 @@
+; Algorithm: integer floor sqrt by incrementing trial
+; Tests: loop with square compare and tracked root candidate
+(core-module
+  (core-version 1)
+  (decls
+    (fn floor_sqrt
+      (params
+        (n i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let r i32
+          (const_i32 0)
+        ) ;; let
+
+        (let t i32
+          (const_i32 1)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (mul_i32
+                (local_get t)
+                (local_get t)
+              ) ;; mul_i32
+              (param_get n)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (set r
+              (local_get t)
+            ) ;; set
+
+            (set t
+              (add_i32
+                (local_get t)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get r)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 floor_sqrt
+            (const_i32 200)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

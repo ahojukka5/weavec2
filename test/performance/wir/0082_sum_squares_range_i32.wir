@@ -1,0 +1,65 @@
+; Algorithm: sum of squares 1^2 + 2^2 + ... + n^2
+; Tests: loop with mul_i32 inside add recurrence
+(core-module
+  (core-version 1)
+  (decls
+    (fn sum_squares
+      (params
+        (n i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let i i32
+          (const_i32 1)
+        ) ;; let
+
+        (let total i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get i)
+              (param_get n)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (set total
+              (add_i32
+                (local_get total)
+                (mul_i32
+                  (local_get i)
+                  (local_get i)
+                ) ;; mul_i32
+              ) ;; add_i32
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get total)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 sum_squares
+            (const_i32 7)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
