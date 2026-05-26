@@ -1,0 +1,65 @@
+; Stress: Fibonacci F(30) with i64 values, i32 index loop
+; Reveals: add_i64, carried i32 a/b, i64 results on stack
+(core-module
+  (core-version 1)
+  (decls
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (let i i32
+          (const_i32 2)
+        ) ;; let
+
+        (let prev i64
+          (const_i64 0)
+        ) ;; let
+
+        (let cur i64
+          (const_i64 1)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get i)
+              (const_i32 30)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (let next i64
+              (add_i64
+                (local_get prev)
+                (local_get cur)
+              ) ;; add_i64
+            ) ;; let
+
+            (set prev
+              (local_get cur)
+            ) ;; set
+
+            (set cur
+              (local_get next)
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (cast_i64_to_i32
+            (mod_i64
+              (local_get cur)
+              (const_i64 1000000007)
+            ) ;; mod_i64
+          ) ;; cast_i64_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

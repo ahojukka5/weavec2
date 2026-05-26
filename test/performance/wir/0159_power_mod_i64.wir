@@ -1,0 +1,106 @@
+; Stress: modular exponentiation base^exp mod m (i64)
+; Reveals: mul_i64, mod_i64, div_i64 on i64 in loop
+(core-module
+  (core-version 1)
+  (decls
+    (fn pow_mod
+      (params
+        (base i64)
+        (exp i32)
+        (modulus i64)
+      ) ;; params
+      (returns i64)
+      (do
+        (let result i64
+          (const_i64 1)
+        ) ;; let
+
+        (let b i64
+          (mod_i64
+            (param_get base)
+            (param_get modulus)
+          ) ;; mod_i64
+        ) ;; let
+
+        (let e i32
+          (param_get exp)
+        ) ;; let
+
+        (while
+          (condition
+            (gt_i32
+              (local_get e)
+              (const_i32 0)
+            ) ;; gt_i32
+          ) ;; condition
+          (do
+            (if
+              (condition
+                (eq_i32
+                  (mod_i32
+                    (local_get e)
+                    (const_i32 2)
+                  ) ;; mod_i32
+                  (const_i32 1)
+                ) ;; eq_i32
+              ) ;; condition
+              (then
+                (do
+                  (set result
+                    (mod_i64
+                      (mul_i64
+                        (local_get result)
+                        (local_get b)
+                      ) ;; mul_i64
+                      (param_get modulus)
+                    ) ;; mod_i64
+                  ) ;; set
+                ) ;; do
+              ) ;; then
+              (else
+                (do)
+              ) ;; else
+            ) ;; if
+
+            (set b
+              (mod_i64
+                (mul_i64
+                  (local_get b)
+                  (local_get b)
+                ) ;; mul_i64
+                (param_get modulus)
+              ) ;; mod_i64
+            ) ;; set
+
+            (set e
+              (div_i32
+                (local_get e)
+                (const_i32 2)
+              ) ;; div_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get result)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (cast_i64_to_i32
+            (call_i64 pow_mod
+              (const_i64 3)
+              (const_i32 13)
+              (const_i64 1000000007)
+            ) ;; call_i64
+          ) ;; cast_i64_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

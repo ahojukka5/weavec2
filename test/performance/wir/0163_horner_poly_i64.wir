@@ -1,0 +1,75 @@
+; Stress: Horner evaluation of degree-6 polynomial (i64)
+; Reveals: mul_i64/add_i64 chain, i32 index loop
+(core-module
+  (core-version 1)
+  (decls
+    (fn horner6
+      (params
+        (x i64)
+      ) ;; params
+      (returns i64)
+      (do
+        (let acc i64
+          (const_i64 7)
+        ) ;; let
+
+        (let i i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (lt_i32
+              (local_get i)
+              (const_i32 6)
+            ) ;; lt_i32
+          ) ;; condition
+          (do
+            (set acc
+              (add_i64
+                (mul_i64
+                  (local_get acc)
+                  (param_get x)
+                ) ;; mul_i64
+                (add_i64
+                  (const_i64 1)
+                  (cast_i32_to_i64
+                    (local_get i)
+                  ) ;; cast_i32_to_i64
+                ) ;; add_i64
+              ) ;; add_i64
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get acc)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (cast_i64_to_i32
+            (mod_i64
+              (call_i64 horner6
+                (const_i64 11)
+              ) ;; call_i64
+              (const_i64 1000000007)
+            ) ;; mod_i64
+          ) ;; cast_i64_to_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
