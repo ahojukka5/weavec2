@@ -1,0 +1,52 @@
+; Algorithm: absolute value of i32 (branch on sign)
+; Tests: compare and select without loops
+(core-module
+  (core-version 1)
+  (decls
+    (fn abs_i32
+      (params
+        (x i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (if
+          (condition
+            (lt_i32
+              (param_get x)
+              (const_i32 0)
+            ) ;; lt_i32
+          ) ;; condition
+          (then
+            (do
+              (return
+                (sub_i32
+                  (const_i32 0)
+                  (param_get x)
+                ) ;; sub_i32
+              ) ;; return
+            ) ;; do
+          ) ;; then
+          (else
+            (do
+              (return
+                (param_get x)
+              ) ;; return
+            ) ;; do
+          ) ;; else
+        ) ;; if
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 abs_i32
+            (const_i32 -123)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

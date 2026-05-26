@@ -1,0 +1,68 @@
+; Algorithm: sign of i32 (-1, 0, 1)
+; Tests: compare branches only
+(core-module
+  (core-version 1)
+  (decls
+    (fn sign_i32
+      (params
+        (x i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (if
+          (condition
+            (lt_i32
+              (param_get x)
+              (const_i32 0)
+            ) ;; lt_i32
+          ) ;; condition
+          (then
+            (do
+              (return
+                (const_i32 -1)
+              ) ;; return
+            ) ;; do
+          ) ;; then
+          (else
+            (do)
+          ) ;; else
+        ) ;; if
+
+        (if
+          (condition
+            (gt_i32
+              (param_get x)
+              (const_i32 0)
+            ) ;; gt_i32
+          ) ;; condition
+          (then
+            (do
+              (return
+                (const_i32 1)
+              ) ;; return
+            ) ;; do
+          ) ;; then
+          (else
+            (do
+              (return
+                (const_i32 0)
+              ) ;; return
+            ) ;; do
+          ) ;; else
+        ) ;; if
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 sign_i32
+            (const_i32 -7)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

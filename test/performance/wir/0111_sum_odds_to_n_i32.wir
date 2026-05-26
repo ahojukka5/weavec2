@@ -1,0 +1,62 @@
+; Algorithm: sum of odd integers from 1 to n
+; Tests: stride-2 loop with add recurrence
+(core-module
+  (core-version 1)
+  (decls
+    (fn sum_odds_to
+      (params
+        (n i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let v i32
+          (const_i32 1)
+        ) ;; let
+
+        (let total i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get v)
+              (param_get n)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (set total
+              (add_i32
+                (local_get total)
+                (local_get v)
+              ) ;; add_i32
+            ) ;; set
+
+            (set v
+              (add_i32
+                (local_get v)
+                (const_i32 2)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get total)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 sum_odds_to
+            (const_i32 15)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module
