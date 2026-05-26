@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Quantum surface tests: WIR goldens (nativization/) and expect-fail validation/.
 set -euo pipefail
 

@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; driver.weave — frontend entry point
 ;
 ; lower_source_file(input_path, output_path) -> i32

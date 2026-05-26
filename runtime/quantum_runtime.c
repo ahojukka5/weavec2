@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 /* Stub quantum runtime for weavec2 end-to-end tests (link with clang). */
 #include <stdint.h>
 

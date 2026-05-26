@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; quantum_nativize.weave — Rigetti-style lowering pass (surface transform stage)
 ;
 ; Runs before WIR emission via rigetti_nativize_emit_qgate (see targets/).

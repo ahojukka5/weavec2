@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; io.weave — low-level I/O helpers for weavec2
 ;
 ; write_byte, write_bytes, write_cstr, write_i64_dec

@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; Rigetti-style nativization rules (declarative; transform engine TBD).
 ;
 ; Rules are implemented in quantum_nativize.weave (rigetti_emit_h_decomposition).

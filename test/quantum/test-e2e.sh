@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Quantum end-to-end: surface .weave -> WIR -> LLVM -> clang + quantum_runtime.c -> run.
 set -euo pipefail
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Regenerate one or all performance LLVM goldens from weavec2 output.
 #
 # Usage:

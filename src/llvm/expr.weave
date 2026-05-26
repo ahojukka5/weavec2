@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; expr.weave — WIR expression → LLVM IR emission for weavec2
 ;
 ; emit_expr(ctx, node) → i64

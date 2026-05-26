@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; extern.weave — all extern declarations for weavec2
 ;
 ; Must be listed first in the build so all other files can call these.

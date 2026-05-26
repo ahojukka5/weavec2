@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; ctx.weave — emission context for weavec2
 ;
 ; Layout (144 bytes):

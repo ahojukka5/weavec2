@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; loop-phi.weave — loop-carried SSA (phi, merge, latch) for weavec2
 
 (program

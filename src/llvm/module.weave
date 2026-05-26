@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; module.weave — top-level WIR module emission for weavec2
 ;
 ; Structure of a WIR module:

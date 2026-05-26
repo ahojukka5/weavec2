@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
 # Build weavec2 with weavec2 itself.
 
 set -euo pipefail

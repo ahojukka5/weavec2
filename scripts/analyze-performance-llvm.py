@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Summarize weavec2 performance LLVM goldens for codegen quality.
 
 Reads test/performance/expected-llvm/*.ll and prints metrics that highlight

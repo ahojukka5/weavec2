@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; emit.weave — verbatim s-expression emission for the frontend lowering pass
 ;
 ; emit_node(fd, source, tree, node) writes any AST node as WIR text:

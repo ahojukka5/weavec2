@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; struct.weave — (struct ...) expansion for the frontend lowering pass
 ;
 ; Expands a (struct NAME (field FNAME FTYPE) ...) declaration into:

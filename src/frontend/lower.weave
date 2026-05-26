@@ -1,3 +1,4 @@
+; SPDX-License-Identifier: Apache-2.0
 ; lower.weave — surface Weave → WIR text lowering
 ;
 ; Transforms a parsed surface Weave program node into WIR text on fd.

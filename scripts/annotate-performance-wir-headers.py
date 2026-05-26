@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Rewrite leading comment blocks on performance WIR fixtures.
 
 Standard header (all lines are ';' comments before (core-module)):
