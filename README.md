@@ -66,7 +66,7 @@ src/
     stmt.weave    — WIR statement -> LLVM IR (let, set, if, while, return, store)
     fn.weave      — function and extern declaration emission
     module.weave  — top-level module emission (header, externs, strings, functions)
-  frontend/     — surface Weave -> WIR frontend
+  frontend/     — surface Weave -> WIR frontend (classical + quantum when added)
   main.weave    — compiler entry point (file I/O, lex/parse, emit)
 ```
 
@@ -89,6 +89,13 @@ repeats the build with stage1:
 
 That path does not link `../weavec0/runtime.c`, `../weavefront/build/*.ll`, or
 `../weavec1/build/weavec1`.
+
+## Tests
+
+- WIR → LLVM goldens: `./test/performance/test.sh` (requires `./build.sh` first)
+- Quantum (planned): `test/quantum/` — surface `.weave` programs, same compiler
+
+Design: `docs/representation-lowering.md` (quantum baked into surface Weave).
 
 ## Usage
 
