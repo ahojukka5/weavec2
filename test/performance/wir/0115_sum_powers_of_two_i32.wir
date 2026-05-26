@@ -1,0 +1,73 @@
+; Algorithm: sum 2^0 + 2^1 + ... + 2^k by repeated doubling
+; Tests: shift/add loop building powers of two
+(core-module
+  (core-version 1)
+  (decls
+    (fn sum_powers
+      (params
+        (k i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let i i32
+          (const_i32 0)
+        ) ;; let
+
+        (let p i32
+          (const_i32 1)
+        ) ;; let
+
+        (let total i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (le_i32
+              (local_get i)
+              (param_get k)
+            ) ;; le_i32
+          ) ;; condition
+          (do
+            (set total
+              (add_i32
+                (local_get total)
+                (local_get p)
+              ) ;; add_i32
+            ) ;; set
+
+            (set p
+              (mul_i32
+                (local_get p)
+                (const_i32 2)
+              ) ;; mul_i32
+            ) ;; set
+
+            (set i
+              (add_i32
+                (local_get i)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get total)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 sum_powers
+            (const_i32 5)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

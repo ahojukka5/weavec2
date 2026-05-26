@@ -1,0 +1,71 @@
+; Algorithm: count trailing zero bits (divide by 2 while even)
+; Tests: mod/div loop similar to popcount
+(core-module
+  (core-version 1)
+  (decls
+    (fn trailing_zeros
+      (params
+        (v i32)
+      ) ;; params
+      (returns i32)
+      (do
+        (let n i32
+          (param_get v)
+        ) ;; let
+
+        (let count i32
+          (const_i32 0)
+        ) ;; let
+
+        (while
+          (condition
+            (and_bool
+              (gt_i32
+                (local_get n)
+                (const_i32 0)
+              ) ;; gt_i32
+              (eq_i32
+                (mod_i32
+                  (local_get n)
+                  (const_i32 2)
+                ) ;; mod_i32
+                (const_i32 0)
+              ) ;; eq_i32
+            ) ;; and_bool
+          ) ;; condition
+          (do
+            (set count
+              (add_i32
+                (local_get count)
+                (const_i32 1)
+              ) ;; add_i32
+            ) ;; set
+
+            (set n
+              (div_i32
+                (local_get n)
+                (const_i32 2)
+              ) ;; div_i32
+            ) ;; set
+          ) ;; do
+        ) ;; while
+
+        (return
+          (local_get count)
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+
+    (fn main
+      (params)
+      (returns i32)
+      (do
+        (return
+          (call_i32 trailing_zeros
+            (const_i32 96)
+          ) ;; call_i32
+        ) ;; return
+      ) ;; do
+    ) ;; fn
+  ) ;; decls
+) ;; core-module

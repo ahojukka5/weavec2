@@ -31,8 +31,8 @@ Examples:
 | 0001–0059 | Language and codegen smoke (ops, control flow, calls) |
 | 0054–0060 | Integration-style WIR (nested control, memory flow) |
 | 0061–0080 | Classical algorithms and small benchmarks |
-| 0081–0113 | Hand-written algorithm demos (ongoing) |
-| 0114–9999 | Next free ids for new demonstrations |
+| 0081–0130 | Hand-written algorithm demos (ongoing) |
+| 0131–9999 | Next free ids for new demonstrations |
 
 Gaps in the low range (e.g. no `0006`) are historical; new smoke tests
 should use the next free id in the appropriate band.
