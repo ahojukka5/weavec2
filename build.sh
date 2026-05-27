@@ -202,7 +202,11 @@ build_weavec2() {
     || fail "llvm-link failed"
 
   log "compiling to executable"
-  clang "$BUILD_DIR/weavec2.bc" -o "$BUILD_DIR/weavec2" \
+  # runtime/portable.c provides weave_rt_open_write_trunc, which wraps
+  # the POSIX open() call so we don't bake platform-specific flag
+  # constants (macOS vs Linux) into the WIR source.
+  clang "$BUILD_DIR/weavec2.bc" "$WEAVEC2_DIR/runtime/portable.c" \
+    -o "$BUILD_DIR/weavec2" \
     || fail "clang failed"
 }
 

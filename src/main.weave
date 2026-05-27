@@ -77,9 +77,10 @@
           (call_void free (local_get source))
           (return (const_i32 1))))
         (else (do)))
-      ; Open output file (O_WRONLY|O_CREAT|O_TRUNC = 577 on Linux, 0x601 on macOS)
-      ; Use 0x601 (O_WRONLY=1 | O_CREAT=0x200 | O_TRUNC=0x400) for macOS
-      (let out_fd i32 (call_i32 open (param_get output_path) (const_i32 1537) (const_i32 420)))
+      ; Open output file via the portability shim — the flag value for
+      ; O_WRONLY|O_CREAT|O_TRUNC differs between macOS (0x601=1537) and
+      ; Linux (0x241=577), so we go through C where <fcntl.h> resolves it.
+      (let out_fd i32 (call_i32 weave_rt_open_write_trunc (param_get output_path) (const_i32 420)))
       (if
         (condition (lt_i32 (local_get out_fd) (const_i32 0)))
         (then (do

@@ -8,6 +8,31 @@ contract stabilises.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-27
+
+Cross-platform portability patch on top of v0.1.0.
+
+### Fixed
+- weavec2 binary failed wholesale on Linux: all 124 correctness
+  tests exited with `weavec2 failed`. Root cause was three call
+  sites in `src/main.weave` and `src/frontend/driver.weave` that
+  baked the macOS-specific value `1537`
+  (`O_WRONLY | O_CREAT | O_TRUNC` on Darwin) in as a flag literal
+  for `open()`. On Linux the same constants decode to `577`, so
+  the literal meant something different and `open()` refused. The
+  v0.1.0 CHANGELOG comment even acknowledged the platform split
+  but kept the macOS value in source.
+
+  Fix: route through a new C portability shim
+  `runtime/portable.c::weave_rt_open_write_trunc`, which calls
+  `open()` with the symbolic `<fcntl.h>` flags. The WIR layer
+  doesn't see the integer constants anymore. `build.sh` links
+  `runtime/portable.c` into the final binary.
+
+  After this fix, the full CI matrix
+  (`ubuntu-latest` + `macos-latest`) passes 124 correctness + 168
+  performance + 4 quantum + 1 quantum-e2e + 1 self-host basic.
+
 ## [0.1.0] — 2026-05-27
 
 The first public release of `weavec2`.

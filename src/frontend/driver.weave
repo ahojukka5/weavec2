@@ -67,8 +67,8 @@
           (call_void free (local_get source))
           (return (const_i32 1))))
         (else (do)))
-      ; Open output (O_WRONLY|O_CREAT|O_TRUNC = 1537 on macOS)
-      (let out_fd i32 (call_i32 open (param_get output_path) (const_i32 1537) (const_i32 420)))
+      ; Open output via the portability shim; see runtime/portable.c.
+      (let out_fd i32 (call_i32 weave_rt_open_write_trunc (param_get output_path) (const_i32 420)))
       (if
         (condition (lt_i32 (local_get out_fd) (const_i32 0)))
         (then (do
@@ -163,7 +163,7 @@
         (condition (le_i64 (cast_i32_to_i64 (param_get argc)) (param_get first_input_index)))
         (then (do (return (const_i32 1))))
         (else (do)))
-      (let out_fd i32 (call_i32 open (param_get output_path) (const_i32 1537) (const_i32 420)))
+      (let out_fd i32 (call_i32 weave_rt_open_write_trunc (param_get output_path) (const_i32 420)))
       (if
         (condition (lt_i32 (local_get out_fd) (const_i32 0)))
         (then (do (return (const_i32 1))))
