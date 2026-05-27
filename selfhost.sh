@@ -77,7 +77,8 @@ build_stage() {
   llvm-link "$out_dir/weavec2.ll" "${runtime_ll[@]}" -o "$out_dir/weavec2.bc"
 
   log "clang $out_bin"
-  clang "$out_dir/weavec2.bc" -o "$out_bin"
+  # runtime/portable.c provides weave_rt_open_write_trunc (see build.sh).
+  clang "$out_dir/weavec2.bc" "$ROOT/runtime/portable.c" -o "$out_bin"
 }
 
 build_stage "$SEED" "$BUILD_DIR/stage1"

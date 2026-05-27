@@ -177,12 +177,13 @@ Review the resulting `git diff` before committing.
   self-host gate: weavec2 compiles its own bootstrapped
   `build/weavec2.wir`, and the output is accepted by `llvm-as` and
   verified by `opt -passes=mem2reg`. **This passes.**
-- `./selfhost.sh` is the deeper experimental flow: re-run the
+- `./selfhost.sh` is the deeper bootstrap flow: re-run the
   surface → WIR pass with the bootstrapped weavec2 and rebuild
-  through stages 1 → 2. It currently fails at stage 2 with a
-  pre-existing string-constant emission bug in the frontend
-  pipeline (tracked as a known limitation in
-  [`CHANGELOG.md`](CHANGELOG.md)). Not in CI.
+  through stages 1 → 2, then run three fixture smoke tests
+  against the stage2 binary. Passes end-to-end as of v0.1.2 (see
+  [`CHANGELOG.md`](CHANGELOG.md) for the loop-phi set-then-read
+  fix). Not in CI — local-only since it builds weavec2 three
+  times.
 
 ### surface-matrix.sh
 
@@ -229,14 +230,8 @@ coexist; weavec2 is bootstrapped through the older one.
 
 ## Known limitations
 
-These are intentional scope choices, plus one open follow-up — not
-bugs:
+These are intentional scope choices — not bugs:
 
-- **`./selfhost.sh` (deeper stage1/stage2 bootstrap) is
-  incomplete.** Basic self-host (`test/selfhost/test.sh`) passes;
-  the deeper flow hits a pre-existing string-constant emission
-  bug in the frontend pipeline (`[1 x i8]` array length for a
-  12-byte string). Tracked separately; not blocking publication.
 - **No source-style checker for `.weave` modules yet.** The
   weavec1 checker only validates WIR style. A surface-Weave
   checker is a follow-up.

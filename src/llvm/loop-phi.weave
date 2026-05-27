@@ -616,6 +616,137 @@
   ; per-loop TAG, so multi-set in one block would emit duplicate SSA names.
   ; Locals with this pattern stay on the alloca path (mode 0), which handles
   ; sequential stores correctly.
+  ; Returns 1 if (local_get NAME) appears anywhere in the subtree rooted at
+  ; node. Recurses into every child, including nested if/while bodies.
+  (fn name_local_get_in_subtree
+    (params (ctx ptr) (node i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (ne_i32 (call_i32 node_kind (local_get tree) (param_get node)) (call_i32 node_list)))
+        (then (do (return (const_i32 0))))
+        (else (do)))
+      (if
+        (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (param_get node)
+          (const_string_ptr "local_get") (const_i64 9)) (const_i32 0)))
+        (then (do
+          (let arg_node i64 (call_i64 nth_child (local_get tree) (param_get node) (const_i64 1)))
+          (if
+            (condition (ne_i32 (call_i32 slices_equal
+              (local_get source)
+              (param_get name_start) (param_get name_len)
+              (call_i64 node_text_start (local_get tree) (local_get arg_node))
+              (call_i64 node_text_len (local_get tree) (local_get arg_node))) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get node)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 name_local_get_in_subtree
+              (param_get ctx) (local_get child) (param_get name_start) (param_get name_len)) (const_i32 0)))
+            (then (do (return (const_i32 1))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
+  ; Returns 1 if some (set NAME ...) at the top level of body_do is followed
+  ; by a (local_get NAME) anywhere in a later top-level sibling's subtree.
+  ; Does NOT recurse into nested if/while do blocks (those are separate
+  ; basic blocks and the loop-phi codegen handles them differently).
+  (fn name_get_after_set_in_one_do
+    (params (ctx ptr) (body_do i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (let seen_set i32 (const_i32 0))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (local_get seen_set) (const_i32 0)))
+            (then (do
+              (if
+                (condition (ne_i32 (call_i32 name_local_get_in_subtree
+                  (param_get ctx) (local_get child) (param_get name_start) (param_get name_len)) (const_i32 0)))
+                (then (do (return (const_i32 1))))
+                (else (do)))))
+            (else (do)))
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "set") (const_i64 3)) (const_i32 0)))
+            (then (do
+              (let sn i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 1)))
+              (if
+                (condition (ne_i32 (call_i32 slices_equal
+                  (local_get source)
+                  (param_get name_start) (param_get name_len)
+                  (call_i64 node_text_start (local_get tree) (local_get sn))
+                  (call_i64 node_text_len (local_get tree) (local_get sn))) (const_i32 0)))
+                (then (do (set seen_set (const_i32 1))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
+  ; Returns 1 if the set-then-get pattern (see name_get_after_set_in_one_do)
+  ; appears in body_do itself or in any nested if-then/if-else do block. The
+  ; loop-phi emission for (set NAME ...) produces %NAME.next<TAG> but does not
+  ; update the local's current-value tracking, so a subsequent (local_get NAME)
+  ; in the same basic block reads the pre-set %NAME.phi<blk> instead. We
+  ; keep such locals on the alloca path where the load picks up the new
+  ; value via %NAME.addr.
+  (fn name_get_after_set_in_subtree
+    (params (ctx ptr) (body_do i64) (name_start i64) (name_len i64))
+    (returns i32)
+    (do
+      (let tree ptr (call_ptr ctx_get_tree (param_get ctx)))
+      (let source ptr (call_ptr ctx_get_source (param_get ctx)))
+      (if
+        (condition (ne_i32 (call_i32 name_get_after_set_in_one_do
+          (param_get ctx) (param_get body_do) (param_get name_start) (param_get name_len)) (const_i32 0)))
+        (then (do (return (const_i32 1))))
+        (else (do)))
+      (let child i64 (call_i64 node_first_child (local_get tree) (param_get body_do)))
+      (if
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (then (do (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+        (else (do)))
+      (while
+        (condition (ne_i64 (local_get child) (const_i64 -1)))
+        (do
+          (if
+            (condition (ne_i32 (call_i32 head_equals (local_get tree) (local_get source) (local_get child)
+              (const_string_ptr "if") (const_i64 2)) (const_i32 0)))
+            (then (do
+              (let tw i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 2)))
+              (let td i64 (call_i64 nth_child (local_get tree) (local_get tw) (const_i64 1)))
+              (let ew i64 (call_i64 nth_child (local_get tree) (local_get child) (const_i64 3)))
+              (let ed i64 (call_i64 nth_child (local_get tree) (local_get ew) (const_i64 1)))
+              (if
+                (condition (ne_i32 (call_i32 name_get_after_set_in_subtree
+                  (param_get ctx) (local_get td) (param_get name_start) (param_get name_len)) (const_i32 0)))
+                (then (do (return (const_i32 1))))
+                (else (do)))
+              (if
+                (condition (ne_i32 (call_i32 name_get_after_set_in_subtree
+                  (param_get ctx) (local_get ed) (param_get name_start) (param_get name_len)) (const_i32 0)))
+                (then (do (return (const_i32 1))))
+                (else (do)))))
+            (else (do)))
+          (set child (call_i64 node_next_sibling (local_get tree) (local_get child)))))
+      (return (const_i32 0))))
+
   (fn name_has_multi_set_in_subtree
     (params (ctx ptr) (root_do i64) (name_start i64) (name_len i64))
     (returns i32)
@@ -920,14 +1051,18 @@
                     (condition (and_bool
                       (and_bool
                         (and_bool
-                          (ne_i32 (call_i32 local_mode_is_stack
-                            (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl))) (const_i32 0))
-                          (eq_i32 (call_i32 local_loop_phi_header_pending
-                            (param_get ctx) (local_get ns) (local_get nl) (param_get blk)) (const_i32 0)))
-                        (eq_i32 (call_i32 name_has_multi_set_in_subtree
+                          (and_bool
+                            (ne_i32 (call_i32 local_mode_is_stack
+                              (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl))) (const_i32 0))
+                            (eq_i32 (call_i32 local_loop_phi_header_pending
+                              (param_get ctx) (local_get ns) (local_get nl) (param_get blk)) (const_i32 0)))
+                          (eq_i32 (call_i32 name_has_multi_set_in_subtree
+                            (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
+                            (local_get ns) (local_get nl)) (const_i32 0)))
+                        (eq_i32 (call_i32 name_let_in_subtree
                           (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
                           (local_get ns) (local_get nl)) (const_i32 0)))
-                      (eq_i32 (call_i32 name_let_in_subtree
+                      (eq_i32 (call_i32 name_get_after_set_in_subtree
                         (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
                         (local_get ns) (local_get nl)) (const_i32 0))))
                     (then (do
@@ -995,12 +1130,16 @@
                   (if
                     (condition (and_bool
                       (and_bool
-                        (ne_i32 (call_i32 local_mode_is_stack_or_loop_phi
-                          (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl))) (const_i32 0))
-                        (eq_i32 (call_i32 name_has_multi_set_in_subtree
+                        (and_bool
+                          (ne_i32 (call_i32 local_mode_is_stack_or_loop_phi
+                            (call_i64 lookup_local_mode (param_get ctx) (local_get ns) (local_get nl))) (const_i32 0))
+                          (eq_i32 (call_i32 name_has_multi_set_in_subtree
+                            (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
+                            (local_get ns) (local_get nl)) (const_i32 0)))
+                        (eq_i32 (call_i32 name_let_in_subtree
                           (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
                           (local_get ns) (local_get nl)) (const_i32 0)))
-                      (eq_i32 (call_i32 name_let_in_subtree
+                      (eq_i32 (call_i32 name_get_after_set_in_subtree
                         (param_get ctx) (call_i64 ctx_get_loop_body_do (param_get ctx))
                         (local_get ns) (local_get nl)) (const_i32 0))))
                     (then (do

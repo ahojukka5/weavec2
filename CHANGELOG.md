@@ -8,6 +8,48 @@ contract stabilises.
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-27
+
+End-to-end self-hosting patch on top of v0.1.1.
+
+### Fixed
+- Loop-phi optimisation produced silently-wrong code for the
+  "set-then-read-in-same-iteration" pattern: emit_set_stmt's fast
+  path emits `%NAME.next<TAG>` for `(set NAME ...)`, but the
+  optimiser does not update the local's current-value tracking,
+  so a subsequent `(local_get NAME)` in the same basic block
+  reads the pre-set `%NAME.phi<blk>` instead of the just-stored
+  `%NAME.next<TAG>`. The seed weavec2 binary (built by weavec1,
+  which keeps these locals on the alloca path) didn't exhibit the
+  bug, but stage1 weavec2 (built by seed-weavec2, which promotes
+  to loop-phi mode) did — most visibly in `write_i64_dec`'s
+  print-digit loop, which then mis-emitted string-constant array
+  lengths during stage2 (`[ 1 x i8] c"(local_get \00"` for what
+  should have been `[12 x i8]`).
+
+  Fix: new gate predicate `name_get_after_set_in_subtree` joins
+  the existing predicates at both mode-3 marking sites. Locals
+  with the set-then-read pattern stay on the alloca path where
+  the next load picks up the new value via the address slot.
+  Re-generated the `0122_kadane5_i32` performance golden — it had
+  captured the buggy output (`%cur.phi0` was being read after
+  `(set cur ...)`, but the existing if-merge logic happened to
+  produce LLVM that `llvm-as` accepted even though the runtime
+  semantics were wrong).
+
+  After this fix:
+    - test-all.sh still passes 124 + 168 + 4 + 1 + 1 (one perf
+      golden regenerated, all others unchanged)
+    - selfhost.sh's deeper stage1 → stage2 bootstrap now
+      completes end-to-end, including the three stage2 fixture
+      smoke tests.
+
+### Changed
+- `selfhost.sh` now links `runtime/portable.c` into the stage1
+  and stage2 binaries (build.sh already did this in v0.1.1).
+  Without the link, the new `weave_rt_open_write_trunc` extern
+  was undefined at stage1's clang step.
+
 ## [0.1.1] — 2026-05-27
 
 Cross-platform portability patch on top of v0.1.0.

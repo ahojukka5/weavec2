@@ -35,12 +35,10 @@ entry:
   ; while condition
   br label %while.pre
 while.pre:
-  %cur.init0 = load i32, ptr %cur.addr
   %best.init0 = load i32, ptr %best.addr
   %i.init0 = load i32, ptr %i.addr
   br label %while.cond
 while.cond:
-  %cur.phi0 = phi i32 [%cur.init0, %while.pre], [%cur.merge1, %while.latch]
   %best.phi0 = phi i32 [%best.init0, %while.pre], [%best.merge2, %while.latch]
   %i.phi0 = phi i32 [%i.init0, %while.pre], [%i.next0, %while.latch]
   %t0 = icmp slt i32 %i.phi0, 5
@@ -51,24 +49,28 @@ while.body:
   %t2 = load i32, ptr %t1
   ; let v
   ; set cur
-  %cur.next0 = add i32 %cur.phi0, %t2
+  %t3 = load i32, ptr %cur.addr
+  %t4 = add i32 %t3, %t2
+  store i32 %t4, ptr %cur.addr
   ; if condition
-  %t3 = icmp slt i32 %cur.phi0, %t2
-  br i1 %t3, label %then1, label %endif1
+  %t5 = load i32, ptr %cur.addr
+  %t6 = icmp slt i32 %t5, %t2
+  br i1 %t6, label %then1, label %endif1
 then1:
   ; then
   ; set cur
-  %cur.next10 = add i32 %t2, 0
+  store i32 %t2, ptr %cur.addr
   br label %endif1
 endif1:
-  %cur.merge1 = phi i32 [%cur.next10, %then1], [%cur.phi0, %while.body]
   ; if condition
-  %t4 = icmp sgt i32 %cur.merge1, %best.phi0
-  br i1 %t4, label %then2, label %endif2
+  %t7 = load i32, ptr %cur.addr
+  %t8 = icmp sgt i32 %t7, %best.phi0
+  br i1 %t8, label %then2, label %endif2
 then2:
   ; then
   ; set best
-  %best.next20 = add i32 %cur.merge1, 0
+  %t9 = load i32, ptr %cur.addr
+  %best.next20 = add i32 %t9, 0
   br label %endif2
 endif2:
   %best.merge2 = phi i32 [%best.next20, %then2], [%best.phi0, %endif1]
@@ -79,14 +81,13 @@ while.latch:
   br label %while.cond
 while.exit-merge:
   ; sync loop-carried locals to stack
-  store i32 %cur.phi0, ptr %cur.addr
   store i32 %best.phi0, ptr %best.addr
   store i32 %i.phi0, ptr %i.addr
   br label %while.end
 while.end:
   ; return
-  %t5 = load i32, ptr %best.addr
-  ret i32 %t5
+  %t10 = load i32, ptr %best.addr
+  ret i32 %t10
 }
 
 ; function: main
